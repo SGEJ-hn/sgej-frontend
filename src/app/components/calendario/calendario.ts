@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+
 import { FullCalendarModule } from '@fullcalendar/angular';
+import { CalendarOptions } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 
 @Component({
@@ -12,7 +14,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 })
 export class Calendario {
 
-  calendarOptions = {
+  calendarOptions: CalendarOptions = {
     plugins: [dayGridPlugin],
     initialView: 'dayGridMonth'
   };
