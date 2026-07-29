@@ -1,0 +1,142 @@
+<!-- =================== PANTALLA DE LOGIN - SGEJ =================== -->
+<div class="login-container">
+  
+  <!-- ====== HERO / CABECERA CON FONDO DE LIBROS DE LEY ====== -->
+  <header class="login-hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <!-- Logo del bufete -->
+      <img src="/logosgej.png" alt="Logo Justice Attorney Law" class="hero-logo" />
+      <h1 class="hero-title">JUSTICE</h1>
+      <p class="hero-subtitle">ATTORNEY LAW</p>
+    </div>
+  </header>
+
+  <!-- ====== SECCIÓN DEL FORMULARIO ====== -->
+  <main class="login-form-section">
+    <div class="login-form-wrapper">
+      
+      <!-- Encabezado del formulario -->
+      <p class="form-pretitle">Portal de Gestión Legal</p>
+      <h2 class="form-title">Iniciar Sesión</h2>
+
+      <!-- Formulario reactivo de login -->
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form" novalidate>
+        
+        <!-- Campo: Correo Electrónico -->
+        <div class="form-group">
+          <label for="email" class="form-label">Correo Electrónico</label>
+          <div class="input-wrapper">
+            <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+            </svg>
+            <input
+              type="email"
+              id="email"
+              formControlName="email"
+              placeholder="correo@ejemplo.com"
+              class="form-input"
+              [class.input-error]="email?.invalid && email?.touched"
+              autocomplete="email"
+            />
+          </div>
+          <!-- Mensajes de error para email -->
+          @if (email?.invalid && email?.touched) {
+            <div class="error-message">
+              @if (email?.errors?.['required']) {
+                <span>El correo electrónico es obligatorio.</span>
+              }
+              @if (email?.errors?.['email']) {
+                <span>Ingrese un correo electrónico válido.</span>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Campo: Contraseña -->
+        <div class="form-group">
+          <label for="password" class="form-label">Contraseña</label>
+          <div class="input-wrapper">
+            <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+            </svg>
+            <input
+              [type]="showPassword() ? 'text' : 'password'"
+              id="password"
+              formControlName="password"
+              placeholder="••••••••"
+              class="form-input"
+              [class.input-error]="password?.invalid && password?.touched"
+              autocomplete="current-password"
+            />
+            <!-- Toggle de visibilidad de contraseña -->
+            <button type="button" class="password-toggle" (click)="togglePassword()" aria-label="Mostrar contraseña">
+              @if (!showPassword()) {
+                <!-- Icono ojo (mostrar) -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="toggle-icon">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                </svg>
+              } @else {
+                <!-- Icono ojo tachado (ocultar) -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="toggle-icon">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                </svg>
+              }
+            </button>
+          </div>
+          <!-- Mensajes de error para contraseña -->
+          @if (password?.invalid && password?.touched) {
+            <div class="error-message">
+              @if (password?.errors?.['required']) {
+                <span>La contraseña es obligatoria.</span>
+              }
+              @if (password?.errors?.['minlength']) {
+                <span>La contraseña debe tener al menos 6 caracteres.</span>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Fila: Recordarme + Olvidó contraseña -->
+        <div class="form-extras">
+          <label class="remember-label">
+            <input type="checkbox" formControlName="rememberMe" class="remember-checkbox" />
+            <span>Recordarme</span>
+          </label>
+          <a href="#" class="forgot-link">¿Olvidó su contraseña?</a>
+        </div>
+
+        <!-- Botón de inicio de sesión -->
+        <button
+          type="submit"
+          class="login-button"
+          [disabled]="isLoading()"
+        >
+          @if (isLoading()) {
+            <svg class="spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="spinner-track" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="spinner-path" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>Procesando...</span>
+          } @else {
+            <span>Iniciar Sesión</span>
+          }
+        </button>
+
+        <!-- Indicador de seguridad -->
+        <div class="security-badge">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="security-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+          </svg>
+          <span>Conexión cifrada · SSL/TLS · Acceso restringido</span>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <!-- ====== FOOTER ====== -->
+  <footer class="login-footer">
+    <p>&copy; 2026 Justice Attorney Law. Abogados Asociados</p>
+  </footer>
+</div>

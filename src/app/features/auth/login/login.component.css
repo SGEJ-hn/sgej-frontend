@@ -1,0 +1,369 @@
+/* =================== PANTALLA DE LOGIN - SGEJ =================== */
+
+/* ----------- CONTENEDOR PRINCIPAL ----------- */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+  background-color: #F5F0EB;
+  font-family: 'Fenix', 'Georgia', serif;
+}
+
+/* ----------- HERO / CABECERA ----------- */
+.login-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1rem;
+  height: 28vh;
+  min-height: 180px;
+  background: radial-gradient(circle at center, #4B1623 0%, #2D0B14 100%);
+  overflow: hidden;
+  shrink: 0;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(75, 22, 35, 0.92) 0%,
+    rgba(58, 15, 24, 0.88) 50%,
+    rgba(40, 10, 18, 0.85) 100%
+  );
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+}
+
+.hero-logo {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  margin-bottom: 0.25rem;
+  filter: brightness(1.1) sepia(0.3) saturate(1.5) hue-rotate(-10deg);
+}
+
+.hero-title {
+  font-size: 1.85rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  color: #D2B48C;
+  line-height: 1;
+  margin: 0;
+}
+
+.hero-subtitle {
+  font-size: 0.75rem;
+  letter-spacing: 0.35em;
+  color: #D2B48C;
+  text-transform: uppercase;
+  margin: 0;
+  opacity: 0.9;
+}
+
+/* ----------- SECCIÓN DEL FORMULARIO ----------- */
+.login-form-section {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 1.5rem;
+}
+
+.login-form-wrapper {
+  width: 100%;
+  max-width: 480px;
+}
+
+/* Pretítulo: "Portal de Gestión Legal" */
+.form-pretitle {
+  font-size: 0.85rem;
+  color: #8B7E74;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.15rem;
+}
+
+/* Título: "Iniciar Sesión" */
+.form-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1A1A1A;
+  margin: 0 0 1.25rem 0;
+  letter-spacing: -0.01em;
+}
+
+/* ----------- FORMULARIO ----------- */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+/* Grupo de campo (label + input) */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #2D2D2D;
+  letter-spacing: 0.02em;
+}
+
+/* Wrapper del input (icono + campo) */
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 14px;
+  width: 18px;
+  height: 18px;
+  color: #A09890;
+  pointer-events: none;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.85rem 1rem 0.85rem 2.75rem;
+  font-size: 0.95rem;
+  font-family: 'Fenix', 'Georgia', serif;
+  color: #1A1A1A;
+  background-color: #FFFFFF;
+  border: 1px solid #DDD5CC;
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.form-input::placeholder {
+  color: #B5ADA5;
+}
+
+.form-input:focus {
+  border-color: #D2B48C;
+  box-shadow: 0 0 0 3px rgba(210, 180, 140, 0.15);
+}
+
+.form-input.input-error {
+  border-color: #C53030;
+  box-shadow: 0 0 0 3px rgba(197, 48, 48, 0.1);
+}
+
+/* ----------- TOGGLE DE CONTRASEÑA ----------- */
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #A09890;
+  transition: color 0.2s ease;
+}
+
+.password-toggle:hover {
+  color: #4B1623;
+}
+
+.toggle-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* ----------- MENSAJES DE ERROR ----------- */
+.error-message {
+  font-size: 0.8rem;
+  color: #C53030;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding-left: 2px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ----------- FILA: RECORDARME + OLVIDÓ CONTRASEÑA ----------- */
+.form-extras {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.25rem;
+}
+
+.remember-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #4A4A4A;
+  cursor: pointer;
+  user-select: none;
+}
+
+.remember-checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: #4B1623;
+  cursor: pointer;
+}
+
+.forgot-link {
+  font-size: 0.85rem;
+  color: #7A3B4E;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.forgot-link:hover {
+  color: #4B1623;
+  text-decoration: underline;
+}
+
+/* ----------- BOTÓN DE LOGIN ----------- */
+.login-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.95rem 1.5rem;
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: 'Fenix', 'Georgia', serif;
+  color: #FFFFFF;
+  background-color: #4B1623;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: background-color 0.3s ease, transform 0.15s ease, box-shadow 0.3s ease;
+}
+
+.login-button:hover:not(:disabled) {
+  background-color: #3A0F18;
+  box-shadow: 0 4px 12px rgba(75, 22, 35, 0.35);
+}
+
+.login-button:active:not(:disabled) {
+  transform: scale(0.985);
+}
+
+.login-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Spinner de carga */
+.spinner {
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+}
+
+.spinner-track {
+  opacity: 0.25;
+}
+
+.spinner-path {
+  opacity: 0.75;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ----------- INDICADOR DE SEGURIDAD ----------- */
+.security-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  color: #9B9189;
+  letter-spacing: 0.02em;
+}
+
+.security-icon {
+  width: 14px;
+  height: 14px;
+  color: #9B9189;
+}
+
+/* ----------- FOOTER ----------- */
+.login-footer {
+  padding: 0.75rem 2rem;
+  text-align: left;
+  font-size: 0.75rem;
+  color: #8B7E74;
+  letter-spacing: 0.02em;
+  shrink: 0;
+}
+
+.login-footer p {
+  margin: 0;
+}
+
+/* ----------- RESPONSIVE ----------- */
+@media (max-width: 640px) {
+  .login-hero {
+    min-height: 200px;
+    padding: 2rem 1rem;
+  }
+
+  .hero-logo {
+    width: 75px;
+    height: 75px;
+  }
+
+  .hero-title {
+    font-size: 1.75rem;
+  }
+
+  .login-form-section {
+    padding: 1.5rem 1rem;
+  }
+
+  .form-title {
+    font-size: 1.5rem;
+  }
+
+  .form-extras {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+}
