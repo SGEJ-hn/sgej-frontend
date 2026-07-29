@@ -61,19 +61,19 @@
   <!-- ================= SECCIÓN INFERIOR (PERFIL Y LOGOUT) ================= -->
   <div class="p-6 border-t border-[#FFFFFF]/54">
     
-    <!-- TARJETA DE USUARIO -->
+    <!-- TARJETA DE USUARIO DINÁMICA -->
     <div class="flex items-center gap-3 mb-4">
       <div class="w-10 h-10 rounded-full bg-[#D2B48C] text-[#4B1623] font-bold flex items-center justify-center shrink-0">
-        CR
+        {{ iniciales }}
       </div>
       <div class="overflow-hidden">
-        <h3 class="text-lg font-light text-white truncate">Dr. Cristiano Ronaldo</h3>
-        <p class="text-sm text-[#ffffff]/56 truncate">Administrador</p>
+        <h3 class="text-lg font-light text-white truncate">{{ usuario?.nombre || 'Administrador' }}</h3>
+        <p class="text-sm text-[#ffffff]/56 truncate">{{ usuario?.rol || 'Administrador' }}</p>
       </div>
     </div>
 
     <!-- BOTÓN CERRAR SESIÓN -->
-    <button class="flex items-center gap-2 text-menu text-[#ffffff]/56 hover:text-white transition-colors cursor-pointer w-full pt-2">
+    <button (click)="logout()" class="flex items-center gap-2 text-menu text-[#ffffff]/56 hover:text-white transition-colors cursor-pointer w-full pt-2">
       <ng-icon name="heroArrowRightOnRectangle" class="text-xl text-[#ffffff]/56"></ng-icon>
       <span>Cerrar Sesión</span>
     </button>
