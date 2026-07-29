@@ -1,11 +1,18 @@
 /* =================== PANTALLA DE LOGIN - SGEJ =================== */
 
+:host {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
 /* ----------- CONTENEDOR PRINCIPAL ----------- */
 .login-container {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  max-height: 100vh;
+  width: 100vw;
   overflow: hidden;
   background-color: #F5F0EB;
   font-family: 'Fenix', 'Georgia', serif;
@@ -17,12 +24,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem 1rem;
-  height: 28vh;
-  min-height: 180px;
+  padding: 0.75rem 1rem;
+  height: 22vh;
+  min-height: 120px;
+  max-height: 160px;
   background: radial-gradient(circle at center, #4B1623 0%, #2D0B14 100%);
   overflow: hidden;
-  shrink: 0;
+  flex-shrink: 0;
 }
 
 .hero-overlay {
@@ -42,19 +50,19 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.1rem;
+  gap: 0;
 }
 
 .hero-logo {
-  width: 70px;
-  height: 70px;
+  width: 48px;
+  height: 48px;
   object-fit: contain;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.1rem;
   filter: brightness(1.1) sepia(0.3) saturate(1.5) hue-rotate(-10deg);
 }
 
 .hero-title {
-  font-size: 1.85rem;
+  font-size: 1.4rem;
   font-weight: 700;
   letter-spacing: 0.3em;
   color: #D2B48C;
@@ -63,7 +71,7 @@
 }
 
 .hero-subtitle {
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   letter-spacing: 0.35em;
   color: #D2B48C;
   text-transform: uppercase;
@@ -77,28 +85,29 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem 1.5rem;
+  padding: 0.5rem 1.5rem;
+  overflow: hidden;
 }
 
 .login-form-wrapper {
   width: 100%;
-  max-width: 480px;
+  max-width: 400px;
 }
 
 /* Pretítulo: "Portal de Gestión Legal" */
 .form-pretitle {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: #8B7E74;
   letter-spacing: 0.05em;
-  margin-bottom: 0.15rem;
+  margin-bottom: 0.1rem;
 }
 
 /* Título: "Iniciar Sesión" */
 .form-title {
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #1A1A1A;
-  margin: 0 0 1.25rem 0;
+  margin: 0 0 0.6rem 0;
   letter-spacing: -0.01em;
 }
 
@@ -106,18 +115,18 @@
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
+  gap: 0.6rem;
 }
 
 /* Grupo de campo (label + input) */
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.2rem;
 }
 
 .form-label {
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: #2D2D2D;
   letter-spacing: 0.02em;
@@ -132,17 +141,17 @@
 
 .input-icon {
   position: absolute;
-  left: 14px;
-  width: 18px;
-  height: 18px;
+  left: 12px;
+  width: 15px;
+  height: 15px;
   color: #A09890;
   pointer-events: none;
 }
 
 .form-input {
   width: 100%;
-  padding: 0.85rem 1rem 0.85rem 2.75rem;
-  font-size: 0.95rem;
+  padding: 0.55rem 0.85rem 0.55rem 2.2rem;
+  font-size: 0.875rem;
   font-family: 'Fenix', 'Georgia', serif;
   color: #1A1A1A;
   background-color: #FFFFFF;
@@ -169,7 +178,7 @@
 /* ----------- TOGGLE DE CONTRASEÑA ----------- */
 .password-toggle {
   position: absolute;
-  right: 12px;
+  right: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -186,30 +195,18 @@
 }
 
 .toggle-icon {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
 }
 
 /* ----------- MENSAJES DE ERROR ----------- */
 .error-message {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: #C53030;
   display: flex;
   align-items: center;
   gap: 0.25rem;
   padding-left: 2px;
-  animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 
 /* ----------- FILA: RECORDARME + OLVIDÓ CONTRASEÑA ----------- */
@@ -217,28 +214,28 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 0.25rem;
+  margin-top: 0.05rem;
 }
 
 .remember-label {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.85rem;
+  gap: 0.35rem;
+  font-size: 0.775rem;
   color: #4A4A4A;
   cursor: pointer;
   user-select: none;
 }
 
 .remember-checkbox {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   accent-color: #4B1623;
   cursor: pointer;
 }
 
 .forgot-link {
-  font-size: 0.85rem;
+  font-size: 0.775rem;
   color: #7A3B4E;
   text-decoration: none;
   transition: color 0.2s ease;
@@ -256,9 +253,9 @@
   justify-content: center;
   gap: 0.5rem;
   width: 100%;
-  padding: 0.95rem 1.5rem;
-  margin-top: 0.5rem;
-  font-size: 1rem;
+  padding: 0.65rem 1rem;
+  margin-top: 0.2rem;
+  font-size: 0.9rem;
   font-weight: 600;
   font-family: 'Fenix', 'Georgia', serif;
   color: #FFFFFF;
@@ -286,8 +283,8 @@
 
 /* Spinner de carga */
 .spinner {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   animation: spin 1s linear infinite;
 }
 
@@ -310,60 +307,29 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
-  margin-top: 0.75rem;
-  font-size: 0.75rem;
+  gap: 0.35rem;
+  margin-top: 0.3rem;
+  font-size: 0.68rem;
   color: #9B9189;
   letter-spacing: 0.02em;
 }
 
 .security-icon {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   color: #9B9189;
 }
 
 /* ----------- FOOTER ----------- */
 .login-footer {
-  padding: 0.75rem 2rem;
+  padding: 0.4rem 1.5rem;
   text-align: left;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: #8B7E74;
   letter-spacing: 0.02em;
-  shrink: 0;
+  flex-shrink: 0;
 }
 
 .login-footer p {
   margin: 0;
-}
-
-/* ----------- RESPONSIVE ----------- */
-@media (max-width: 640px) {
-  .login-hero {
-    min-height: 200px;
-    padding: 2rem 1rem;
-  }
-
-  .hero-logo {
-    width: 75px;
-    height: 75px;
-  }
-
-  .hero-title {
-    font-size: 1.75rem;
-  }
-
-  .login-form-section {
-    padding: 1.5rem 1rem;
-  }
-
-  .form-title {
-    font-size: 1.5rem;
-  }
-
-  .form-extras {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
-  }
 }
