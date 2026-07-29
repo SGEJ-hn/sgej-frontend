@@ -118,6 +118,28 @@
   gap: 0.6rem;
 }
 
+/* Banner de error del servidor */
+.server-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.85rem;
+  background-color: #FDF2F2;
+  border: 1px solid #F8B4B4;
+  border-radius: 6px;
+  color: #9B1C1C;
+  font-size: 0.8rem;
+  font-weight: 500;
+  animation: fadeIn 0.3s ease;
+}
+
+.error-banner-icon {
+  width: 18px;
+  height: 18px;
+  color: #C53030;
+  flex-shrink: 0;
+}
+
 /* Grupo de campo (label + input) */
 .form-group {
   display: flex;

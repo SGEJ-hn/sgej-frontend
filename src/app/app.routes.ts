@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './features/auth/login/login.component';
 import { Component } from '@angular/core';
+import { authGuard } from './core/guards/auth.guard';
 
 @Component({
   selector: 'app-dashboard-dummy',
@@ -22,6 +23,7 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     component: DashboardDummyComponent,
+    canActivate: [authGuard],
   },
   {
     path: '',
@@ -33,4 +35,3 @@ export const routes: Routes = [
     redirectTo: 'login',
   },
 ];
-

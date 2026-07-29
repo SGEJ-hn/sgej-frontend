@@ -2,6 +2,7 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -14,10 +15,12 @@ export class LoginComponent {
   loginForm: FormGroup;
   showPassword = signal(false);
   isLoading = signal(false);
+  errorMessage = signal<string | null>(null);
 
   constructor(
     private fb: FormBuilder,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -27,7 +30,7 @@ export class LoginComponent {
   }
 
   togglePassword(): void {
-    this.showPassword.update(v => !v);
+    this.showPassword.update((v) => !v);
   }
 
   onSubmit(): void {
@@ -37,17 +40,28 @@ export class LoginComponent {
     }
 
     this.isLoading.set(true);
+    this.errorMessage.set(null);
 
-    const { email, password, rememberMe } = this.loginForm.value;
-    console.log('Login attempt:', { email, password, rememberMe });
+    const { email, password } = this.loginForm.value;
 
-    setTimeout(() => {
-      this.isLoading.set(false);
-      this.router.navigate(['/dashboard']);
-    }, 1000);
+    this.authService.login({ correo: email, contrasena: password }).subscribe({
+      next: (response) => {
+        this.isLoading.set(false);
+        console.log('Login exitoso:', response);
+        this.router.navigate(['/dashboard']);
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        const msg = err.error?.error || 'No se pudo conectar con el servidor. Intente nuevamente.';
+        this.errorMessage.set(msg);
+      },
+    });
   }
 
-  // Getters para acceder fácilmente a los controles del formulario en el template
-  get email() { return this.loginForm.get('email'); }
-  get password() { return this.loginForm.get('password'); }
+  get email() {
+    return this.loginForm.get('email');
+  }
+  get password() {
+    return this.loginForm.get('password');
+  }
 }
