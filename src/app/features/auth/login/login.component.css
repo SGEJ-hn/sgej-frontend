@@ -1,0 +1,357 @@
+/* =================== PANTALLA DE LOGIN - SGEJ =================== */
+
+:host {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ----------- CONTENEDOR PRINCIPAL ----------- */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background-color: #F5F0EB;
+  font-family: 'Fenix', 'Georgia', serif;
+}
+
+/* ----------- HERO / CABECERA ----------- */
+.login-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  height: 30vh;
+  min-height: 260px;
+  background: url('/fondo.jpg') center/cover no-repeat;
+  background-color: #4B1623; 
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(75, 22, 35, 0.92) 0%,
+    rgba(58, 15, 24, 0.88) 50%,
+    rgba(40, 10, 18, 0.85) 100%
+  );
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hero-logo {
+  width: 130px;
+  height: 120px;
+  object-fit: contain;
+  margin-bottom: 0.5rem;
+  filter: brightness(1.1) sepia(0.3) saturate(1.5) hue-rotate(-10deg);
+}
+
+.hero-title {
+  font-size: 2.5rem; 
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  color: #D2B48C;
+  line-height: 1;
+  margin: 0;
+}
+
+.hero-subtitle {
+  font-size: 0.85rem;
+  letter-spacing: 0.35em;
+  color: #D2B48C;
+  text-transform: uppercase;
+  margin: 0;
+  opacity: 0.9;
+}
+
+/* ----------- SECCIÓN DEL FORMULARIO ----------- */
+.login-form-section {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1.5rem;
+  overflow: hidden;
+}
+
+.login-form-wrapper {
+  width: 100%;
+  max-width: 400px;
+}
+
+/* Pretítulo: "Portal de Gestión Legal" */
+.form-pretitle {
+  font-size: 0.8rem;
+  color: #8B7E74;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.1rem;
+}
+
+/* Título: "Iniciar Sesión" */
+.form-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1A1A1A;
+  margin: 0 0 0.6rem 0;
+  letter-spacing: -0.01em;
+}
+
+/* ----------- FORMULARIO ----------- */
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+/* Banner de error del servidor */
+.server-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.85rem;
+  background-color: #FDF2F2;
+  border: 1px solid #F8B4B4;
+  border-radius: 6px;
+  color: #9B1C1C;
+  font-size: 0.8rem;
+  font-weight: 500;
+  animation: fadeIn 0.3s ease;
+}
+
+.error-banner-icon {
+  width: 18px;
+  height: 18px;
+  color: #C53030;
+  flex-shrink: 0;
+}
+
+/* Grupo de campo (label + input) */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.form-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #2D2D2D;
+  letter-spacing: 0.02em;
+}
+
+/* Wrapper del input (icono + campo) */
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 12px;
+  width: 15px;
+  height: 15px;
+  color: #A09890;
+  pointer-events: none;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.55rem 0.85rem 0.55rem 2.2rem;
+  font-size: 0.875rem;
+  font-family: 'Fenix', 'Georgia', serif;
+  color: #1A1A1A;
+  background-color: #FFFFFF;
+  border: 1px solid #DDD5CC;
+  border-radius: 6px;
+  outline: none;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.form-input::placeholder {
+  color: #B5ADA5;
+}
+
+.form-input:focus {
+  border-color: #D2B48C;
+  box-shadow: 0 0 0 3px rgba(210, 180, 140, 0.15);
+}
+
+.form-input.input-error {
+  border-color: #C53030;
+  box-shadow: 0 0 0 3px rgba(197, 48, 48, 0.1);
+}
+
+/* ----------- TOGGLE DE CONTRASEÑA ----------- */
+.password-toggle {
+  position: absolute;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: #A09890;
+  transition: color 0.2s ease;
+}
+
+.password-toggle:hover {
+  color: #4B1623;
+}
+
+.toggle-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* ----------- MENSAJES DE ERROR ----------- */
+.error-message {
+  font-size: 0.75rem;
+  color: #C53030;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding-left: 2px;
+}
+
+/* ----------- FILA: RECORDARME + OLVIDÓ CONTRASEÑA ----------- */
+.form-extras {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.05rem;
+}
+
+.remember-label {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.775rem;
+  color: #4A4A4A;
+  cursor: pointer;
+  user-select: none;
+}
+
+.remember-checkbox {
+  width: 14px;
+  height: 14px;
+  accent-color: #4B1623;
+  cursor: pointer;
+}
+
+.forgot-link {
+  font-size: 0.775rem;
+  color: #7A3B4E;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.forgot-link:hover {
+  color: #4B1623;
+  text-decoration: underline;
+}
+
+/* ----------- BOTÓN DE LOGIN ----------- */
+.login-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.65rem 1rem;
+  margin-top: 0.2rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: 'Fenix', 'Georgia', serif;
+  color: #FFFFFF;
+  background-color: #4B1623;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: background-color 0.3s ease, transform 0.15s ease, box-shadow 0.3s ease;
+}
+
+.login-button:hover:not(:disabled) {
+  background-color: #3A0F18;
+  box-shadow: 0 4px 12px rgba(75, 22, 35, 0.35);
+}
+
+.login-button:active:not(:disabled) {
+  transform: scale(0.985);
+}
+
+.login-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Spinner de carga */
+.spinner {
+  width: 16px;
+  height: 16px;
+  animation: spin 1s linear infinite;
+}
+
+.spinner-track {
+  opacity: 0.25;
+}
+
+.spinner-path {
+  opacity: 0.75;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ----------- INDICADOR DE SEGURIDAD ----------- */
+.security-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  margin-top: 0.3rem;
+  font-size: 0.68rem;
+  color: #9B9189;
+  letter-spacing: 0.02em;
+}
+
+.security-icon {
+  width: 12px;
+  height: 12px;
+  color: #9B9189;
+}
+
+/* ----------- FOOTER ----------- */
+.login-footer {
+  padding: 0.4rem 1.5rem;
+  text-align: left;
+  font-size: 0.7rem;
+  color: #8B7E74;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+
+.login-footer p {
+  margin: 0;
+}
