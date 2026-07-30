@@ -24,11 +24,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.75rem 1rem;
-  height: 22vh;
-  min-height: 120px;
-  max-height: 160px;
-  background: radial-gradient(circle at center, #4B1623 0%, #2D0B14 100%);
+  padding: 2rem 1rem;
+  height: 30vh;
+  min-height: 260px;
+  background: url('/fondo.jpg') center/cover no-repeat;
+  background-color: #4B1623; 
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -50,19 +50,19 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0;
+  gap: 0.5rem;
 }
 
 .hero-logo {
-  width: 48px;
-  height: 48px;
+  width: 130px;
+  height: 120px;
   object-fit: contain;
-  margin-bottom: 0.1rem;
+  margin-bottom: 0.5rem;
   filter: brightness(1.1) sepia(0.3) saturate(1.5) hue-rotate(-10deg);
 }
 
 .hero-title {
-  font-size: 1.4rem;
+  font-size: 2.5rem; 
   font-weight: 700;
   letter-spacing: 0.3em;
   color: #D2B48C;
@@ -71,7 +71,7 @@
 }
 
 .hero-subtitle {
-  font-size: 0.65rem;
+  font-size: 0.85rem;
   letter-spacing: 0.35em;
   color: #D2B48C;
   text-transform: uppercase;

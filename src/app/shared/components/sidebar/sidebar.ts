@@ -58,44 +58,50 @@ export class Sidebar {
     {
       nombre: 'Inicio',
       ruta: '/dashboard',
-      icono: heroHome
+      icono: 'heroHome',
+      roles: ['Administrador', 'Abogado', 'Paralegal', 'Cliente'] 
     },
     {
       nombre: 'Expedientes',
       ruta: '/expedientes',
-      icono: heroFolder
+      icono: 'heroFolder',
+      roles: ['Administrador', 'Abogado', 'Paralegal', 'Cliente']
     },
     {
       nombre: 'Documentos',
       ruta: '/documentos',
-      icono: heroDocument
+      icono: 'heroDocument',
+      roles: ['Administrador', 'Abogado', 'Paralegal', 'Cliente']
     },
     {
       nombre: 'Calendario',
       ruta: '/calendario',
-      icono: heroCalendar
+      icono: 'heroCalendar',
+      roles: ['Administrador', 'Abogado', 'Paralegal', 'Cliente'] 
     },
     {
       nombre: 'Gestion de Usuarios',
       ruta: '/usuarios',
-      icono: heroUsers,
-      soloAdmin: true
+      icono: 'heroUsers',
+      roles: ['Administrador'] 
     },
     {
       nombre: 'Reportes Generales',
       ruta: '/reportes',
-      icono: heroChartPie
+      icono: 'heroChartPie',
+      roles: ['Administrador', 'Abogado'] 
     }
   ];
 
 
   get menuFiltrado() {
+    const usuarioActual = this.usuario;
 
-    if (this.usuario?.rol === 'Administrador') {
-      return this.menuItems;
+    if (!usuarioActual || !usuarioActual.rol) {
+      return [];
     }
 
-    return this.menuItems.filter(item => !item.soloAdmin);
+    return this.menuItems.filter(item => item.roles.includes(usuarioActual.rol));
   }
 
 
