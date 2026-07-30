@@ -1,4 +1,12 @@
 import { Routes } from '@angular/router';
+import { Calendario } from './components/calendario/calendario';
+
+export const routes: Routes = [
+  {
+    path: '',
+    component: Calendario
+  }
+];
 import { Component } from '@angular/core';
 import { LoginComponent } from './features/auth/login/login.component';
 import { authGuard } from './core/guards/auth.guard';
