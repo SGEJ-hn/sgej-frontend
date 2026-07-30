@@ -4,7 +4,6 @@ import { CommonModule } from '@angular/common';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { CalendarOptions } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
-
 import esLocale from '@fullcalendar/core/locales/es';
 
 @Component({
@@ -16,55 +15,27 @@ import esLocale from '@fullcalendar/core/locales/es';
 })
 export class Calendario {
 
- calendarOptions: CalendarOptions = {
-  plugins: [dayGridPlugin],
-  initialView: 'dayGridMonth',
-  locale: esLocale,
-  height: 'auto',
-  contentHeight: 'auto',
+  fechaActual: Date = new Date();
 
-  headerToolbar: {
-    left: 'title',
-    center: '',
-    right: 'prev,next'
-  },
+  calendarOptions: CalendarOptions = {
+    plugins: [dayGridPlugin],
+    initialView: 'dayGridMonth',
+    locale: esLocale,
+    height: 'auto',
+    contentHeight: 'auto',
 
-  eventDisplay: 'list-item',
-
-  events: [
-    {
-      start: '2026-07-07',
-      color: '#4CAF50'
+    headerToolbar: {
+      left: 'title',
+      center: '',
+      right: 'prev,next'
     },
-    {
-      start: '2026-07-10',
-      color: '#2196F3'
-    },
-    {
-      start: '2026-07-22',
-      color: '#FF9800'
-    },
-    {
-      start: '2026-07-30',
-      color: '#4CAF50'
-    }
-  ]
-};
 
-ngAfterViewInit() {
+    eventDisplay: 'list-item',
 
-  setTimeout(() => {
-
-    const dias = document.querySelectorAll('.fc-daygrid-day');
-
-    dias.forEach((dia: any) => {
-
-      if (dia.getAttribute('data-date') === '2026-07-07') {
-
-        const numero = dia.querySelector('.fc-daygrid-day-number');
-
-        if(numero){
-
+    dayCellDidMount: (arg) => {
+      if (arg.isToday) {
+        const numero = arg.el.querySelector('.fc-daygrid-day-number') as HTMLElement;
+        if (numero) {
           numero.style.background = '#5b1f2b';
           numero.style.color = 'white';
           numero.style.width = '36px';
@@ -74,15 +45,16 @@ ngAfterViewInit() {
           numero.style.justifyContent = 'center';
           numero.style.borderRadius = '2px';
           numero.style.margin = '6px';
-
         }
-
       }
+    },
 
-    });
-
-  });
-
-}
+    events: [
+      { start: '2026-07-07', color: '#4CAF50' },
+      { start: '2026-07-10', color: '#2196F3' },
+      { start: '2026-07-22', color: '#FF9800' },
+      { start: '2026-07-30', color: '#4CAF50' }
+    ]
+  };
 
 }

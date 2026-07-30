@@ -1,0 +1,54 @@
+<div class="contenedor">
+
+  <div class="encabezado">
+
+    <div>
+      <h2>Calendario de Citas</h2>
+      <p>Julio de 2026</p>
+    </div>
+
+    <button class="btn-nueva">
+      + Nueva Cita
+    </button>
+
+  </div>
+
+  <div class="busqueda">
+    <input
+      type="text"
+      placeholder="Buscar cita por abogado..."
+    >
+  </div>
+
+  <div class="contenido">
+   <div class="izquierda">
+      <full-calendar
+        id="calendario"
+        [options]="calendarOptions">
+      </full-calendar>
+
+      <div class="leyenda">
+        <span class="audiencia">● Audiencia</span>
+        <span class="reunion">● Reunión</span>
+        <span class="tramite">● Trámite</span>
+      </div>
+    </div>
+
+      <div class="derecha">
+        <div class="tarjeta">
+          <h3>Martes 7 de julio de 2026</h3>
+          <div class="detalle-vacio"></div>
+        </div>
+
+        <div class="tarjeta">
+          <h3>Próximas Citas - Julio</h3>
+          <div class="lista-vacia"></div>
+          <div class="lista-vacia"></div>
+          <div class="lista-vacia"></div>
+          <div class="lista-vacia"></div>
+        </div>
+    </div>
+  </div>
+</div>
+
+  

@@ -1,15 +1,8 @@
 import { Routes } from '@angular/router';
-import { Calendario } from './components/calendario/calendario';
-
-export const routes: Routes = [
-  {
-    path: '',
-    component: Calendario
-  }
-];
 import { Component } from '@angular/core';
 import { LoginComponent } from './features/auth/login/login.component';
 import { authGuard } from './core/guards/auth.guard';
+import { Calendario } from './features/Calendario/components/calendario/calendario'; 
 
 
 @Component({
@@ -27,9 +20,7 @@ import { authGuard } from './core/guards/auth.guard';
   `
 })
 export class DashboardDummyComponent {
-
   titulo = '';
-
 }
 
 
@@ -45,64 +36,52 @@ export class DashboardDummyComponent {
   `
 })
 export class PageDummyComponent {
-
   titulo = '';
-
 }
 
 
 export const routes: Routes = [
-
   {
     path: 'login',
     component: LoginComponent,
   },
-
   {
     path: 'dashboard',
     component: DashboardDummyComponent,
     canActivate: [authGuard],
   },
-
   {
     path: 'expedientes',
     component: PageDummyComponent,
     canActivate: [authGuard],
   },
-
   {
     path: 'documentos',
     component: PageDummyComponent,
     canActivate: [authGuard],
   },
-
   {
     path: 'calendario',
-    component: PageDummyComponent,
+    component: Calendario,
     canActivate: [authGuard],
   },
-
   {
     path: 'usuarios',
     component: PageDummyComponent,
     canActivate: [authGuard],
   },
-
   {
     path: 'reportes',
     component: PageDummyComponent,
     canActivate: [authGuard],
   },
-
   {
     path: '',
     redirectTo: 'dashboard',
     pathMatch: 'full',
   },
-
   {
     path: '**',
     redirectTo: 'login',
   }
-
 ];
