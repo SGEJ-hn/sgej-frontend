@@ -1,83 +1,128 @@
 <aside class="w-72 h-screen bg-[#4B1623] text-[#F3E8E8] flex flex-col justify-between select-none shadow-xl shrink-0 custom-font">
-  
-  <!-- ================= SECCIÓN SUPERIOR ================= -->
+
+  <!-- SECCIÓN SUPERIOR -->
   <div>
-    <!-- LOGO Y TÍTULO DE LA FIRMA -->
+
+    <!-- LOGO -->
     <div class="p-4 flex items-center gap-2 border-b border-[#FFFFFF]/54">
-      <img src="/logosgej.png" alt="Logo de la Compañía" class="w-20 h-20 object-contain">
+
+      <img 
+        src="/logosgej.png" 
+        alt="Logo de la Compañía" 
+        class="w-20 h-20 object-contain">
+
       <div class="flex flex-col items-center">
-        <h1 class="text-3xl font-bold tracking-wider text-[#D2B48C] leading-tight">JUSTICE</h1>
-        <p class="text-[12px] tracking-[0.25em] text-[#D2B48C] uppercase">Attorney Law</p>
+
+        <h1 class="text-3xl font-bold tracking-wider text-[#D2B48C] leading-tight">
+          JUSTICE
+        </h1>
+
+        <p class="text-[12px] tracking-[0.25em] text-[#D2B48C] uppercase">
+          Attorney Law
+        </p>
+
       </div>
+
     </div>
 
-    <!-- TÍTULO DE NAVEGACIÓN -->
+
+    <!-- TITULO MENU -->
     <div class="px-6 pt-6 pb-3">
-      <span class="text-menu font-medium text-[#ffffff]/56">Menu de Navegación</span>
+
+      <span class="text-menu font-medium text-[#ffffff]/56">
+        Menu de Navegación
+      </span>
+
     </div>
 
-    <!-- MENÚ DE OPCIONES -->
+
+    <!-- MENU DINAMICO -->
     <nav class="flex flex-col gap-0">
-      
-      <!-- ITEM ACTIVO: INICIO -->
-      <a class="flex items-center gap-3 px-6 py-3 bg-[#1A0C10]/33 text-[#D2B48C] border-l-4 border-[#D2B48C] font-medium transition-all cursor-pointer">
-        <ng-icon name="heroHome" class="text-xl text-[#D2B48C]"></ng-icon>
-        <span class="text-sidebar">Inicio</span>
+
+
+      <a 
+        *ngFor="let item of menuFiltrado"
+        [routerLink]="item.ruta"
+        routerLinkActive="bg-[#1A0C10]/33 text-[#D2B48C] border-l-4 border-[#D2B48C]"
+        class="flex items-center gap-3 px-6 py-3 text-[#AEAEAE]/70 hover:bg-[#1A0C10]/33 hover:text-[#D2B48C] transition-all cursor-pointer">
+
+
+        <ng-icon
+          [name]="item.icono"
+          class="text-xl text-[#D2B48C]">
+        </ng-icon>
+
+
+        <span class="text-sidebar">
+          {{ item.nombre }}
+        </span>
+
+
       </a>
 
-      <!-- ITEM INACTIVO: EXPEDIENTES -->
-      <a class="flex items-center gap-3 px-6 py-3 text-[#AEAEAE]/70 hover:bg-[#1A0C10]/33 hover:text-[#D2B48C] transition-all cursor-pointer">
-        <ng-icon name="heroFolder" class="text-xl text-[#D2B48C]"></ng-icon>
-        <span class="text-sidebar">Expedientes</span>
-      </a>
-
-      <!-- ITEM INACTIVO: DOCUMENTOS -->
-      <a class="flex items-center gap-3 px-6 py-3 text-[#AEAEAE]/70 hover:bg-[#1A0C10]/33 hover:text-[#D2B48C] transition-all cursor-pointer">
-        <ng-icon name="heroDocument" class="text-xl text-[#D2B48C]"></ng-icon>
-        <span class="text-sidebar">Documentos</span>
-      </a>
-
-      <!-- ITEM INACTIVO: CALENDARIO -->
-      <a class="flex items-center gap-3 px-6 py-3 text-[#AEAEAE]/70 hover:bg-[#1A0C10]/33 hover:text-[#D2B48C] transition-all cursor-pointer">
-        <ng-icon name="heroCalendar" class="text-xl text-[#D2B48C]"></ng-icon>
-        <span class="text-sidebar">Calendario</span>
-      </a>
-
-      <!-- ITEM INACTIVO: GESTIÓN DE USUARIOS -->
-      <a class="flex items-center gap-3 px-6 py-3 text-[#AEAEAE]/70 hover:bg-[#1A0C10]/33 hover:text-[#D2B48C] transition-all cursor-pointer">
-        <ng-icon name="heroUsers" class="text-xl text-[#D2B48C]"></ng-icon>
-        <span class="text-sidebar">Gestion de Usuarios</span>
-      </a>
-
-      <!-- ITEM INACTIVO: REPORTES GENERALES -->
-      <a class="flex items-center gap-3 px-6 py-3 text-[#AEAEAE]/70 hover:bg-[#1A0C10]/33 hover:text-[#D2B48C] transition-all cursor-pointer">
-        <ng-icon name="heroChartPie" class="text-xl text-[#D2B48C]"></ng-icon>
-        <span class="text-sidebar">Reportes Generales</span>
-      </a>
 
     </nav>
+
   </div>
 
-  <!-- ================= SECCIÓN INFERIOR (PERFIL Y LOGOUT) ================= -->
+
+
+  <!-- PERFIL Y LOGOUT -->
   <div class="p-6 border-t border-[#FFFFFF]/54">
-    
-    <!-- TARJETA DE USUARIO DINÁMICA -->
+
+
     <div class="flex items-center gap-3 mb-4">
+
+
+      <!-- INICIALES -->
       <div class="w-10 h-10 rounded-full bg-[#D2B48C] text-[#4B1623] font-bold flex items-center justify-center shrink-0">
+
         {{ iniciales }}
+
       </div>
+
+
+      <!-- DATOS USUARIO -->
       <div class="overflow-hidden">
-        <h3 class="text-lg font-light text-white truncate">{{ usuario?.nombre || 'Administrador' }}</h3>
-        <p class="text-sm text-[#ffffff]/56 truncate">{{ usuario?.rol || 'Administrador' }}</p>
+
+        <h3 class="text-lg font-light text-white truncate">
+          {{ usuario?.nombre || 'Administrador' }}
+        </h3>
+
+
+        <p class="text-sm text-[#ffffff]/56 truncate">
+          {{ usuario?.rol || 'Administrador' }}
+        </p>
+
+
       </div>
+
+
     </div>
 
-    <!-- BOTÓN CERRAR SESIÓN -->
-    <button (click)="logout()" class="flex items-center gap-2 text-menu text-[#ffffff]/56 hover:text-white transition-colors cursor-pointer w-full pt-2">
-      <ng-icon name="heroArrowRightOnRectangle" class="text-xl text-[#ffffff]/56"></ng-icon>
-      <span>Cerrar Sesión</span>
+
+
+    <!-- CERRAR SESION -->
+    <button 
+      (click)="logout()"
+      class="flex items-center gap-2 text-menu text-[#ffffff]/56 hover:text-white transition-colors cursor-pointer w-full pt-2">
+
+
+      <ng-icon
+        name="heroArrowRightOnRectangle"
+        class="text-xl text-[#ffffff]/56">
+      </ng-icon>
+
+
+      <span>
+        Cerrar Sesión
+      </span>
+
+
     </button>
 
+
   </div>
+
 
 </aside>
