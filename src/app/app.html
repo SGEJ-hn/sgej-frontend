@@ -1,22 +1,23 @@
-<router-outlet>
-  
-</router-outlet>
-<!-- Contenedor principal condicional -->
-<!-- Si estamos en /login, mostrar SOLO el router-outlet (pantalla completa) -->
-<!-- Si estamos en cualquier otra ruta, mostrar el layout con sidebar -->
-
+<!-- Login sin sidebar -->
 @if (isLoginRoute()) {
-  <!-- Layout de Login: pantalla completa sin sidebar -->
+
   <router-outlet></router-outlet>
+
 } @else {
-  <!-- Layout principal: sidebar + contenido -->
-  <div class="flex h-screen bg-[#F5F2EE]">
-    <!-- Sidebar visualmente terminado -->
+
+  <!-- Layout principal -->
+  <div class="app-layout">
+
+    <!-- Sidebar -->
     <app-sidebar></app-sidebar>
 
-    <!-- Área de contenido -->
-    <main class="flex-1 overflow-y-auto p-8">
+    <!-- Contenido -->
+    <main class="app-content">
+
       <router-outlet></router-outlet>
+
     </main>
+
   </div>
+
 }

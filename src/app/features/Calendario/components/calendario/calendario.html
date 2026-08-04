@@ -1,54 +1,418 @@
 <div class="contenedor">
 
+  <!-- Encabezado -->
   <div class="encabezado">
 
     <div>
       <h2>Calendario de Citas</h2>
-      <p>Julio de 2026</p>
+      <p>Gestión de citas</p>
     </div>
 
-    <button class="btn-nueva">
+    <button
+      *ngIf="esAdministrador"
+      class="btn-nueva"
+      (click)="abrirModalNuevaCita()"
+    >
       + Nueva Cita
     </button>
 
   </div>
 
+
+  <!-- Buscador -->
   <div class="busqueda">
+
     <input
       type="text"
       placeholder="Buscar cita por abogado..."
     >
+
   </div>
 
+
+  <!-- Contenido -->
   <div class="contenido">
-   <div class="izquierda">
+
+    <!-- Calendario -->
+    <div class="izquierda">
+
       <full-calendar
-        id="calendario"
         [options]="calendarOptions">
       </full-calendar>
 
       <div class="leyenda">
-        <span class="audiencia">● Audiencia</span>
-        <span class="reunion">● Reunión</span>
-        <span class="tramite">● Trámite</span>
+
+        <span class="audiencia">
+          ● Audiencia
+        </span>
+
+        <span class="reunion">
+          ● Reunión
+        </span>
+
+        <span class="tramite">
+          ● Trámite
+        </span>
+
       </div>
+
     </div>
 
-      <div class="derecha">
-        <div class="tarjeta">
-          <h3>Martes 7 de julio de 2026</h3>
-          <div class="detalle-vacio"></div>
+
+    <!-- Panel derecho -->
+    <div class="derecha">
+
+      <!-- Detalle -->
+      <div class="tarjeta">
+
+        <!-- Cita seleccionada -->
+        <div *ngIf="citaSeleccionada">
+
+          <h3>
+            {{ formatearFecha(citaSeleccionada.fecha) }}
+          </h3>
+
+          <div class="detalle-cita">
+
+            <h4>
+              {{ citaSeleccionada.titulo }}
+            </h4>
+
+            <p>
+              <strong>Tipo:</strong>
+              {{ citaSeleccionada.tipo_cita }}
+            </p>
+
+            <p>
+              <strong>Hora:</strong>
+              {{ formatearHora(citaSeleccionada.hora_inicio) }}
+            </p>
+
+            <p>
+              <strong>Lugar:</strong>
+              {{ citaSeleccionada.lugar_sala || 'No especificado' }}
+            </p>
+
+            <p>
+              <strong>Duración:</strong>
+              {{ citaSeleccionada.duracion_estimada || 'No especificada' }}
+            </p>
+
+            <p>
+              <strong>Notas:</strong>
+              {{ citaSeleccionada.notas_recordatorio || 'Sin notas' }}
+            </p>
+
+
+            <!-- Acciones de administrador -->
+            <div
+              class="acciones-cita"
+              *ngIf="esAdministrador"
+            >
+
+              <button
+                type="button"
+                class="btn-editar"
+                (click)="abrirModalEditar()"
+              >
+                Editar
+              </button>
+
+              <button
+                type="button"
+                class="btn-eliminar"
+                (click)="eliminarCita()"
+              >
+                Eliminar
+              </button>
+
+            </div>
+
+          </div>
+
         </div>
 
-        <div class="tarjeta">
-          <h3>Próximas Citas - Julio</h3>
-          <div class="lista-vacia"></div>
-          <div class="lista-vacia"></div>
-          <div class="lista-vacia"></div>
-          <div class="lista-vacia"></div>
+
+        <!-- Sin cita seleccionada -->
+        <div *ngIf="!citaSeleccionada">
+
+          <h3>Detalle de la cita</h3>
+
+          <div class="detalle-vacio">
+            Selecciona una cita del calendario.
+          </div>
+
         </div>
+
+      </div>
+
+
+      <!-- Próximas citas -->
+      <div class="tarjeta">
+
+        <h3>Próximas Citas</h3>
+
+        <div
+          class="proxima-cita"
+          *ngFor="let cita of proximasCitas"
+          (click)="seleccionarCita(cita)"
+        >
+
+          <div class="proxima-fecha">
+            {{ formatearFecha(cita.fecha) }}
+          </div>
+
+          <div class="proxima-titulo">
+            {{ cita.titulo }}
+          </div>
+
+          <div class="proxima-info">
+
+            {{ formatearHora(cita.hora_inicio) }}
+
+            <span *ngIf="cita.lugar_sala">
+              · {{ cita.lugar_sala }}
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <!-- Sin próximas citas -->
+        <div
+          class="sin-citas"
+          *ngIf="proximasCitas.length === 0"
+        >
+          No hay próximas citas.
+        </div>
+
+      </div>
+
     </div>
+
   </div>
+
 </div>
 
-  
+
+<!-- Modal -->
+<div
+  class="modal-overlay"
+  *ngIf="modalNuevaCitaAbierto && esAdministrador"
+  (click)="cerrarModalNuevaCita()"
+>
+
+  <div
+    class="modal-cita"
+    (click)="$event.stopPropagation()"
+  >
+
+    <!-- Encabezado modal -->
+    <div class="modal-header">
+
+      <div>
+
+        <h2>
+          {{ modoEdicion ? 'Editar Cita' : 'Nueva Cita' }}
+        </h2>
+
+        <p>
+          {{
+            modoEdicion
+              ? 'Modifica la información de la cita'
+              : 'Agrega una cita al calendario'
+          }}
+        </p>
+
+      </div>
+
+      <button
+        type="button"
+        class="btn-cerrar"
+        (click)="cerrarModalNuevaCita()"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <!-- Formulario -->
+    <div class="modal-body">
+
+      <!-- Expediente -->
+      <div class="campo campo-completo">
+
+        <label>Expediente</label>
+
+        <select
+          [(ngModel)]="nuevaCita.id_expediente"
+        >
+
+          <option value="">
+            Sin expediente asociado
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- Título -->
+      <div class="campo campo-completo">
+
+        <label>Título *</label>
+
+        <input
+          type="text"
+          [(ngModel)]="nuevaCita.titulo"
+          placeholder="Ej. Audiencia inicial"
+        >
+
+      </div>
+
+
+      <!-- Tipo y lugar -->
+      <div class="fila-campos">
+
+        <div class="campo">
+
+          <label>Tipo de cita *</label>
+
+          <select
+            [(ngModel)]="nuevaCita.tipo_cita"
+          >
+
+            <option value="">
+              Seleccionar
+            </option>
+
+            <option value="Audiencia">
+              Audiencia
+            </option>
+
+            <option value="Reunión">
+              Reunión
+            </option>
+
+            <option value="Trámite">
+              Trámite
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="campo">
+
+          <label>Lugar / Sala</label>
+
+          <input
+            type="text"
+            [(ngModel)]="nuevaCita.lugar_sala"
+            placeholder="Ej. Sala Judicial 2"
+          >
+
+        </div>
+
+      </div>
+
+
+      <!-- Fecha y hora -->
+      <div class="fila-campos">
+
+        <div class="campo">
+
+          <label>Fecha *</label>
+
+          <input
+            type="date"
+            [(ngModel)]="nuevaCita.fecha"
+          >
+
+        </div>
+
+
+        <div class="campo">
+
+          <label>Hora *</label>
+
+          <input
+            type="time"
+            [(ngModel)]="nuevaCita.hora_inicio"
+          >
+
+        </div>
+
+      </div>
+
+
+      <!-- Duración -->
+      <div class="campo campo-completo">
+
+        <label>Duración estimada</label>
+
+        <input
+          type="text"
+          [(ngModel)]="nuevaCita.duracion_estimada"
+          placeholder="Ej. 1 hora"
+        >
+
+      </div>
+
+
+      <!-- Notas -->
+      <div class="campo campo-completo">
+
+        <label>Notas / Recordatorio</label>
+
+        <textarea
+          [(ngModel)]="nuevaCita.notas_recordatorio"
+          placeholder="Escribe información adicional..."
+          rows="3">
+        </textarea>
+
+      </div>
+
+
+      <!-- Recordatorio -->
+      <label class="recordatorio">
+
+        <input
+          type="checkbox"
+          [(ngModel)]="nuevaCita.recordatorio_automatico"
+        >
+
+        Recordatorio automático
+
+      </label>
+
+    </div>
+
+
+    <!-- Botones -->
+    <div class="modal-footer">
+
+      <button
+        type="button"
+        class="btn-cancelar"
+        (click)="cerrarModalNuevaCita()"
+      >
+        Cancelar
+      </button>
+
+      <button
+        type="button"
+        class="btn-guardar"
+        (click)="guardarCita()"
+      >
+        {{ modoEdicion ? 'Guardar Cambios' : 'Guardar Cita' }}
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
