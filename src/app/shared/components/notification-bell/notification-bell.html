@@ -1,0 +1,65 @@
+<div class="relative inline-block text-left">
+  <!-- Botón de la Campanita (Con tus estilos originales) -->
+  <button 
+    (click)="toggleDropdown()" 
+    class="relative hover:opacity-80 transition-opacity cursor-pointer flex items-center justify-center p-1 text-[#4B1623]"
+    aria-label="Notificaciones"
+  >
+    <ng-icon name="heroBellSolid" size="1.6rem"></ng-icon>
+    
+    <!-- Tu Punto indicador o Contador (Solo si hay sin leer) -->
+    <span 
+      *ngIf="unreadCount > 0"
+      class="absolute top-1 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold leading-none text-white bg-red-600 rounded-full border-2 border-white"
+    >
+      {{ unreadCount > 99 ? '99+' : unreadCount }}
+    </span>
+  </button>
+
+  <!-- Panel Desplegable -->
+  <div 
+    *ngIf="isOpen"
+    class="origin-top-right absolute right-0 mt-2 w-80 sm:w-96 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50 divide-y divide-gray-100"
+  >
+    <div class="px-4 py-3 bg-gray-50 rounded-t-md flex justify-between items-center">
+      <p class="text-sm font-medium text-gray-900">Notificaciones</p>
+      <span class="text-xs text-gray-500">{{ unreadCount }} sin leer</span>
+    </div>
+
+    <!-- Lista de Notificaciones -->
+    <div class="max-h-96 overflow-y-auto">
+      <div *ngIf="notificaciones.length === 0" class="p-4 text-center text-sm text-gray-500">
+        No tienes notificaciones.
+      </div>
+
+      <div 
+        *ngFor="let notif of notificaciones" 
+        (click)="manejarClicNotificacion(notif)"
+        [ngClass]="{'bg-blue-50': !notif.leida, 'hover:bg-gray-50': true}"
+        class="cursor-pointer p-4 flex gap-3 transition-colors duration-150"
+      >
+        <div class="flex-shrink-0 mt-1">
+          <div [ngClass]="{'text-[#4B1623]': !notif.leida, 'text-gray-400': notif.leida}">
+             <ng-icon [name]="getIconoPorTipo(notif.tipo)" class="w-5 h-5"></ng-icon>
+          </div>
+        </div>
+        
+        <div class="flex-1 min-w-0">
+          <p [ngClass]="{'font-semibold text-gray-900': !notif.leida, 'font-medium text-gray-700': notif.leida}" class="text-sm truncate">
+            {{ notif.titulo }}
+          </p>
+          <p class="text-sm text-gray-500 line-clamp-2 mt-0.5">
+            {{ notif.mensaje }}
+          </p>
+          <p class="text-xs text-gray-400 mt-1">
+            {{ notif.fecha_creacion | date:'short' }}
+          </p>
+        </div>
+        
+        <div *ngIf="!notif.leida" class="flex-shrink-0 self-center">
+          <span class="inline-block w-2.5 h-2.5 bg-blue-600 rounded-full"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

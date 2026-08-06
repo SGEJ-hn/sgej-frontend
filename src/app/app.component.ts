@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { Sidebar } from './shared/components/sidebar/sidebar';
+import { fadeAnimation } from './shared/animations/route-animations'; // <-- Ajusta la ruta a donde guardaste el archivo
 
 @Component({
   selector: 'app-root',
@@ -11,6 +12,7 @@ import { Sidebar } from './shared/components/sidebar/sidebar';
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',
+  animations: [fadeAnimation]
 })
 export class AppComponent {
 
@@ -20,6 +22,10 @@ export class AppComponent {
   isLoginRoute(): boolean {
     return this.router.url === '/' ||
            this.router.url.startsWith('/login');
+  }
+
+  prepararRuta(outlet: RouterOutlet) {
+    return outlet && outlet.isActivated ? outlet.activatedRoute : '';
   }
 
 }

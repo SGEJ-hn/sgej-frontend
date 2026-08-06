@@ -1,28 +1,30 @@
-<!-- Contenedor Principal (Fondo gris claro/crema del sistema) -->
-<div class="min-h-screen bg-[#F3F2EE] p-8 font-sans custom-font">
+<!-- Contenedor General -->
+<div class="min-h-screen bg-[#F3F2EE] font-sans custom-font flex flex-col">
   
-  <!-- Encabezado y Botones de Acción -->
-  <div class="flex justify-between items-start mb-8">
-    <div>
-      <h1 class="text-2xl text-gray-900 border-l-[3px] border-gray-900 pl-3">Subir Documento</h1>
-      <p class="text-sm text-[#000000]/60 mt-2 pl-4">{{ numeroExpedienteVisual }} • Grupo Empresarial Vidal S.A.</p>
-    </div>
+  <!-- NUEVO HEADER COMPARTIDO (Sin iconos de campana/config) -->
+  <app-shared-header 
+    titulo="Subir Documento" 
+    [subtitulo]="numeroExpedienteVisual + ' • Grupo Empresarial Vidal S.A.'"
+    [mostrarIconos]="false">
     
-    <div class="flex gap-4">
-      <a 
-        [routerLink]="['/expedientes', expedienteAsociadoId, 'documentos']"
-        class="px-6 py-2 bg-[#D2B48C] hover:bg-[#b89e78] text-gray-900 font-medium transition-discrete cursor-pointer inline-flex items-center justify-center text-center">
-        Cancelar
-      </a>
-  
-      <button 
-        (click)="subirDocumento()"
-        class="px-6 py-2 bg-[#4B1623] hover:bg-[#38101c]/90 text-[#F3F2EE] font-medium flex items-center gap-2 transition-colors cursor-pointer">
-        <ng-icon name="heroArrowUpTray" size="1.2rem"></ng-icon>
-        Subir Documento
-      </button>
-    </div>
-  </div>
+    <!-- Botones proyectados hacia la derecha -->
+    <a 
+      [routerLink]="['/expedientes', expedienteAsociadoId, 'documentos']"
+      class="px-6 py-2 bg-[#D2B48C] hover:bg-[#b89e78] text-gray-900 font-medium transition-discrete cursor-pointer inline-flex items-center justify-center text-center">
+      Cancelar
+    </a>
+
+    <button 
+      (click)="subirDocumento()"
+      class="px-6 py-2 bg-[#4B1623] hover:bg-[#38101c]/90 text-[#F3F2EE] font-medium flex items-center gap-2 transition-colors cursor-pointer">
+      <ng-icon name="heroArrowUpTray" size="1.2rem"></ng-icon>
+      Subir Documento
+    </button>
+
+  </app-shared-header>
+
+  <!-- Contenedor del Contenido Principal (con su padding) -->
+  <div class="p-8">
 
   <!-- Sección 1: Información del Documento -->
   <div class="bg-white border border-gray-200 p-8 mb-8">
@@ -63,86 +65,84 @@
   </div>
 
   <!-- Sección 2: Zona Drag & Drop y Lista de Recientes -->
-<div class="flex flex-col lg:flex-row justify-between gap-7 items-start">
-  <!-- Zona de Carga (Izquierda) -->
-  <div 
-    class="border-2 border-dashed border-[#d4b88c] p-10 flex flex-col items-center justify-center text-center w-2xl h-105 transition-all duration-300 relative"
-    [class.bg-[#fcfaf7]]="!archivoSeleccionado && !estaSubiendo"
-    [class.bg-[#f0eadd]]="archivoSeleccionado && !estaSubiendo"
-    [class.bg-white]="estaSubiendo || mensajeExito"
-    appDragDrop 
-    (fileDropped)="onFileDropped($event)">
+  <div class="flex flex-col lg:flex-row gap-8 items-start w-full">
     
-    <!-- ESTADO 1: Normal (Para seleccionar archivo) -->
-    <ng-container *ngIf="!estaSubiendo && !mensajeExito">
-      <div class="w-20 h-20 bg-[#d4b88c] rounded-full flex items-center justify-center mb-6 text-[#4a1525]">
-        <ng-icon name="heroArrowUpTray" size="2rem"></ng-icon>
-      </div>
+    <!-- Zona de Carga (Izquierda) -->
+    <!-- CAMBIO: Quitamos w-2xl y agregamos flex-1 w-full para que se estire -->
+    <div 
+      class="border-2 border-dashed border-[#d4b88c] p-10 flex flex-col items-center justify-center text-center flex-1 w-full h-105 transition-all duration-300 relative"
+      [class.bg-[#fcfaf7]]="!archivoSeleccionado && !estaSubiendo"
+      [class.bg-[#f0eadd]]="archivoSeleccionado && !estaSubiendo"
+      [class.bg-white]="estaSubiendo || mensajeExito"
+      appDragDrop 
+      (fileDropped)="onFileDropped($event)">
       
-      <p class="text-gray-900 font-medium mb-3">
-        {{ archivoSeleccionado ? 'Archivo listo: ' + archivoSeleccionado.name : 'Arrastre un archivo o haga clic para seleccionar' }}
-      </p>
-      <p class="text-xs text-gray-400 mb-8 tracking-wide">PDF, DOC, DOCX, XLS, XLSX, PNG, JPG — máx. 50 MB</p>
+      <!-- ESTADO 1: Normal (Para seleccionar archivo) -->
+      <ng-container *ngIf="!estaSubiendo && !mensajeExito">
+        <div class="w-20 h-20 bg-[#d4b88c] rounded-full flex items-center justify-center mb-6 text-[#4a1525]">
+          <ng-icon name="heroArrowUpTray" size="2rem"></ng-icon>
+        </div>
+        
+        <p class="text-gray-900 font-medium mb-3">
+          {{ archivoSeleccionado ? 'Archivo listo: ' + archivoSeleccionado.name : 'Arrastre un archivo o haga clic para seleccionar' }}
+        </p>
+        <p class="text-xs text-gray-400 mb-8 tracking-wide">PDF, DOC, DOCX, XLS, XLSX, PNG, JPG — máx. 50 MB</p>
+        
+        <button 
+          (click)="fileInput.click()" 
+          class="px-6 py-2 bg-[#d4b88c] hover:bg-[#c4a67a] text-gray-900 text-sm font-medium transition-colors cursor-pointer">
+          {{ archivoSeleccionado ? 'Cambiar Archivo' : 'Seleccionar Archivo' }}
+        </button>
+        <input type="file" #fileInput hidden (change)="fileBrowseHandler($event)">
+      </ng-container>
+
+      <!-- ESTADO 2: Subiendo (Barra de progreso) -->
+      <div *ngIf="estaSubiendo && !mensajeExito" class="w-full flex flex-col items-center justify-center px-8">
+        <p class="text-gray-800 font-medium mb-4">Subiendo archivo...</p>
+        <div class="w-full bg-gray-200 rounded-full h-2.5 mb-2 overflow-hidden">
+          <div class="bg-[#4B1623] h-2.5 rounded-full transition-all duration-300 ease-out" [style.width]="progresoSubida + '%'"></div>
+        </div>
+        <p class="text-xs text-gray-500 font-medium">{{ progresoSubida }}%</p>
+      </div>
+
+      <!-- ESTADO 3: Éxito (Mensaje de confirmación) -->
+      <div *ngIf="mensajeExito" class="flex flex-col items-center justify-center">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4 text-green-600">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+        <p class="text-green-700 font-medium text-center">{{ mensajeExito }}</p>
+      </div>
+
+    </div>
+
+    <!-- Lista de Documentos (Derecha) -->
+    <!-- CAMBIO: Mantenemos un ancho fijo pero aseguramos que no se encoja (shrink-0 y w-96) -->
+    <div class="bg-white border border-gray-200 w-full lg:w-96 shrink-0 h-105 flex flex-col">
       
-      <button 
-        (click)="fileInput.click()" 
-        class="px-6 py-2 bg-[#d4b88c] hover:bg-[#c4a67a] text-gray-900 text-sm font-medium transition-colors cursor-pointer">
-        {{ archivoSeleccionado ? 'Cambiar Archivo' : 'Seleccionar Archivo' }}
-      </button>
-      <input type="file" #fileInput hidden (change)="fileBrowseHandler($event)">
-    </ng-container>
-
-    <!-- ESTADO 2: Subiendo (Barra de progreso) -->
-    <div *ngIf="estaSubiendo && !mensajeExito" class="w-full flex flex-col items-center justify-center px-8">
-      <p class="text-gray-800 font-medium mb-4">Subiendo archivo...</p>
-      <div class="w-full bg-gray-200 rounded-full h-2.5 mb-2 overflow-hidden">
-        <div class="bg-[#4B1623] h-2.5 rounded-full transition-all duration-300 ease-out" [style.width]="progresoSubida + '%'"></div>
+      <div class="p-8 border-b border-gray-200">
+        <h2 class="text-base font-medium text-gray-900 border-l-[3px] border-gray-900 pl-3">
+          Subidos recientemente
+        </h2>
       </div>
-      <p class="text-xs text-gray-500 font-medium">{{ progresoSubida }}%</p>
-    </div>
 
-    <!-- ESTADO 3: Éxito (Mensaje de confirmación) -->
-    <div *ngIf="mensajeExito" class="flex flex-col items-center justify-center">
-      <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4 text-green-600">
-        <!-- Icono de Check nativo en SVG -->
-        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
-        </svg>
-      </div>
-      <p class="text-green-700 font-medium text-center">{{ mensajeExito }}</p>
-    </div>
+      <ul class="flex-1 overflow-y-auto divide-y divide-gray-100">
+        <li *ngFor="let doc of documentosRecientes" class="p-5 flex items-center gap-6 hover:bg-gray-50 transition-colors">
+          <div class="bg-red-50 text-red-400 p-2 rounded-lg">
+            <ng-icon name="heroDocumentText" size="1.2rem"></ng-icon>
+          </div>
+          <div class="flex-1">
+            <p class="text-sm text-gray-800 font-medium">{{ doc.nombre_documento }}</p>
+            <p class="text-xs text-gray-500 mt-0.5">{{ doc.fecha_carga | date:'mediumDate' }} · {{ doc.tamano_mb }} MB</p>
+          </div>
+        </li>
 
+        <li *ngIf="documentosRecientes.length === 0" class="p-8 text-center text-gray-400 text-sm">
+          Aún no hay documentos recientes.
+        </li>
+      </ul>
+      
+    </div>
   </div>
-
-  <!-- Lista de Documentos (Derecha) -->
-  <div class="bg-white border border-gray-200 w-sm h-105 flex flex-col">
-    
-    <div class="p-8 border-b border-gray-200">
-      <h2 class="text-base font-medium text-gray-900 border-l-[3px] border-gray-900 pl-3">
-        Subidos recientemente
-      </h2>
-    </div>
-
-    <ul class="flex-1 overflow-y-auto divide-y divide-gray-100">
-      <li *ngFor="let doc of documentosRecientes" class="p-5 flex items-center gap-6 hover:bg-gray-50 transition-colors">
-
-        <div class="bg-red-50 text-red-400 p-2 rounded-lg">
-          <ng-icon name="heroDocumentText" size="1.2rem"></ng-icon>
-        </div>
-
-        <div class="flex-1">
-          <p class="text-sm text-gray-800 font-medium">{{ doc.nombre_documento }}</p>
-          <p class="texto-sec text-gray-500 mt-0.5">{{ doc.fecha_carga | date:'mediumDate' }} · {{ doc.tamano_mb }} MB</p>
-        </div>
-
-      </li>
-
-      <!-- Mensaje por si no hay recientes -->
-      <li *ngIf="documentosRecientes.length === 0" class="p-8 text-center text-gray-400 text-sm">
-        Aún no hay documentos recientes.
-      </li>
-    </ul>
-    
-  </div>
-</div>
 </div>

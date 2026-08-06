@@ -22,6 +22,7 @@ import { CitaService } from '../../../../core/services/cita.service';
 import type { Cita } from '../../../../core/services/cita.service';
 
 import { AuthService } from '../../../../core/services/auth.service';
+import { ExpedienteService, Expediente } from '../../../../core/services/expediente';
 
 
 @Component({
@@ -43,7 +44,8 @@ export class Calendario implements OnInit {
   constructor(
     private citaService: CitaService,
     private authService: AuthService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private expedienteService: ExpedienteService 
   ) {}
 
 
@@ -58,6 +60,7 @@ export class Calendario implements OnInit {
   citas: Cita[] = [];
 
   citaSeleccionada: Cita | null = null;
+  expedientes: Expediente[] = [];
 
 
   // Usuario actual
@@ -191,6 +194,7 @@ export class Calendario implements OnInit {
   ngOnInit(): void {
 
     this.cargarCitas();
+    this.cargarExpedientes(); // <-- ¡Esto faltaba!
 
   }
 
@@ -295,6 +299,32 @@ export class Calendario implements OnInit {
 
     });
 
+  }
+
+ cargarExpedientes(): void {
+    console.log('CARGANDO EXPEDIENTES DESDE ANGULAR...');
+
+    this.expedienteService.obtenerExpedientes().subscribe({
+      next: (respuesta: any) => {
+        console.log('EXPEDIENTES RECIBIDOS:', respuesta);
+
+        // Validar si la respuesta es un arreglo directo o viene dentro de una propiedad
+        if (Array.isArray(respuesta)) {
+          this.expedientes = respuesta;
+        } else if (respuesta && Array.isArray(respuesta.expedientes)) {
+          this.expedientes = respuesta.expedientes;
+        } else if (respuesta && Array.isArray(respuesta.data)) {
+          this.expedientes = respuesta.data;
+        } else {
+          this.expedientes = [];
+        }
+
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('ERROR AL CARGAR EXPEDIENTES:', error);
+      }
+    });
   }
 
 

@@ -13,11 +13,12 @@ import {
   heroDocumentText
 } from '@ng-icons/heroicons/outline';
 import { Documentos } from '../../services/documentos';
+import { SharedHeader } from '../../../../shared/components/shared-header/shared-header';
 
 @Component({
   selector: 'app-lista-documentos',
   standalone: true,
-  imports: [CommonModule, RouterModule, NgIconComponent,FormsModule],
+  imports: [CommonModule, RouterModule, NgIconComponent,FormsModule, SharedHeader],
   viewProviders: [provideIcons({ 
     heroEye, heroArrowDownTray, heroPencilSquare, heroTrash, heroArrowLeft, heroPlus, heroDocumentText 
   })],

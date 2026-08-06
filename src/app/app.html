@@ -6,18 +6,20 @@
 } @else {
 
   <!-- Layout principal -->
-  <div class="app-layout">
+  <div class="app-layout flex h-screen w-full overflow-hidden bg-[#F3F2EE]">
 
     <!-- Sidebar -->
     <app-sidebar></app-sidebar>
 
-    <!-- Contenido -->
-    <main class="app-content">
-
-      <router-outlet></router-outlet>
+    <!-- Contenido (FUSIONADO: Animación + Scroll + Tu clase app-content) -->
+    <main 
+      [@routeAnimations]="prepararRuta(outlet)" 
+      class="app-content flex-1 h-screen overflow-y-auto overflow-x-hidden relative">
+      
+      <router-outlet #outlet="outlet"></router-outlet>
 
     </main>
-
+    
   </div>
 
 }
