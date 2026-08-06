@@ -1,29 +1,31 @@
-import { Component, signal } from '@angular/core';
-import { Router, RouterOutlet, NavigationEnd } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { Component } from '@angular/core';
+import { Router, RouterOutlet } from '@angular/router';
 import { Sidebar } from './shared/components/sidebar/sidebar';
-import { filter } from 'rxjs/operators';
+import { fadeAnimation } from './shared/animations/route-animations'; // <-- Ajusta la ruta a donde guardaste el archivo
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, Sidebar, CommonModule],
+  imports: [
+    RouterOutlet,
+    Sidebar
+  ],
   templateUrl: './app.html',
   styleUrl: './app.css',
+  animations: [fadeAnimation]
 })
 export class AppComponent {
-  title = 'sgej-frontend';
-  private _isLoginRoute = signal(true);
 
-  constructor(private router: Router) {
-    this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe((event: NavigationEnd) => {
-        this._isLoginRoute.set(event.urlAfterRedirects.startsWith('/login') || event.urlAfterRedirects === '/');
-      });
-  }
+  constructor(private router: Router) {}
 
+  // Verifica si estamos en el login
   isLoginRoute(): boolean {
-    return this._isLoginRoute();
+    return this.router.url === '/' ||
+           this.router.url.startsWith('/login');
   }
+
+  prepararRuta(outlet: RouterOutlet) {
+    return outlet && outlet.isActivated ? outlet.activatedRoute : '';
+  }
+
 }

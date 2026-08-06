@@ -1,0 +1,148 @@
+<div class="min-h-screen bg-[#f8f7f5] font-sans custom-font relative flex flex-col">
+  
+  <app-shared-header 
+    titulo="Documentos del Expediente" 
+    subtitulo="EXP-2026-0142 • Grupo Empresarial Vidal S.A.">
+    
+    <!-- Botones proyectados hacia la derecha -->
+    <a [routerLink]="['/expedientes', expedienteId]" class="text-gray-500 hover:text-gray-800 flex items-center gap-2 text-sm transition-colors cursor-pointer mr-2">
+      <ng-icon name="heroArrowLeft"></ng-icon>
+      Volver al Expediente
+    </a>
+    <a [routerLink]="['/expedientes', expedienteId, 'documentos', 'subir']" class="px-5 py-2 bg-[#4a1525] hover:bg-[#38101c] text-white font-medium flex items-center gap-2 transition-colors cursor-pointer">
+      <ng-icon name="heroPlus"></ng-icon>
+      Subir Documento
+    </a>
+    
+  </app-shared-header>
+
+  <!-- Contenedor Principal del Contenido (le ponemos el padding p-8 aquí) -->
+  <div class="p-8">
+    
+    <!-- Caja Blanca Principal (Buscador y Tabla) -->
+    <div class="bg-white border border-gray-200">
+
+  <!-- Caja Blanca Principal -->
+  <div class="bg-white border border-gray-200">
+    
+    <!-- Buscador -->
+    <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+      <input 
+        type="text" 
+        [(ngModel)]="terminoBusqueda" 
+        placeholder="Buscar documento..." 
+        class="w-1/3 border border-gray-300 p-2 text-sm focus:outline-none focus:border-[#d4b88c]">
+      <span class="text-sm text-gray-400">{{ documentosFiltrados.length }} Resultados</span>
+    </div>
+
+    <!-- Tabla de Documentos -->
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-gray-200 text-gray-500 text-sm">
+            <th class="py-4 pl-8 pr-4 font-normal">Documento</th>
+            <th class="p-4 font-normal">Categoría</th>
+            <th class="p-4 font-normal">Fecha</th>
+            <th class="p-4 font-normal">Tamaño</th>
+            <th class="py-4 pl-4 pr-8 font-normal text-right">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          
+          <tr *ngFor="let doc of documentosFiltrados" class="hover:bg-gray-50 transition-colors group">
+            <td class="py-4 pl-8 pr-4 flex items-center gap-3">
+              <div class="bg-red-50 text-red-400 p-1.5 rounded">
+                <ng-icon name="heroDocumentText"></ng-icon>
+              </div>
+              <span class="text-sm text-gray-800 font-medium">{{ doc.nombre_documento }}</span>
+            </td>
+            <td class="p-4 text-sm text-gray-600">{{ doc.categoria }}</td>
+            <td class="p-4 text-sm text-gray-600">{{ doc.fecha_carga | date:'longDate' }}</td>
+            <td class="p-4 text-sm text-gray-600">{{ doc.tamano_mb }} MB</td>
+            
+            <td class="py-4 pl-4 pr-8 flex items-center justify-end gap-2">
+              
+              <!-- Botón Ver -->
+              <a [href]="doc.url_archivo" target="_blank" class="bg-[#4a1525] hover:bg-[#38101c] text-white px-3 py-1.5 rounded flex items-center gap-1 text-xs transition-colors">
+                <ng-icon name="heroEye"></ng-icon> Ver
+              </a>
+              
+              <!-- Botón Descargar -->
+              <button (click)="descargarDocumento(doc)" class="bg-[#4a1525] hover:bg-[#38101c] text-white px-3 py-1.5 rounded flex items-center gap-1 text-xs transition-colors cursor-pointer">
+                <ng-icon name="heroArrowDownTray"></ng-icon> Descargar
+              </button>
+              
+              <!-- Botón Editar -->
+              <button (click)="abrirModalEditar(doc)" class="bg-[#4a1525] hover:bg-[#38101c] text-white p-1.5 rounded transition-colors cursor-pointer">
+                <ng-icon name="heroPencilSquare"></ng-icon>
+              </button>
+              
+              <!-- Botón Eliminar -->
+              <button (click)="eliminar(doc.id_documento)" class="bg-[#4a1525] hover:bg-red-700 text-white p-1.5 rounded transition-colors cursor-pointer">
+                <ng-icon name="heroTrash"></ng-icon>
+              </button>
+              
+            </td>
+          </tr>
+
+          <!-- Mensaje si no hay documentos -->
+          <tr *ngIf="documentosFiltrados.length === 0">
+            <td colspan="5" class="p-8 text-center text-gray-500">
+              No se encontraron documentos.
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- =============================== -->
+  <!-- MODAL DE EDICIÓN DE DOCUMENTO   -->
+  <!-- =============================== -->
+  <div *ngIf="mostrarModalEdicion" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg w-full max-w-md p-6 shadow-xl border border-gray-200">
+      
+      <h2 class="text-xl text-gray-900 border-l-[3px] border-[#4a1525] pl-3 mb-6">Editar Documento</h2>
+      
+      <!-- Input: Nombre -->
+      <div class="mb-4">
+        <label class="block text-sm text-gray-700 mb-1">Nombre del Documento</label>
+        <input 
+          type="text" 
+          [(ngModel)]="editNombre" 
+          class="w-full border border-gray-300 p-2 text-sm focus:outline-none focus:border-[#d4b88c] rounded">
+      </div>
+
+      <!-- Select: Categoría -->
+      <div class="mb-8">
+        <label class="block text-sm text-gray-700 mb-1">Categoría</label>
+        <select 
+          [(ngModel)]="editCategoria" 
+          class="w-full border border-gray-300 p-2 text-sm focus:outline-none focus:border-[#d4b88c] rounded">
+          <option value="Demanda Inicial">Demanda Inicial</option>
+          <option value="Pruebas">Pruebas</option>
+          <option value="Escritos">Escritos</option>
+          <option value="Resoluciones">Resoluciones</option>
+          <option value="Otros">Otros</option>
+        </select>
+      </div>
+
+      <!-- Botones del Modal -->
+      <div class="flex justify-end gap-3">
+        <button 
+          (click)="cerrarModalEditar()" 
+          class="px-4 py-2 text-sm text-gray-500 hover:text-gray-800 transition-colors cursor-pointer">
+          Cancelar
+        </button>
+        <button 
+          (click)="guardarEdicion()" 
+          class="px-4 py-2 text-sm bg-[#4a1525] hover:bg-[#38101c] text-white rounded transition-colors cursor-pointer">
+          Guardar Cambios
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>

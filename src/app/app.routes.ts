@@ -3,6 +3,8 @@ import { Component } from '@angular/core';
 import { LoginComponent } from './features/auth/login/login.component';
 import { authGuard } from './core/guards/auth.guard';
 import { Calendario } from './features/Calendario/components/calendario/calendario'; 
+import { ListaDocumentos } from './features/expedientes/components/lista-documentos/lista-documentos';
+import { DocumentosExpediente } from './features/expedientes/components/documentos-expediente/documentos-expediente';
 
 
 @Component({
@@ -50,11 +52,23 @@ export const routes: Routes = [
     component: DashboardDummyComponent,
     canActivate: [authGuard],
   },
+  // === FLUJO DE EXPEDIENTES ===
   {
     path: 'expedientes',
     component: PageDummyComponent,
     canActivate: [authGuard],
   },
+  {
+    path: 'expedientes/:id_expediente/documentos',
+    component: ListaDocumentos,
+    canActivate: [authGuard],
+  },
+  {
+    path: 'expedientes/:id_expediente/documentos/subir',
+    component: DocumentosExpediente,
+    canActivate: [authGuard],
+  },
+  // ============================
   {
     path: 'documentos',
     component: PageDummyComponent,
