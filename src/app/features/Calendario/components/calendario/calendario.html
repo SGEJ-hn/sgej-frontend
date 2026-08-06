@@ -248,10 +248,18 @@
 
         <select
           [(ngModel)]="nuevaCita.id_expediente"
+          name="id_expediente"
         >
 
           <option value="">
             Sin expediente asociado
+          </option>
+
+          <option 
+            *ngFor="let exp of expedientes" 
+            [value]="exp.id_expediente"
+          >
+            {{ exp.numero_expediente }} - {{ exp.materia }} ({{ exp.tribunal_juzgado }})
           </option>
 
         </select>

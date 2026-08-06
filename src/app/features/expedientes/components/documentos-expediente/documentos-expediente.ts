@@ -7,11 +7,13 @@ import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroArrowUpTray, heroDocumentText} from '@ng-icons/heroicons/outline';
 import { DragDrop } from '../../../../shared/directives/drag-drop';
 import { Documentos } from '../../services/documentos';
+import { SharedHeader } from '../../../../shared/components/shared-header/shared-header';
+
 
 @Component({
   selector: 'app-documentos-expediente',
   standalone: true,
-  imports: [CommonModule, FormsModule, DragDrop, NgIconComponent, RouterModule],
+  imports: [CommonModule, FormsModule, DragDrop, NgIconComponent, RouterModule, SharedHeader],
   viewProviders: [provideIcons({ heroArrowUpTray, heroDocumentText })],
   templateUrl: './documentos-expediente.html',
   styleUrl: './documentos-expediente.css'
