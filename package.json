@@ -24,8 +24,11 @@
     "@fullcalendar/interaction": "^6.1.21",
     "@ng-icons/core": "^34.0.0",
     "@ng-icons/heroicons": "^34.0.0",
+    "jspdf": "^4.2.1",
     "rxjs": "~7.8.0",
-    "tslib": "^2.3.0"
+    "tslib": "^2.3.0",
+    "xlsx": "^0.18.5",
+    "xlsx-js-style": "^1.2.0"
   },
   "devDependencies": {
     "@angular/build": "^22.0.7",
