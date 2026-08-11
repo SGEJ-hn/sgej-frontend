@@ -1,0 +1,32 @@
+.custom-font {
+  font-family: 'Fenix', serif;
+}
+
+.texto-sec {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+}
+
+/* Estructura básica de la Línea de Tiempo */
+.timeline {
+  position: relative;
+  padding-left: 2rem;
+  border-left: 2px solid #d4c8be;
+  margin-left: 1rem;
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.timeline-marker {
+  position: absolute;
+  left: -2.55rem;
+  top: 1.25rem;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #4a1525;
+  border: 2px solid #f8f7f5;
+}

@@ -31,21 +31,44 @@
 
     <!-- MENU DINAMICO -->
     <nav class="flex flex-col gap-0">
-      <a 
-        *ngFor="let item of menuFiltrado"
-        [routerLink]="item.ruta"
-        routerLinkActive="bg-[#1A0C10]/33 text-[#D2B48C] border-l-4 border-[#D2B48C]"
-        class="flex items-center gap-3 px-6 py-3 text-[#AEAEAE]/70 hover:bg-[#1A0C10]/33 hover:text-[#D2B48C] transition-all cursor-pointer">
+      <ng-container *ngFor="let item of menuFiltrado">
+        
+        <!-- ELEMENTOS CLICKEABLES (TODOS MENOS DOCUMENTOS) -->
+        <a *ngIf="item.nombre !== 'Documentos'"
+          [routerLink]="item.ruta"
+          [ngClass]="esActivo(item) 
+            ? 'bg-[#1A0C10]/33 text-[#D2B48C] border-l-4 border-[#D2B48C]' 
+            : 'text-[#AEAEAE]/70 hover:bg-[#1A0C10]/33 hover:text-[#D2B48C] border-l-4 border-transparent'"
+          class="flex items-center gap-3 px-6 py-3 transition-all cursor-pointer">
+  
+          <ng-icon
+            [name]="item.icono"
+            class="text-xl text-[#D2B48C]">
+          </ng-icon>
+  
+          <span class="text-sidebar">
+            {{ item.nombre }}
+          </span>
+        </a>
 
-        <ng-icon
-          [name]="item.icono"
-          class="text-xl text-[#D2B48C]">
-        </ng-icon>
+        <!-- ELEMENTO NO CLICKEABLE (AYUDA VISUAL - SOLO DOCUMENTOS) -->
+        <div *ngIf="item.nombre === 'Documentos'"
+          [ngClass]="esActivo(item) 
+            ? 'bg-[#1A0C10]/33 text-[#D2B48C] border-l-4 border-[#D2B48C]' 
+            : 'text-[#AEAEAE]/70 border-l-4 border-transparent'"
+          class="flex items-center gap-3 px-6 py-3 transition-all cursor-default select-none">
+  
+          <ng-icon
+            [name]="item.icono"
+            class="text-xl text-[#D2B48C]">
+          </ng-icon>
+  
+          <span class="text-sidebar">
+            {{ item.nombre }}
+          </span>
+        </div>
 
-        <span class="text-sidebar">
-          {{ item.nombre }}
-        </span>
-      </a>
+      </ng-container>
     </nav>
   </div>
 

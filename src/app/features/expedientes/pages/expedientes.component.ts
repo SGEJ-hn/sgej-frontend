@@ -13,6 +13,9 @@ import { RouterModule } from '@angular/router';
         <button routerLink="/expedientes/6b650cd6-dc60-4de5-80db-674986f4249e/documentos" class="bg-[#4B1623] text-white px-4 py-2 rounded shadow hover:bg-[#3a111b] transition cursor-pointer">
           Documentos
         </button>
+        <button routerLink="/expedientes/6b650cd6-dc60-4de5-80db-674986f4249e/historial" class="bg-[#4B1623] text-white px-4 py-2 rounded shadow hover:bg-[#3a111b] transition cursor-pointer">
+          Historial
+        </button>
       </div>
 
       <div class="bg-white rounded-lg shadow overflow-hidden border border-gray-200">

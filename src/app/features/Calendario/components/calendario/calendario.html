@@ -1,426 +1,306 @@
-<div class="contenedor">
-
+<div class="min-h-screen bg-[#f8f7f5] font-sans relative flex flex-col" style="font-family: 'Fenix', sans-serif;">
+  
   <!-- Encabezado -->
-  <div class="encabezado">
+  <app-shared-header 
+    titulo="Calendario de Citas" 
+    [subtitulo]="mesAnioActual">
+    
+    <button 
+      *ngIf="esAdministrador"
+      (click)="abrirModalNuevaCita()" 
+      class="px-5 py-2 bg-[#4a1525] hover:bg-[#38101c] text-white font-medium flex items-center gap-2 transition-colors cursor-pointer">
+      <ng-icon name="heroPlus"></ng-icon>
+        Nueva Cita
+    </button>
+  </app-shared-header>
 
-    <div>
-      <h2>Calendario de Citas</h2>
-      <p>Gestión de citas</p>
+  <!-- Contenedor Principal con Padding -->
+  <div class="p-8">
+
+    <!-- Buscador -->
+    <div class="bg-white border border-gray-200 p-4 mb-6 flex items-center">
+      <ng-icon name="heroMagnifyingGlass" class="text-gray-400 mr-3 text-lg"></ng-icon>
+      <input
+        type="text"
+        [(ngModel)]="terminoBusqueda"
+        (ngModelChange)="filtrarCitas()"
+        placeholder="Buscar cita por expediente..."
+        class="w-full text-sm text-gray-700 focus:outline-none bg-transparent custom-font"
+      >
     </div>
 
-    <button
-      *ngIf="esAdministrador"
-      class="btn-nueva"
-      (click)="abrirModalNuevaCita()"
-    >
-      + Nueva Cita
-    </button>
+    <!-- Grid Layout: Izquierda (Calendario) / Derecha (Detalles) -->
+    <div class="grid grid-cols-1 lg:grid-cols-[2.5fr_1fr] gap-6">
 
-  </div>
+      <!-- COLUMNA IZQUIERDA -->
+      <div class="flex flex-col gap-6">
+        
+        <!-- Tarjeta FullCalendar -->
+        <div class="bg-white border border-gray-200 p-8 h-full min-h-150">
+          <ng-container *ngIf="esNavegador">
+            <full-calendar
+              [options]="calendarOptions"
+              class="w-full">
+            </full-calendar>
+          </ng-container>
+        </div>
 
-
-  <!-- Buscador -->
-  <div class="busqueda">
-
-    <input
-      type="text"
-      placeholder="Buscar cita por abogado..."
-    >
-
-  </div>
-
-
-  <!-- Contenido -->
-  <div class="contenido">
-
-    <!-- Calendario -->
-    <div class="izquierda">
-
-      <full-calendar
-        [options]="calendarOptions">
-      </full-calendar>
-
-      <div class="leyenda">
-
-        <span class="audiencia">
-          ● Audiencia
-        </span>
-
-        <span class="reunion">
-          ● Reunión
-        </span>
-
-        <span class="tramite">
-          ● Trámite
-        </span>
+        <!-- Leyenda -->
+        <div class="bg-white border border-gray-200 p-4 flex items-center gap-8 text-sm text-gray-600">
+          <span class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-[#4CAF50]"></div> Audiencia
+          </span>
+          <span class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-[#2196F3]"></div> Reunión
+          </span>
+          <span class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-[#D4A373]"></div> Trámite
+          </span>
+        </div>
 
       </div>
 
-    </div>
+      <!-- COLUMNA DERECHA -->
+      <div class="flex flex-col gap-6">
 
-
-    <!-- Panel derecho -->
-    <div class="derecha">
-
-      <!-- Detalle -->
-      <div class="tarjeta">
-
-        <!-- Cita seleccionada -->
-        <div *ngIf="citaSeleccionada">
-
-          <h3>
-            {{ formatearFecha(citaSeleccionada.fecha) }}
+        <!-- Detalle de la Cita -->
+        <div class="bg-white border border-gray-200 p-6">
+          <h3 class="text-xl text-gray-900 border-l-[3px] border-[#4a1525] pl-3 mb-6" style="font-family: 'Fenix', serif;">
+            {{ citaSeleccionada ? formatearFecha(citaSeleccionada.fecha) : 'Detalle de la cita' }}
           </h3>
 
-          <div class="detalle-cita">
-
-            <h4>
-              {{ citaSeleccionada.titulo }}
-            </h4>
-
-            <p>
-              <strong>Tipo:</strong>
-              {{ citaSeleccionada.tipo_cita }}
+          <!-- Con Cita -->
+          <div *ngIf="citaSeleccionada" class="bg-gray-50 border border-gray-100 p-5 rounded-sm">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-2 h-2 rounded-full bg-[#4CAF50]"></div>
+              <span class="font-medium text-gray-900 text-sm">{{ citaSeleccionada.tipo_cita }}</span>
+            </div>
+            
+            <h4 class="text-sm font-medium text-gray-900 mb-1 custom-font">{{ citaSeleccionada.titulo }}</h4>
+            <div class="text-xs text-[#000000]/50 mb-4 space-y-1 custom-font">
+              <p>{{ formatearHora(citaSeleccionada.hora_inicio) }} hrs</p>
+              <p class="text-[#000000]/50 custom-font">{{ citaSeleccionada.lugar_sala || 'Sin lugar' }}</p>
+            </div>
+            
+            <div class="border-t border-gray-200 my-4"></div>
+            
+            <p class="text-xs text-gray-600">
+              <span class="font-black text-gray-800">
+                {{ obtenerNumeroExpediente(citaSeleccionada.id_expediente) }}
+              </span> - {{ citaSeleccionada.notas_recordatorio || 'Sin notas' }}
             </p>
 
-            <p>
-              <strong>Hora:</strong>
-              {{ formatearHora(citaSeleccionada.hora_inicio) }}
-            </p>
-
-            <p>
-              <strong>Lugar:</strong>
-              {{ citaSeleccionada.lugar_sala || 'No especificado' }}
-            </p>
-
-            <p>
-              <strong>Duración:</strong>
-              {{ citaSeleccionada.duracion_estimada || 'No especificada' }}
-            </p>
-
-            <p>
-              <strong>Notas:</strong>
-              {{ citaSeleccionada.notas_recordatorio || 'Sin notas' }}
-            </p>
-
-
-            <!-- Acciones de administrador -->
-            <div
-              class="acciones-cita"
-              *ngIf="esAdministrador"
-            >
-
-              <button
-                type="button"
-                class="btn-editar"
-                (click)="abrirModalEditar()"
-              >
+            <div class="flex gap-3 mt-5 pt-4 border-t border-gray-200" *ngIf="esAdministrador">
+              <button 
+                class="px-4 py-2 text-sm font-medium text-white bg-[#4a1525] rounded-md shadow-sm hover:bg-opacity-90 transition-all cursor-pointer" 
+                (click)="abrirModalEditar()">
                 Editar
               </button>
 
-              <button
-                type="button"
-                class="btn-eliminar"
-                (click)="eliminarCita()"
-              >
+              <!-- Botón Eliminar: Estilo Peligro/Secundario (Contorno) -->
+              <button 
+                class="px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-600 rounded-md shadow-sm hover:bg-red-50 transition-all cursor-pointer" 
+                (click)="eliminarCita()">
                 Eliminar
               </button>
+            </div>
+          </div>
 
+          <!-- Sin Cita -->
+          <div *ngIf="!citaSeleccionada" class="border border-dashed border-gray-300 bg-gray-50 p-8 text-center flex items-center justify-center min-h-37.5">
+            <p class="text-xs text-gray-400">Selecciona una cita del calendario.</p>
+          </div>
+        </div>
+
+        <!-- Próximas Citas -->
+        <!-- Próximas Citas -->
+        <div class="bg-white border border-gray-200 p-6">
+          
+          <!-- Contenedor del título y el filtro -->
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl text-gray-900 border-l-[3px] border-[#4a1525] pl-3 m-0" style="font-family: 'Fenix', serif;">
+              Próximas Citas
+            </h3>
+            
+            <!-- Selector de rango de días -->
+            <select 
+              [(ngModel)]="filtroDias"
+              class="text-xs border border-gray-300 rounded px-1 py-1.5 text-gray-600 focus:outline-none focus:border-[#4a1525] custom-font cursor-pointer bg-white">
+              <option [value]="7">Próximos 7 días</option>
+              <option [value]="15">Próximos 15 días</option>
+              <option [value]="30">Próximo mes</option>
+              <option [value]="90">Próximos 3 meses</option>
+            </select>
+          </div>
+
+          <div class="flex flex-col">
+            <div 
+              *ngFor="let cita of proximasCitas" 
+              class="py-4 border-b border-gray-100 last:border-0 cursor-pointer hover:bg-gray-50 transition-colors"
+              (click)="seleccionarCita(cita)">
+              
+              <div class="text-xs font-bold text-gray-800 mb-1">{{ formatearFecha(cita.fecha) }}</div>
+              <div class="text-sm text-gray-700 mb-1">{{ cita.titulo }}</div>
+              <div class="text-xs text-gray-400 flex items-center justify-between">
+                <span>{{ formatearHora(cita.hora_inicio) }} - {{ cita.lugar_sala || 'Sin lugar' }}</span>
+              </div>
             </div>
 
+            <div *ngIf="proximasCitas.length === 0" class="text-xs text-gray-400 text-center py-6">
+              No hay próximas citas.
+            </div>
           </div>
-
         </div>
-
-
-        <!-- Sin cita seleccionada -->
-        <div *ngIf="!citaSeleccionada">
-
-          <h3>Detalle de la cita</h3>
-
-          <div class="detalle-vacio">
-            Selecciona una cita del calendario.
-          </div>
-
-        </div>
-
       </div>
-
-
-      <!-- Próximas citas -->
-      <div class="tarjeta">
-
-        <h3>Próximas Citas</h3>
-
-        <div
-          class="proxima-cita"
-          *ngFor="let cita of proximasCitas"
-          (click)="seleccionarCita(cita)"
-        >
-
-          <div class="proxima-fecha">
-            {{ formatearFecha(cita.fecha) }}
-          </div>
-
-          <div class="proxima-titulo">
-            {{ cita.titulo }}
-          </div>
-
-          <div class="proxima-info">
-
-            {{ formatearHora(cita.hora_inicio) }}
-
-            <span *ngIf="cita.lugar_sala">
-              · {{ cita.lugar_sala }}
-            </span>
-
-          </div>
-
-        </div>
-
-
-        <!-- Sin próximas citas -->
-        <div
-          class="sin-citas"
-          *ngIf="proximasCitas.length === 0"
-        >
-          No hay próximas citas.
-        </div>
-
-      </div>
-
     </div>
-
   </div>
-
 </div>
 
-
-<!-- Modal -->
-<div
-  class="modal-overlay"
-  *ngIf="modalNuevaCitaAbierto && esAdministrador"
+<!-- =============================== -->
+<!-- MODAL DE NUEVA / EDITAR CITA    -->
+<!-- =============================== -->
+<div 
+  *ngIf="modalNuevaCitaAbierto && esAdministrador" 
   (click)="cerrarModalNuevaCita()"
->
-
-  <div
-    class="modal-cita"
-    (click)="$event.stopPropagation()"
-  >
-
+  class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 font-sans" 
+  style="font-family: 'DM Sans', sans-serif;">
+  
+  <div 
+    class="bg-white rounded-lg w-full max-w-lg p-6 shadow-xl border border-gray-200 max-h-[90vh] overflow-y-auto"
+    (click)="$event.stopPropagation()">
+    
     <!-- Encabezado modal -->
-    <div class="modal-header">
-
+    <div class="mb-6 flex justify-between items-start">
       <div>
-
-        <h2>
+        <h2 class="text-xl text-gray-900 border-l-[3px] border-[#4a1525] pl-3 mb-1" style="font-family: 'Fenix', serif;">
           {{ modoEdicion ? 'Editar Cita' : 'Nueva Cita' }}
         </h2>
-
-        <p>
-          {{
-            modoEdicion
-              ? 'Modifica la información de la cita'
-              : 'Agrega una cita al calendario'
-          }}
+        <p class="text-sm text-gray-500 pl-3">
+          {{ modoEdicion ? 'Modifica la información de la cita' : 'Agrega una cita al calendario' }}
         </p>
-
       </div>
-
-      <button
-        type="button"
-        class="btn-cerrar"
-        (click)="cerrarModalNuevaCita()"
-      >
-        ×
+      <button 
+        type="button" 
+        class="text-gray-400 hover:text-gray-800 text-2xl leading-none font-bold cursor-pointer"
+        (click)="cerrarModalNuevaCita()">
+        &times;
       </button>
-
     </div>
 
-
     <!-- Formulario -->
-    <div class="modal-body">
-
+    <div class="space-y-4" style="font-family: Fenix;">
+      
       <!-- Expediente -->
-      <div class="campo campo-completo">
-
-        <label>Expediente</label>
-
-        <select
-          [(ngModel)]="nuevaCita.id_expediente"
+      <div>
+        <label class="block text-sm text-gray-700 mb-1">Expediente</label>
+        <select 
+          [(ngModel)]="nuevaCita.id_expediente" 
           name="id_expediente"
-        >
-
-          <option value="">
-            Sin expediente asociado
-          </option>
-
-          <option 
-            *ngFor="let exp of expedientes" 
-            [value]="exp.id_expediente"
-          >
+          class="w-full border border-gray-300 p-2 text-sm focus:outline-none focus:border-[#d4b88c] rounded custom-font">
+          <option value="">Sin expediente asociado</option>
+          <option *ngFor="let exp of expedientes" [value]="exp.id_expediente">
             {{ exp.numero_expediente }} - {{ exp.materia }} ({{ exp.tribunal_juzgado }})
           </option>
-
         </select>
-
       </div>
-
 
       <!-- Título -->
-      <div class="campo campo-completo">
-
-        <label>Título *</label>
-
-        <input
-          type="text"
-          [(ngModel)]="nuevaCita.titulo"
+      <div>
+        <label class="block text-sm text-gray-700 mb-1">Título *</label>
+        <input 
+          type="text" 
+          [(ngModel)]="nuevaCita.titulo" 
           placeholder="Ej. Audiencia inicial"
-        >
-
+          class="w-full border border-gray-300 p-2 text-sm focus:outline-none focus:border-[#d4b88c] rounded custom-font">
       </div>
 
-
-      <!-- Tipo y lugar -->
-      <div class="fila-campos">
-
-        <div class="campo">
-
-          <label>Tipo de cita *</label>
-
-          <select
+      <!-- Tipo y lugar (En dos columnas) -->
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm text-gray-700 mb-1 custom-font">Tipo de cita *</label>
+          <select 
             [(ngModel)]="nuevaCita.tipo_cita"
-          >
-
-            <option value="">
-              Seleccionar
-            </option>
-
-            <option value="Audiencia">
-              Audiencia
-            </option>
-
-            <option value="Reunión">
-              Reunión
-            </option>
-
-            <option value="Trámite">
-              Trámite
-            </option>
-
+            class="w-full border border-gray-300 p-2 text-sm focus:outline-none focus:border-[#d4b88c] rounded custom-font">
+            <option value="">Seleccionar</option>
+            <option value="Audiencia">Audiencia</option>
+            <option value="Reunión">Reunión</option>
+            <option value="Trámite">Trámite</option>
           </select>
-
         </div>
-
-
-        <div class="campo">
-
-          <label>Lugar / Sala</label>
-
-          <input
-            type="text"
-            [(ngModel)]="nuevaCita.lugar_sala"
+        <div>
+          <label class="block text-sm text-gray-700 mb-1">Lugar / Sala</label>
+          <input 
+            type="text" 
+            [(ngModel)]="nuevaCita.lugar_sala" 
             placeholder="Ej. Sala Judicial 2"
-          >
-
+            class="w-full border border-gray-300 p-2 text-sm focus:outline-none focus:border-[#d4b88c] rounded custom-font">
         </div>
-
       </div>
 
-
-      <!-- Fecha y hora -->
-      <div class="fila-campos">
-
-        <div class="campo">
-
-          <label>Fecha *</label>
-
-          <input
-            type="date"
+      <!-- Fecha y hora (En dos columnas) -->
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm text-gray-700 mb-1">Fecha *</label>
+          <input 
+            type="date" 
             [(ngModel)]="nuevaCita.fecha"
-          >
-
+            class="w-full border border-gray-300 p-2 text-sm focus:outline-none focus:border-[#d4b88c] rounded custom-font ">
         </div>
-
-
-        <div class="campo">
-
-          <label>Hora *</label>
-
-          <input
-            type="time"
+        <div>
+          <label class="block text-sm text-gray-700 mb-1">Hora *</label>
+          <input 
+            type="time" 
             [(ngModel)]="nuevaCita.hora_inicio"
-          >
-
+            class="w-full border border-gray-300 p-2 text-sm focus:outline-none focus:border-[#d4b88c] rounded custom-font">
         </div>
-
       </div>
-
 
       <!-- Duración -->
-      <div class="campo campo-completo">
-
-        <label>Duración estimada</label>
-
-        <input
-          type="text"
-          [(ngModel)]="nuevaCita.duracion_estimada"
+      <div>
+        <label class="block text-sm text-gray-700 mb-1">Duración estimada</label>
+        <input 
+          type="text" 
+          [(ngModel)]="nuevaCita.duracion_estimada" 
           placeholder="Ej. 1 hora"
-        >
-
+          class="w-full border border-gray-300 p-2 text-sm focus:outline-none focus:border-[#d4b88c] rounded custom-font">
       </div>
-
 
       <!-- Notas -->
-      <div class="campo campo-completo">
-
-        <label>Notas / Recordatorio</label>
-
-        <textarea
-          [(ngModel)]="nuevaCita.notas_recordatorio"
-          placeholder="Escribe información adicional..."
-          rows="3">
-        </textarea>
-
+      <div>
+        <label class="block text-sm text-gray-700 mb-1">Notas / Recordatorio</label>
+        <textarea 
+          [(ngModel)]="nuevaCita.notas_recordatorio" 
+          placeholder="Escribe información adicional..." 
+          rows="3"
+          class="w-full border border-gray-300 p-2 text-sm focus:outline-none focus:border-[#d4b88c] rounded resize-none custom-font"></textarea>
       </div>
 
-
-      <!-- Recordatorio -->
-      <label class="recordatorio">
-
-        <input
-          type="checkbox"
+      <!-- Recordatorio Checkbox -->
+      <label class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer mt-2 custom-font">
+        <input 
+          type="checkbox" 
           [(ngModel)]="nuevaCita.recordatorio_automatico"
-        >
-
+          class="w-4 h-4 text-[#4a1525] focus:ring-[#4a1525] border-gray-300 rounded cursor-pointer">
         Recordatorio automático
-
       </label>
 
     </div>
 
-
-    <!-- Botones -->
-    <div class="modal-footer">
-
-      <button
-        type="button"
-        class="btn-cancelar"
-        (click)="cerrarModalNuevaCita()"
-      >
+    <!-- Botones (Footer del modal) -->
+    <div class="flex justify-end gap-3 mt-8 pt-4 border-t border-gray-100 custom-font">
+      <button 
+        type="button" 
+        class="px-4 py-2 text-sm text-gray-500 hover:text-gray-800 transition-colors cursor-pointer"
+        (click)="cerrarModalNuevaCita()">
         Cancelar
       </button>
-
-      <button
-        type="button"
-        class="btn-guardar"
-        (click)="guardarCita()"
-      >
+      <button 
+        type="button" 
+        class="px-4 py-2 text-sm bg-[#4a1525] hover:bg-[#38101c] text-white rounded transition-colors cursor-pointer "
+        (click)="guardarCita()">
         {{ modoEdicion ? 'Guardar Cambios' : 'Guardar Cita' }}
       </button>
-
     </div>
 
   </div>
-
 </div>

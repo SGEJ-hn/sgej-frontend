@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { 
   heroEye, 
   heroArrowDownTray, 
@@ -10,7 +12,8 @@ import {
   heroTrash, 
   heroArrowLeft, 
   heroPlus,
-  heroDocumentText
+  heroDocumentText, 
+  heroMagnifyingGlass
 } from '@ng-icons/heroicons/outline';
 import { Documentos } from '../../services/documentos';
 import { SharedHeader } from '../../../../shared/components/shared-header/shared-header';
@@ -20,7 +23,7 @@ import { SharedHeader } from '../../../../shared/components/shared-header/shared
   standalone: true,
   imports: [CommonModule, RouterModule, NgIconComponent,FormsModule, SharedHeader],
   viewProviders: [provideIcons({ 
-    heroEye, heroArrowDownTray, heroPencilSquare, heroTrash, heroArrowLeft, heroPlus, heroDocumentText 
+    heroEye, heroArrowDownTray, heroPencilSquare, heroTrash, heroArrowLeft, heroPlus, heroDocumentText, heroMagnifyingGlass 
   })],
   templateUrl: './lista-documentos.html',
   styleUrl: './lista-documentos.css'
@@ -34,38 +37,59 @@ export class ListaDocumentos implements OnInit {
   expedienteId: string = '';
   documentos: any[] = [];
   terminoBusqueda: string = ''; 
+  private searchSubject = new Subject<string>();
   
-  // Variables de Edición
   mostrarModalEdicion: boolean = false;
   documentoEnEdicion: any = null;
   editNombre: string = '';
   editCategoria: string = '';
-
-  get documentosFiltrados() {
-    if (!this.terminoBusqueda) {
-      return this.documentos;
-    }
-    const termino = this.terminoBusqueda.toLowerCase();
-    return this.documentos.filter(doc => 
-      doc.nombre_documento.toLowerCase().includes(termino) || 
-      doc.categoria.toLowerCase().includes(termino)
-    );
-  }  
+  subtituloDinamico: string = '';
+  paginaActual: number = 1;
+  limite: number = 7;
+  totalPaginas: number = 1;
+  totalEntradas: number = 0;
   
   ngOnInit() {
     this.expedienteId = this.route.snapshot.paramMap.get('id_expediente') || '';
     if (this.expedienteId) {
       this.cargarDocumentos();
     }
+
+    this.searchSubject.pipe(
+      debounceTime(400),
+      distinctUntilChanged() 
+    ).subscribe(termino => {
+      this.terminoBusqueda = termino;
+      this.ejecutarBusqueda();
+    });
+  }
+
+  // 👇 NUEVA FUNCIÓN que se conectará al HTML
+  onSearchChange(termino: string) {
+    this.searchSubject.next(termino);
   }
 
   cargarDocumentos() {
-    this.documentosService.obtenerDocumentos(this.expedienteId).subscribe({
+    this.documentosService.obtenerDocumentos(this.expedienteId, this.paginaActual, this.limite, this.terminoBusqueda).subscribe({
       next: (res: any) => {
         console.log('Datos recibidos del backend:', res);
         
         if (res && res.documentos) {
           this.documentos = res.documentos;
+          
+          // 👇 Capturamos datos de paginación
+          this.totalPaginas = res.total_paginas || 1;
+          this.totalEntradas = res.total || 0;
+
+          const numExp = res.numero_expediente || '';
+          const cliente = res.nombre_cliente || '';
+          
+          if (numExp && cliente) {
+            this.subtituloDinamico = `${numExp} • ${cliente}`;
+          } else {
+            this.subtituloDinamico = 'Datos del expediente no disponibles';
+          }
+          
         } else if (Array.isArray(res)) {
           this.documentos = res;
         } else {
@@ -73,8 +97,16 @@ export class ListaDocumentos implements OnInit {
         }
         this.cdr.detectChanges();
       },
-      error: (err) => console.error('Error cargando la lista de documentos', err)
+      error: (err) => {
+        console.error('Error cargando la lista de documentos', err);
+        this.subtituloDinamico = 'Error al cargar los datos';
+      }
     });
+  }
+
+  ejecutarBusqueda() {
+    this.paginaActual = 1;
+    this.cargarDocumentos();
   }
 
   eliminar(id_documento: string) {
@@ -116,14 +148,10 @@ export class ListaDocumentos implements OnInit {
     }
   }
 
-  // ==========================================
-  // NUEVAS FUNCIONES PARA EL MODAL DE EDICIÓN
-  // ==========================================
-
   abrirModalEditar(doc: any) {
     this.documentoEnEdicion = doc;
-    this.editNombre = doc.nombre_documento; // Pre-cargamos el nombre actual
-    this.editCategoria = doc.categoria;     // Pre-cargamos la categoría actual
+    this.editNombre = doc.nombre_documento; 
+    this.editCategoria = doc.categoria;   
     this.mostrarModalEdicion = true;
   }
 
@@ -151,6 +179,20 @@ export class ListaDocumentos implements OnInit {
         alert('Hubo un error al guardar los cambios.');
       }
     });
+  }
+
+  paginaAnterior(): void {
+    if (this.paginaActual > 1) {
+      this.paginaActual--;
+      this.cargarDocumentos();
+    }
+  }
+
+  paginaSiguiente(): void {
+    if (this.paginaActual < this.totalPaginas) {
+      this.paginaActual++;
+      this.cargarDocumentos();
+    }
   }
   
 }
