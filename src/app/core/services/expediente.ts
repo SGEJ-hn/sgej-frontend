@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
-// Es buena práctica definir una interfaz básica basada en tu base de datos
 export interface Expediente {
   id_expediente: string;
   numero_expediente: string;
@@ -11,44 +11,75 @@ export interface Expediente {
   estado: string;
   tribunal_juzgado: string;
   juez_cargo?: string;
-  cuantia_litigio?: number;
+  cuantia_litigio?: number | string;
   fecha_apertura: string;
   descripcion_hechos: string;
+
+  cliente?: {
+    id_usuario: string;
+    nombre: string;
+    correo: string;
+  };
+
+  equipo?: {
+    id_usuario?: string;
+    user?: {
+      id_usuario: string;
+      nombre: string;
+      rol: string;
+    };
+  }[];
 }
 
+export interface ExpedientesResponse {
+  total: number;
+  expedientes: Expediente[];
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class ExpedienteService {
-  
-  // 🌟 IMPORTANTE: Ajusta esta URL al puerto y ruta real de tu backend
-  private apiUrl = 'http://localhost:3000/api/expedientes'; 
 
-  constructor(private http: HttpClient) { }
+  private apiUrl = `${environment.apiUrl}/expedientes`;
 
-  // 1. OBTENER TODOS (GET)
-  obtenerExpedientes(): Observable<Expediente[]> {
-    return this.http.get<Expediente[]>(this.apiUrl);
+  constructor(private http: HttpClient) {}
+
+  // Obtener todos los expedientes
+  obtenerExpedientes(): Observable<ExpedientesResponse> {
+    return this.http.get<ExpedientesResponse>(this.apiUrl);
   }
 
-  // 2. OBTENER POR ID (GET)
+  // Obtener un expediente por ID
+  obtenerExpediente(id: string): Observable<Expediente> {
+    return this.http.get<Expediente>(`${this.apiUrl}/${id}`);
+  }
+
+  // Obtener un expediente por ID
+  // Mantiene compatibilidad con el código anterior del equipo
   obtenerExpedientePorId(id: string): Observable<Expediente> {
     return this.http.get<Expediente>(`${this.apiUrl}/${id}`);
   }
 
-  // 3. CREAR NUEVO (POST)
+  // Crear un expediente
   crearExpediente(expediente: Expediente): Observable<Expediente> {
     return this.http.post<Expediente>(this.apiUrl, expediente);
   }
 
-  // 4. ACTUALIZAR (PUT)
-  actualizarExpediente(id: string, expediente: Partial<Expediente>): Observable<Expediente> {
-    return this.http.put<Expediente>(`${this.apiUrl}/${id}`, expediente);
+  // Actualizar un expediente
+  actualizarExpediente(
+    id: string,
+    expediente: Partial<Expediente>
+  ): Observable<Expediente> {
+    return this.http.put<Expediente>(
+      `${this.apiUrl}/${id}`,
+      expediente
+    );
   }
 
-  // 5. ELIMINAR (DELETE)
+  // Eliminar un expediente
   eliminarExpediente(id: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
 }
+
