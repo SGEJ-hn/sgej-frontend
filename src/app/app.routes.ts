@@ -8,6 +8,7 @@ import { UsuariosComponent } from './features/usuarios/usuarios.component';
 import { ReportesComponent } from './features/reportes/reportes.component';
 import { ListaDocumentos } from './features/expedientes/components/lista-documentos/lista-documentos';
 import { DocumentosExpediente } from './features/expedientes/components/documentos-expediente/documentos-expediente';
+import { HistorialComponent } from './features/expedientes/components/historial/historial';
 
 
 @Component({
@@ -59,6 +60,11 @@ export const routes: Routes = [
   {
     path: 'expedientes',
     component: ExpedientesComponent,
+    canActivate: [authGuard],
+  },
+  {
+    path: 'expedientes/:id_expediente/historial',
+    component: HistorialComponent,
     canActivate: [authGuard],
   },
   {

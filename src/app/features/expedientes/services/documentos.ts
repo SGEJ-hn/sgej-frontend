@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment'; 
 
@@ -36,9 +36,16 @@ export class Documentos {
     return this.http.post<{ mensaje: string; documento: Documento }>(`${this.apiUrl}/upload`, formData);
   }
 
-  // GET: Obtener todos los documentos de un expediente
-  obtenerDocumentos(id_expediente: string): Observable<DocumentosResponse> {
-    return this.http.get<DocumentosResponse>(`${this.apiUrl}/expediente/${id_expediente}`);
+  obtenerDocumentos(idExpediente: string, page: number = 1, limit: number = 7, search: string = '') {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString());
+
+    if (search.trim() !== '') {
+      params = params.set('search', search);
+    }
+
+    return this.http.get<any>(`${this.apiUrl}/expediente/${idExpediente}`, { params }); 
   }
 
   // DELETE: Eliminar un documento por su ID

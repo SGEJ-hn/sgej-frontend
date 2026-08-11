@@ -16,6 +16,7 @@ export interface Expediente {
   descripcion_hechos: string;
 }
 
+
 @Injectable({
   providedIn: 'root'
 })
@@ -26,8 +27,28 @@ export class ExpedienteService {
 
   constructor(private http: HttpClient) { }
 
-  // Método para traer todos los expedientes
+  // 1. OBTENER TODOS (GET)
   obtenerExpedientes(): Observable<Expediente[]> {
     return this.http.get<Expediente[]>(this.apiUrl);
+  }
+
+  // 2. OBTENER POR ID (GET)
+  obtenerExpedientePorId(id: string): Observable<Expediente> {
+    return this.http.get<Expediente>(`${this.apiUrl}/${id}`);
+  }
+
+  // 3. CREAR NUEVO (POST)
+  crearExpediente(expediente: Expediente): Observable<Expediente> {
+    return this.http.post<Expediente>(this.apiUrl, expediente);
+  }
+
+  // 4. ACTUALIZAR (PUT)
+  actualizarExpediente(id: string, expediente: Partial<Expediente>): Observable<Expediente> {
+    return this.http.put<Expediente>(`${this.apiUrl}/${id}`, expediente);
+  }
+
+  // 5. ELIMINAR (DELETE)
+  eliminarExpediente(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`);
   }
 }

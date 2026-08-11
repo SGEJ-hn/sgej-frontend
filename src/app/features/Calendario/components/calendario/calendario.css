@@ -1,648 +1,110 @@
-/* Contenedor */
-
-.contenedor {
-    padding: 30px;
-    background: #f7f6f4;
-    min-height: 100vh;
-    font-family: 'Poppins', sans-serif;
+.custom-font {
+  font-family: 'DM Sans', sans-serif;
 }
-
-
-/* Encabezado */
-
-.encabezado {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 22px;
-}
-
-.encabezado h2 {
-    margin: 0;
-    color: #3b2a2a;
-    font-size: 26px;
-    font-weight: 600;
-}
-
-.encabezado p {
-    margin: 5px 0 0;
-    color: #888;
-    font-size: 14px;
-}
-
-
-/* Botón nueva cita */
-
-.btn-nueva {
-    background: #5b1f2b;
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 500;
-    transition: 0.2s;
-}
-
-.btn-nueva:hover {
-    background: #471721;
-}
-
-
-/* Buscador */
-
-.busqueda {
-    margin-bottom: 20px;
-}
-
-.busqueda input {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 13px 15px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    background: white;
-    font-family: 'Poppins', sans-serif;
-    outline: none;
-}
-
-.busqueda input:focus {
-    border-color: #5b1f2b;
-}
-
-
-/* Contenido */
-
-.contenido {
-    display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(280px, 0.9fr);
-    gap: 20px;
-    align-items: start;
-}
-
-
-/* Calendario */
-
-.izquierda {
-    background: white;
-    padding: 20px;
-    border: 1px solid #e2e2e2;
-    border-radius: 7px;
-    min-width: 0;
-}
-
-
-/* Panel derecho */
-
-.derecha {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-    min-width: 0;
-}
-
-
-/* Tarjetas */
-
-.tarjeta {
-    background: white;
-    border: 1px solid #e2e2e2;
-    border-radius: 7px;
-    padding: 20px;
-}
-
-.tarjeta h3 {
-    margin: 0 0 15px;
-    color: #3b2a2a;
-    font-size: 17px;
-    font-weight: 600;
-}
-
-
-/* Detalle de cita */
-
-.detalle-cita h4 {
-    margin: 0 0 15px;
-    color: #5b1f2b;
-    font-size: 17px;
-    font-weight: 600;
-}
-
-.detalle-cita p {
-    margin: 8px 0;
-    color: #555;
-    font-size: 14px;
-    line-height: 1.5;
-}
-
-.detalle-cita strong {
-    color: #3b2a2a;
-    font-weight: 600;
-}
-
-
-/* Sin cita seleccionada */
-
-.detalle-vacio {
-    min-height: 120px;
-    margin-top: 10px;
-    background: #f7f6f4;
-    border: 1px dashed #d5d5d5;
-    border-radius: 6px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    padding: 15px;
-
-    color: #999;
-    font-size: 13px;
-    text-align: center;
-}
-
-
-/* Botones editar y eliminar */
-
-.acciones-cita {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
-    padding-top: 15px;
-    border-top: 1px solid #eee;
-}
-
-.btn-editar,
-.btn-eliminar {
-    flex: 1;
-    padding: 9px 14px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-family: 'Poppins', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    transition: 0.2s;
-}
-
-.btn-editar {
-    background: #5b1f2b;
-    color: white;
-    border: 1px solid #5b1f2b;
-}
-
-.btn-editar:hover {
-    background: #471721;
-}
-
-.btn-eliminar {
-    background: white;
-    color: #a22c3a;
-    border: 1px solid #a22c3a;
-}
-
-.btn-eliminar:hover {
-    background: #a22c3a;
-    color: white;
-}
-
-
-/* Próximas citas */
-
-.proxima-cita {
-    padding: 13px 10px;
-    border-bottom: 1px solid #eeeeee;
-    cursor: pointer;
-    transition: 0.2s;
-    border-radius: 4px;
-}
-
-.proxima-cita:last-of-type {
-    border-bottom: none;
-}
-
-.proxima-cita:hover {
-    background: #f8f3f4;
-}
-
-.proxima-fecha {
-    color: #8b6b53;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: capitalize;
-    margin-bottom: 3px;
-}
-
-.proxima-titulo {
-    color: #3b2a2a;
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 3px;
-
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.proxima-info {
-    color: #777;
-    font-size: 12px;
-}
-
-.sin-citas {
-    padding: 25px 10px;
-    color: #999;
-    font-size: 13px;
-    text-align: center;
-}
-
-
-/* Leyenda */
-
-.leyenda {
-    margin-top: 20px;
-    padding-top: 15px;
-    border-top: 1px solid #eee;
-
-    display: flex;
-    gap: 25px;
-    flex-wrap: wrap;
-
-    font-size: 13px;
-}
-
-.audiencia {
-    color: #4CAF50;
-}
-
-.reunion {
-    color: #2196F3;
-}
-
-.tramite {
-    color: #d58b00;
-}
-
-
-/* FullCalendar */
 
 .fc {
-    background: white;
+    background: transparent;
 }
 
+/* Encabezado del calendario (Mes y botones) */
 .fc .fc-toolbar {
-    margin-bottom: 20px;
+    margin-bottom: 30px !important;
 }
-
 .fc .fc-toolbar-title {
-    font-size: 25px !important;
-    color: #3b2a2a;
-    font-weight: 500;
-    text-transform: lowercase;
+    font-family: 'Fenix', serif;
+    font-size: 24px !important;
+    color: #111827;
+    border-left: 3px solid #111827;
+    padding-left: 12px;
 }
-
-.fc .fc-button {
-    background: #2f465d !important;
-    border: none !important;
-    box-shadow: none !important;
-    border-radius: 4px !important;
-}
-
-.fc .fc-button:hover {
-    background: #24384b !important;
-}
-
-.fc .fc-col-header-cell {
-    background: #fafafa;
-}
-
-.fc .fc-col-header-cell-cushion {
-    color: #3b2a2a;
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 8px 4px;
-}
-
-.fc .fc-daygrid-day-number {
-    color: #333;
-    text-decoration: none;
-    font-size: 13px;
-    padding: 7px;
-}
-
-.fc-theme-standard td,
-.fc-theme-standard th {
-    border: 1px solid #ececec;
-}
-
-.fc .fc-daygrid-day {
-    transition: 0.15s;
-}
-
-.fc .fc-daygrid-day:hover {
-    background: #faf8f7;
-}
-
-
-/* Eventos */
-
-.fc .fc-daygrid-event {
-    border: none !important;
+.fc .fc-button-primary {
     background: transparent !important;
-    padding: 2px 4px !important;
-    margin: 2px 3px !important;
-    cursor: pointer;
+    border: none !important;
+    color: #9ca3af !important;
+    box-shadow: none !important;
+}
+.fc .fc-button-primary:hover,
+.fc .fc-button-primary:not(:disabled):active {
+    background: transparent !important;
+    color: #4a1525 !important;
 }
 
-.fc .fc-daygrid-event:hover {
-    background: #f5f5f5 !important;
+/* Remover líneas de la cuadrícula completamente */
+.fc-theme-standard td,
+.fc-theme-standard th,
+.fc-theme-standard .fc-scrollgrid {
+    border: none !important;
 }
 
-.fc .fc-event-title {
-    display: block !important;
-    color: #333 !important;
-    font-size: 11px;
-    font-weight: 600;
-
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+/* Cabecera de los días (DOM, LUN, etc.) */
+.fc .fc-col-header-cell-cushion {
+    font-family: 'DM Sans', sans-serif;
+    color: #6b7280;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.fc .fc-daygrid-event-dot {
-    border-width: 4px;
-}
-
-.fc .fc-day-today {
-    background: #fffbea !important;
-}
-
-.fc-highlight {
-    background: rgba(91, 31, 43, 0.1) !important;
-}
-
-
-/* Modal */
-
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-
+/* Números de los días */
+.fc .fc-daygrid-day-number {
+    font-family: 'DM Sans', sans-serif;
+    color: #111827;
+    font-size: 14px;
+    padding: 10px;
     width: 100%;
-    height: 100%;
+    text-align: center;
+}
 
-    background: rgba(0, 0, 0, 0.45);
-
+/* Cuadro oscuro para el día de hoy / seleccionado */
+.fc .fc-day-today {
+    background: transparent !important;
+}
+.fc .fc-day-today .fc-daygrid-day-number {
+    background: #4a1525;
+    color: white;
     display: flex;
     align-items: center;
     justify-content: center;
-
-    z-index: 9999;
-
-    padding: 20px;
-    box-sizing: border-box;
+    width: 32px;
+    height: 32px;
+    border-radius: 2px;
+    margin: 5px auto;
 }
 
-
-/* Caja del modal */
-
-.modal-cita {
-    width: 100%;
-    max-width: 650px;
-    max-height: 90vh;
-
-    background: white;
-    border-radius: 8px;
-
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
-
-    overflow-y: auto;
-
-    font-family: 'Poppins', sans-serif;
+/* =========================================
+   EVENTOS (Punto + Número de Expediente)
+========================================= */
+::ng-deep .fc .fc-daygrid-event {
+    background: transparent !important;
+    border: none !important;
+    /* Alineamos el punto y el texto horizontalmente */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important; 
+    padding-left: 8px !important; 
+    cursor: pointer !important;
 }
 
-
-/* Encabezado modal */
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-
-    padding: 22px 25px;
-
-    border-bottom: 1px solid #e5e5e5;
+::ng-deep .fc .fc-event-title {
+    display: block !important; 
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 11px !important; 
+    font-weight: 600 !important;
+    color: #4b5563 !important; 
+    padding-left: 5px !important;  
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
 }
 
-.modal-header h2 {
-    margin: 0;
-    color: #3b2a2a;
-    font-size: 22px;
+::ng-deep .fc .fc-daygrid-event-dot {
+    border-width: 4px !important;
+    margin: 0 !important;
 }
 
-.modal-header p {
-    margin: 5px 0 0;
-    color: #888;
-    font-size: 13px;
-}
-
-
-/* Cerrar modal */
-
-.btn-cerrar {
-    background: transparent;
-    border: none;
-
-    font-size: 28px;
-    line-height: 1;
-
-    color: #777;
-
-    cursor: pointer;
-}
-
-.btn-cerrar:hover {
-    color: #5b1f2b;
-}
-
-
-/* Contenido modal */
-
-.modal-body {
-    padding: 25px;
-}
-
-.fila-campos {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 18px;
-}
-
-.campo {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 18px;
-}
-
-.campo label {
-    margin-bottom: 7px;
-
-    color: #3b2a2a;
-
-    font-size: 13px;
-    font-weight: 600;
-}
-
-.campo input,
-.campo select,
-.campo textarea {
-    width: 100%;
-
-    box-sizing: border-box;
-
-    padding: 11px 12px;
-
-    border: 1px solid #d8d8d8;
-    border-radius: 5px;
-
-    background: white;
-
-    font-family: 'Poppins', sans-serif;
-    font-size: 14px;
-
-    outline: none;
-}
-
-.campo input:focus,
-.campo select:focus,
-.campo textarea:focus {
-    border-color: #5b1f2b;
-    box-shadow: 0 0 0 2px rgba(91, 31, 43, 0.08);
-}
-
-.campo textarea {
-    resize: vertical;
-}
-
-
-/* Recordatorio */
-
-.recordatorio {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    color: #555;
-
-    font-size: 13px;
-
-    cursor: pointer;
-}
-
-.recordatorio input {
-    accent-color: #5b1f2b;
-}
-
-
-/* Footer modal */
-
-.modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-
-    padding: 18px 25px;
-
-    border-top: 1px solid #e5e5e5;
-
-    background: #fafafa;
-}
-
-.btn-cancelar,
-.btn-guardar {
-    padding: 10px 20px;
-
-    border-radius: 5px;
-
-    font-family: 'Poppins', sans-serif;
-    font-size: 14px;
-
-    cursor: pointer;
-
-    transition: 0.2s;
-}
-
-.btn-cancelar {
-    background: white;
-    color: #555;
-
-    border: 1px solid #ccc;
-}
-
-.btn-cancelar:hover {
-    background: #f1f1f1;
-}
-
-.btn-guardar {
-    background: #5b1f2b;
-    color: white;
-
-    border: 1px solid #5b1f2b;
-}
-
-.btn-guardar:hover {
-    background: #471721;
-}
-
-
-/* Responsive */
-
-@media (max-width: 1000px) {
-
-    .contenido {
-        grid-template-columns: 1fr;
-    }
-
-    .derecha {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-    }
-
-}
-
-@media (max-width: 700px) {
-
-    .contenedor {
-        padding: 15px;
-    }
-
-    .encabezado {
-        align-items: flex-start;
-        gap: 15px;
-        flex-direction: column;
-    }
-
-    .contenido {
-        grid-template-columns: 1fr;
-    }
-
-    .derecha {
-        display: flex;
-    }
-
-    .fila-campos {
-        grid-template-columns: 1fr;
-        gap: 0;
-    }
-
-    .modal-cita {
-        max-height: 95vh;
-    }
-
-    .leyenda {
-        gap: 15px;
-    }
-
+/* Efecto al pasar el mouse */
+::ng-deep .fc .fc-daygrid-event:hover .fc-event-title {
+    color: #4a1525 !important; 
 }
