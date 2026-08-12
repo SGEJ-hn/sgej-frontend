@@ -22,9 +22,18 @@
             class="w-full border border-gray-300 p-3 text-sm focus:outline-none focus:border-[#d4b88c]">
         </div>
 
-        <div class="text-sm text-gray-400">
-          {{ expedientesFiltrados.length }}
-          {{ expedientesFiltrados.length === 1 ? 'Expediente' : 'Expedientes' }}
+        <div class="flex items-center gap-4">
+          <div class="text-sm text-gray-400">
+            {{ expedientesFiltrados.length }}
+            {{ expedientesFiltrados.length === 1 ? 'Expediente' : 'Expedientes' }}
+          </div>
+
+          <a
+            routerLink="/expedientes/nuevo"
+            class="px-4 py-2.5 bg-[#4A1525] hover:bg-[#38101c] text-white text-xs font-semibold rounded shadow transition flex items-center gap-2 cursor-pointer">
+            <span>+</span>
+            <span>Nuevo Expediente</span>
+          </a>
         </div>
 
       </div>

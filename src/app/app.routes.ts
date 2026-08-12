@@ -14,6 +14,8 @@ import { DetalleExpediente } from './features/expedientes/components/detalle-exp
 import { ListaDocumentos } from './features/expedientes/components/lista-documentos/lista-documentos';
 import { DocumentosExpediente } from './features/expedientes/components/documentos-expediente/documentos-expediente';
 import { HistorialComponent } from './features/expedientes/components/historial/historial';
+import { NuevoExpediente } from './features/expedientes/components/nuevo-expediente/nuevo-expediente';
+import { ClienteDashboard } from './features/cliente/components/cliente-dashboard/cliente-dashboard';
 
 @Component({
   selector: 'app-dashboard-dummy',
@@ -73,6 +75,20 @@ export const routes: Routes = [
   {
     path: 'expedientes/lista',
     component: ListaExpedientes,
+    canActivate: [authGuard],
+  },
+
+  // Crear nuevo expediente
+  {
+    path: 'expedientes/nuevo',
+    component: NuevoExpediente,
+    canActivate: [authGuard],
+  },
+
+  // Portal de solo lectura para Cliente
+  {
+    path: 'cliente',
+    component: ClienteDashboard,
     canActivate: [authGuard],
   },
 
