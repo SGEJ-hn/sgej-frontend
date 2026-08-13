@@ -5,6 +5,9 @@ import { authGuard } from './core/guards/auth.guard';
 import { Calendario } from './features/Calendario/components/calendario/calendario'; 
 import { ListaDocumentos } from './features/expedientes/components/lista-documentos/lista-documentos';
 import { DocumentosExpediente } from './features/expedientes/components/documentos-expediente/documentos-expediente';
+import { ConfiguracionComponent } from './features/configuracion/configuracion.component';
+import { UsuariosComponent } from './features/usuarios/usuarios.component';
+import { CrearUsuarioComponent } from './features/usuarios/crear-usuario/crear-usuario.component';
 
 
 @Component({
@@ -79,16 +82,30 @@ export const routes: Routes = [
     component: Calendario,
     canActivate: [authGuard],
   },
+  // === GESTIÓN DE USUARIOS ===
   {
     path: 'usuarios',
-    component: PageDummyComponent,
+    component: UsuariosComponent,
     canActivate: [authGuard],
   },
+  {
+    path: 'usuarios/crear',
+    component: CrearUsuarioComponent,
+    canActivate: [authGuard],
+  },
+  // ============================
   {
     path: 'reportes',
     component: PageDummyComponent,
     canActivate: [authGuard],
   },
+  // === CONFIGURACIÓN DEL SISTEMA ===
+  {
+    path: 'configuracion',
+    component: ConfiguracionComponent,
+    canActivate: [authGuard],
+  },
+  // ============================
   {
     path: '',
     redirectTo: 'dashboard',

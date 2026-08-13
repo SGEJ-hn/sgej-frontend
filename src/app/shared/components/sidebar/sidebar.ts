@@ -10,7 +10,8 @@ import {
   heroCalendar,
   heroUsers,
   heroChartPie,
-  heroArrowRightOnRectangle
+  heroArrowRightOnRectangle,
+  heroCog8Tooth
 } from '@ng-icons/heroicons/outline';
 
 import { AuthService } from '../../../core/services/auth.service';
@@ -34,7 +35,8 @@ import { AuthService } from '../../../core/services/auth.service';
       heroCalendar,
       heroUsers,
       heroChartPie,
-      heroArrowRightOnRectangle
+      heroArrowRightOnRectangle,
+      heroCog8Tooth
     })
   ],
 
@@ -90,6 +92,12 @@ export class Sidebar {
       ruta: '/reportes',
       icono: 'heroChartPie',
       roles: ['Administrador', 'Abogado'] 
+    },
+    {
+      nombre: 'Configuración',
+      ruta: '/configuracion',
+      icono: 'heroCog8Tooth',
+      roles: ['Administrador'] 
     }
   ];
 
