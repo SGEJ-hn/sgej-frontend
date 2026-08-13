@@ -1,0 +1,116 @@
+<!-- Header con botón Volver -->
+<app-shared-header 
+  titulo="Crear Nuevo Usuario" 
+  subtitulo="Complete el formulario para registrar un nuevo usuario en el sistema">
+
+  <button class="btn-volver" (click)="volver()">
+    <ng-icon name="heroArrowLeft" size="1rem"></ng-icon>
+    Volver
+  </button>
+</app-shared-header>
+
+<!-- Contenido -->
+<div class="crear-container">
+
+  @if (mensajeError) {
+    <div class="alerta alerta-error">❌ {{ mensajeError }}</div>
+  }
+
+  <div class="form-card">
+    <div class="card-header">
+      <div class="card-icon">👤</div>
+      <div>
+        <h2 class="card-title">Datos del Usuario</h2>
+        <p class="card-subtitle">Todos los campos marcados con * son obligatorios</p>
+      </div>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="guardar()">
+      <div class="form-grid">
+
+        <!-- Nombre Completo -->
+        <div class="form-group full-width">
+          <label for="nombre">Nombre Completo *</label>
+          <input id="nombre" type="text" formControlName="nombre" placeholder="Ej: Juan Carlos Pérez López">
+          @if (form.get('nombre')?.touched && form.get('nombre')?.hasError('required')) {
+            <span class="form-error">El nombre es obligatorio.</span>
+          }
+          @if (form.get('nombre')?.touched && form.get('nombre')?.hasError('minlength')) {
+            <span class="form-error">El nombre debe tener al menos 3 caracteres.</span>
+          }
+        </div>
+
+        <!-- Correo Electrónico -->
+        <div class="form-group">
+          <label for="correo">Correo Electrónico *</label>
+          <input id="correo" type="email" formControlName="correo" placeholder="correo@ejemplo.com">
+          @if (form.get('correo')?.touched && form.get('correo')?.hasError('required')) {
+            <span class="form-error">El correo es obligatorio.</span>
+          }
+          @if (form.get('correo')?.touched && form.get('correo')?.hasError('email')) {
+            <span class="form-error">Ingrese un correo electrónico válido.</span>
+          }
+        </div>
+
+        <!-- Contraseña -->
+        <div class="form-group">
+          <label for="contrasena">Contraseña *</label>
+          <div class="password-wrapper">
+            <input 
+              id="contrasena" 
+              [type]="mostrarContrasena ? 'text' : 'password'" 
+              formControlName="contrasena" 
+              placeholder="Mínimo 8 caracteres">
+            <button type="button" class="password-toggle" (click)="toggleContrasena()">
+              {{ mostrarContrasena ? '🙈' : '👁️' }}
+            </button>
+          </div>
+          @if (form.get('contrasena')?.touched && form.get('contrasena')?.hasError('required')) {
+            <span class="form-error">La contraseña es obligatoria.</span>
+          }
+          @if (form.get('contrasena')?.touched && form.get('contrasena')?.hasError('minlength')) {
+            <span class="form-error">La contraseña debe tener al menos 8 caracteres.</span>
+          }
+        </div>
+
+        <!-- Rol -->
+        <div class="form-group">
+          <label for="rol">Rol en el Sistema *</label>
+          <select id="rol" formControlName="rol">
+            <option value="" disabled>Seleccione un rol</option>
+            <option value="Administrador">👑 Administrador</option>
+            <option value="Abogado">⚖️ Abogado</option>
+            <option value="Cliente">👤 Cliente</option>
+          </select>
+          @if (form.get('rol')?.touched && form.get('rol')?.hasError('required')) {
+            <span class="form-error">Debe seleccionar un rol.</span>
+          }
+        </div>
+
+        <!-- Estado -->
+        <div class="form-group">
+          <label for="estado">Estado Inicial *</label>
+          <select id="estado" formControlName="estado">
+            <option value="Activo">✅ Activo</option>
+            <option value="Inactivo">⏸️ Inactivo</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Acciones -->
+      <div class="form-actions">
+        <button type="button" class="btn-cancelar" (click)="volver()">
+          Cancelar
+        </button>
+        <button type="submit" class="btn-guardar" [disabled]="form.invalid || guardando">
+          @if (guardando) {
+            <span class="btn-spinner"></span>
+            Guardando...
+          } @else {
+            💾 Crear Usuario
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
