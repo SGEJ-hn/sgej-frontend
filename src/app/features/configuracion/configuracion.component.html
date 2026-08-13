@@ -1,0 +1,178 @@
+<!-- Header -->
+<app-shared-header 
+  titulo="Configuración del Sistema" 
+  subtitulo="Administrar los datos del bufete y las políticas de seguridad">
+</app-shared-header>
+
+<!-- Contenido Principal -->
+<div class="config-container">
+
+  <!-- Loader -->
+  @if (cargando) {
+    <div class="loader-wrapper">
+      <div class="loader-spinner"></div>
+      <p>Cargando configuración...</p>
+    </div>
+  } @else {
+
+    <!-- Mensajes de retroalimentación -->
+    @if (mensajeExito) {
+      <div class="alerta alerta-exito">
+        ✅ {{ mensajeExito }}
+      </div>
+    }
+    @if (mensajeError) {
+      <div class="alerta alerta-error">
+        ❌ {{ mensajeError }}
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="guardar()">
+
+      <!-- ==================== SECCIÓN 1: INFORMACIÓN DEL BUFETE ==================== -->
+      <div class="config-card">
+        <div class="card-header">
+          <div class="card-icon icon-bufete">🏛️</div>
+          <div>
+            <h2 class="card-title">Información General del Bufete</h2>
+            <p class="card-subtitle">Datos de identificación y contacto de la firma legal</p>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <!-- Nombre del Bufete -->
+          <div class="form-group full-width">
+            <label for="nombre_bufete">Nombre del Bufete *</label>
+            <input id="nombre_bufete" type="text" formControlName="nombre_bufete" placeholder="Ej: Justice Attorney Law">
+          </div>
+
+          <!-- Cédula / RTN -->
+          <div class="form-group">
+            <label for="cedula_rtn">Cédula / RTN *</label>
+            <input id="cedula_rtn" type="text" formControlName="cedula_rtn" placeholder="Ej: 0801-1990-00001">
+          </div>
+
+          <!-- Sitio Web -->
+          <div class="form-group">
+            <label for="sitio_web">Sitio Web</label>
+            <input id="sitio_web" type="url" formControlName="sitio_web" placeholder="https://www.ejemplo.com">
+          </div>
+
+          <!-- Teléfono -->
+          <div class="form-group">
+            <label for="telefono">Teléfono</label>
+            <input id="telefono" type="tel" formControlName="telefono" placeholder="+504 9999-0000">
+          </div>
+
+          <!-- Correo Electrónico -->
+          <div class="form-group">
+            <label for="correo_electronico">Correo Electrónico</label>
+            <input id="correo_electronico" type="email" formControlName="correo_electronico" placeholder="contacto@bufete.com">
+          </div>
+
+          <!-- Dirección -->
+          <div class="form-group full-width">
+            <label for="direccion">Dirección</label>
+            <input id="direccion" type="text" formControlName="direccion" placeholder="Barrio El Centro, Tegucigalpa, Honduras">
+          </div>
+
+          <!-- Descripción del Bufete -->
+          <div class="form-group full-width">
+            <label for="descripcion_bufete">Descripción del Bufete</label>
+            <textarea id="descripcion_bufete" formControlName="descripcion_bufete" rows="3" placeholder="Breve descripción de los servicios legales ofrecidos..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== SECCIÓN 2: POLÍTICAS DE SEGURIDAD ==================== -->
+      <div class="config-card">
+        <div class="card-header">
+          <div class="card-icon icon-seguridad">🔒</div>
+          <div>
+            <h2 class="card-title">Políticas de Seguridad</h2>
+            <p class="card-subtitle">Configurar reglas de protección del sistema y sesión</p>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <!-- Tiempo de Inactividad -->
+          <div class="form-group">
+            <label for="tiempo_inactividad_min">Tiempo de Inactividad (minutos) *</label>
+            <input id="tiempo_inactividad_min" type="number" formControlName="tiempo_inactividad_min" min="1" max="480">
+            <span class="form-hint">La sesión se cerrará automáticamente después de este periodo sin actividad.</span>
+          </div>
+
+          <!-- Longitud Mínima Contraseña -->
+          <div class="form-group">
+            <label for="longitud_min_contrasena">Longitud Mínima de Contraseña *</label>
+            <input id="longitud_min_contrasena" type="number" formControlName="longitud_min_contrasena" min="6" max="50">
+            <span class="form-hint">Número mínimo de caracteres requeridos para las contraseñas.</span>
+          </div>
+
+          <!-- Intentos Máximos de Login -->
+          <div class="form-group">
+            <label for="intentos_max_login">Intentos Máximos de Login *</label>
+            <input id="intentos_max_login" type="number" formControlName="intentos_max_login" min="1" max="20">
+            <span class="form-hint">Número de intentos fallidos antes de bloquear la cuenta.</span>
+          </div>
+
+          <!-- Duración de Bloqueo -->
+          <div class="form-group">
+            <label for="duracion_bloqueo_min">Duración del Bloqueo (minutos) *</label>
+            <input id="duracion_bloqueo_min" type="number" formControlName="duracion_bloqueo_min" min="1" max="1440">
+            <span class="form-hint">Tiempo que la cuenta permanecerá bloqueada tras exceder los intentos.</span>
+          </div>
+        </div>
+
+        <!-- Toggles de Seguridad -->
+        <div class="toggles-section">
+          <div class="toggle-item">
+            <div>
+              <span class="toggle-label">Autenticación de Dos Factores (2FA)</span>
+              <span class="toggle-desc">Requerir verificación adicional al iniciar sesión</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" formControlName="requerir_2fa">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="toggle-item">
+            <div>
+              <span class="toggle-label">Notificaciones Push</span>
+              <span class="toggle-desc">Enviar notificaciones push a los usuarios del sistema</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" formControlName="notificaciones_push">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="toggle-item">
+            <div>
+              <span class="toggle-label">Recordatorios de Audiencias</span>
+              <span class="toggle-desc">Enviar recordatorios automáticos antes de las audiencias programadas</span>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" formControlName="recordatorios_audiencias">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== BOTÓN GUARDAR ==================== -->
+      <div class="form-actions">
+        <button type="submit" class="btn-guardar" [disabled]="form.invalid || guardando">
+          @if (guardando) {
+            <span class="btn-spinner"></span>
+            Guardando...
+          } @else {
+            💾 Guardar Configuración
+          }
+        </button>
+      </div>
+
+    </form>
+  }
+</div>

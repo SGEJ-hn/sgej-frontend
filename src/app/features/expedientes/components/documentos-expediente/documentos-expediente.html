@@ -4,7 +4,7 @@
   <!-- NUEVO HEADER COMPARTIDO (Sin iconos de campana/config) -->
   <app-shared-header 
     titulo="Subir Documento" 
-    [subtitulo]="numeroExpedienteVisual + ' • Grupo Empresarial Vidal S.A.'"
+    [subtitulo]="numeroExpedienteVisual + (nombreClienteVisual ? ' • ' + nombreClienteVisual : '')"
     [mostrarIconos]="false">
     
     <!-- Botones proyectados hacia la derecha -->

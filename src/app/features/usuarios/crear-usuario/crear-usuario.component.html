@@ -1,0 +1,163 @@
+<div class="min-h-screen bg-[#F3F2EE] font-sans custom-font">
+  <!-- Header con botón Volver -->
+  <app-shared-header 
+    titulo="Crear Nuevo Usuario" 
+    subtitulo="Complete el formulario para registrar un nuevo usuario en el sistema"
+    [mostrarIconos]="false">
+    
+    <button class="text-gray-500 hover:text-gray-800 flex items-center gap-2 text-sm transition-colors cursor-pointer mr-2" (click)="volver()">
+      <ng-icon name="heroArrowLeft" size="1.1rem"></ng-icon>
+      Volver a Usuarios
+    </button>
+    
+  </app-shared-header>
+
+  <!-- Contenido -->
+  <div class="p-8 max-w-5xl mx-auto">
+
+    <!-- Alertas -->
+    @if (mensajeError) {
+      <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-600 text-red-800 flex items-center gap-3 shadow-sm">
+        <ng-icon name="heroMinusCircle" size="1.4rem" class="text-red-600"></ng-icon>
+        {{ mensajeError }}
+      </div>
+    }
+
+    <!-- Contenedor Principal del Formulario -->
+    <div class="bg-white border border-gray-200 rounded-sm shadow-sm overflow-hidden">
+      
+      <!-- Cabecera de la Tarjeta -->
+      <div class="p-8 border-b border-gray-100 flex items-center gap-5">
+        <div class="w-12 h-12 bg-[#4B1623] text-white rounded-lg flex items-center justify-center">
+          <ng-icon name="heroUser" size="1.5rem"></ng-icon>
+        </div>
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900">Datos del Usuario</h2>
+          <p class="text-sm text-gray-500 mt-1">Todos los campos marcados con * son obligatorios</p>
+        </div>
+      </div>
+
+      <!-- Formulario -->
+      <form [formGroup]="form" (ngSubmit)="guardar()" class="p-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+
+          <!-- Nombre Completo (Ocupa ambas columnas) -->
+          <div class="md:col-span-2">
+            <label for="nombre" class="block text-xs font-medium text-gray-500 mb-2">Nombre Completo *</label>
+            <input 
+              id="nombre" 
+              type="text" 
+              formControlName="nombre" 
+              placeholder="Ej: Juan Carlos Pérez López"
+              class="w-full border border-gray-300 p-2.5 text-sm focus:outline-none focus:border-[#d4b88c] focus:ring-1 focus:ring-[#d4b88c] rounded-sm"
+            >
+            @if (form.get('nombre')?.touched && form.get('nombre')?.hasError('required')) {
+              <span class="text-xs text-red-500 mt-1.5 block">El nombre es obligatorio.</span>
+            }
+            @if (form.get('nombre')?.touched && form.get('nombre')?.hasError('minlength')) {
+              <span class="text-xs text-red-500 mt-1.5 block">El nombre debe tener al menos 3 caracteres.</span>
+            }
+          </div>
+
+          <!-- Correo Electrónico -->
+          <div>
+            <label for="correo" class="block text-xs font-medium text-gray-500 mb-2">Correo Electrónico *</label>
+            <input 
+              id="correo" 
+              type="email" 
+              formControlName="correo" 
+              placeholder="correo@ejemplo.com"
+              class="w-full border border-gray-300 p-2.5 text-sm focus:outline-none focus:border-[#d4b88c] focus:ring-1 focus:ring-[#d4b88c] rounded-sm"
+            >
+            @if (form.get('correo')?.touched && form.get('correo')?.hasError('required')) {
+              <span class="text-xs text-red-500 mt-1.5 block">El correo es obligatorio.</span>
+            }
+            @if (form.get('correo')?.touched && form.get('correo')?.hasError('email')) {
+              <span class="text-xs text-red-500 mt-1.5 block">Ingrese un correo electrónico válido.</span>
+            }
+          </div>
+
+          <!-- Contraseña -->
+          <div>
+            <label for="contrasena" class="block text-xs font-medium text-gray-500 mb-2">Contraseña *</label>
+            <div class="relative w-full">
+              <input 
+                id="contrasena" 
+                [type]="mostrarContrasena ? 'text' : 'password'" 
+                formControlName="contrasena" 
+                placeholder="Mínimo 8 caracteres"
+                class="w-full border border-gray-300 p-2.5 pr-10 text-sm focus:outline-none focus:border-[#d4b88c] focus:ring-1 focus:ring-[#d4b88c] rounded-sm"
+              >
+              <button 
+                type="button" 
+                class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-[#4B1623] cursor-pointer transition-colors" 
+                (click)="toggleContrasena()"
+                tabindex="-1">
+                <ng-icon [name]="mostrarContrasena ? 'heroEyeSlash' : 'heroEye'" size="1.2rem"></ng-icon>
+              </button>
+            </div>
+            @if (form.get('contrasena')?.touched && form.get('contrasena')?.hasError('required')) {
+              <span class="text-xs text-red-500 mt-1.5 block">La contraseña es obligatoria.</span>
+            }
+            @if (form.get('contrasena')?.touched && form.get('contrasena')?.hasError('minlength')) {
+              <span class="text-xs text-red-500 mt-1.5 block">La contraseña debe tener al menos 8 caracteres.</span>
+            }
+          </div>
+
+          <!-- Rol -->
+          <div>
+            <label for="rol" class="block text-xs font-medium text-gray-500 mb-2">Rol en el Sistema *</label>
+            <select 
+              id="rol" 
+              formControlName="rol"
+              class="w-full border border-gray-300 p-2.5 text-sm focus:outline-none focus:border-[#d4b88c] focus:ring-1 focus:ring-[#d4b88c] rounded-sm bg-white appearance-none">
+              <option value="" disabled>Seleccione un rol</option>
+              <option value="Administrador">Administrador</option>
+              <option value="Abogado">Abogado</option>
+              <option value="Cliente">Cliente</option>
+            </select>
+            @if (form.get('rol')?.touched && form.get('rol')?.hasError('required')) {
+              <span class="text-xs text-red-500 mt-1.5 block">Debe seleccionar un rol.</span>
+            }
+          </div>
+
+          <!-- Estado -->
+          <div>
+            <label for="estado" class="block text-xs font-medium text-gray-500 mb-2">Estado Inicial *</label>
+            <select 
+              id="estado" 
+              formControlName="estado"
+              class="w-full border border-gray-300 p-2.5 text-sm focus:outline-none focus:border-[#d4b88c] focus:ring-1 focus:ring-[#d4b88c] rounded-sm bg-white appearance-none">
+              <option value="Activo">Activo</option>
+              <option value="Inactivo">Inactivo</option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- Acciones Inferiores -->
+        <div class="mt-10 pt-6 border-t border-gray-100 flex items-center justify-end gap-4">
+          <button 
+            type="button" 
+            class="px-6 py-2.5 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 text-sm font-medium rounded-sm transition-colors cursor-pointer shadow-sm" 
+            (click)="volver()">
+            Cancelar
+          </button>
+          
+          <button 
+            type="submit" 
+            class="px-6 py-2.5 bg-[#4B1623] hover:bg-[#38101c] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-sm transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm min-w-40" 
+            [disabled]="form.invalid || guardando">
+            @if (guardando) {
+              <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              Guardando...
+            } @else {
+              Crear Usuario
+            }
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>

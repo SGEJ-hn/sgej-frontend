@@ -1,0 +1,309 @@
+<div class="min-h-screen bg-[#f8f7f5] font-sans custom-font">
+  <!-- ENCABEZADO SUPERIOR -->
+  <app-shared-header
+    titulo="Nuevo Expediente"
+    subtitulo="Expediente / Nuevo"
+    [mostrarIconos]="false">
+    
+    <button 
+      type="button"
+      (click)="cancelar()"
+      class="px-6 py-2 bg-[#D2B48C] hover:bg-[#b89e78] text-gray-900 font-medium transition-colors cursor-pointer inline-flex items-center justify-center text-center">
+      Cancelar
+    </button>
+
+    <button 
+      type="button"
+      (click)="onSubmit()"
+      [disabled]="guardando"
+      class="px-6 py-2 bg-[#4B1623] hover:bg-[#38101c]/90 text-[#F3F2EE] font-medium flex items-center gap-2 transition-colors cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed">
+      <ng-icon *ngIf="!guardando" name="heroDocumentPlus" size="1.2rem"></ng-icon>
+      <span *ngIf="guardando" class="inline-block animate-spin">⌛</span>
+      <span>{{ guardando ? 'Guardando...' : 'Crear Expediente' }}</span>
+    </button>
+  </app-shared-header>
+
+  <div class="max-w-6xl mx-auto p-6 md:p-8">
+
+    <div *ngIf="mensajeError" class="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded flex items-center gap-3">
+      <span>{{ mensajeError }}</span>
+    </div>
+
+    <div *ngIf="mensajeExito" class="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 text-sm rounded flex items-center gap-3">
+      <span>{{ mensajeExito }}</span>
+    </div>
+
+    <!-- FORMULARIO PRINCIPAL -->
+    <form [formGroup]="expedienteForm" (ngSubmit)="onSubmit()" class="space-y-6">
+
+      <!-- TARJETA 1: CLASIFICACIÓN DEL EXPEDIENTE -->
+      <div class="bg-white p-6 rounded shadow-sm border border-gray-200">
+        <h2 class="text-base font-medium text-gray-900 mb-6 border-l-[3px] border-[#4A1525] pl-2">
+          Clasificación del Expediente
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <!-- Tipo / Materia -->
+          <div>
+            <label class="block text-[11px] font-semibold text-gray-500 uppercase mb-1">
+              Tipo de Expediente *
+            </label>
+            <select
+              formControlName="materia"
+              class="w-full p-2.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-[#d4b88c] focus:outline-none bg-white">
+              <option *ngFor="let m of materias" [value]="m">{{ m }}</option>
+            </select>
+          </div>
+
+          <!-- Número de Expediente (Generado Automáticamente) -->
+          <div>
+            <label class="block text-[11px] font-semibold text-gray-500 uppercase mb-1">
+              Número de Expediente *
+            </label>
+            <input
+              type="text"
+              formControlName="numero_expediente"
+              readonly
+              class="w-full p-2.5 text-sm border border-gray-300 rounded bg-gray-50 text-gray-600 font-mono font-medium cursor-not-allowed focus:outline-none" />
+          </div>
+
+          <!-- Tribunal / Instancia -->
+          <div>
+            <label class="block text-[11px] font-semibold text-gray-500 uppercase mb-1">
+              Tribunal / Instancia *
+            </label>
+            <select
+              formControlName="tribunal_juzgado"
+              class="w-full p-2.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-[#d4b88c] focus:outline-none bg-white">
+              <option *ngFor="let t of tribunales" [value]="t">{{ t }}</option>
+            </select>
+          </div>
+
+          <!-- Fecha de Inicio (Solo Lectura) -->
+          <div>
+            <label class="block text-[11px] font-semibold text-gray-500 uppercase mb-1">
+              Fecha de Inicio *
+            </label>
+            <input
+              type="date"
+              formControlName="fecha_apertura"
+              readonly
+              class="w-full p-2.5 text-sm border border-gray-300 rounded bg-gray-50 text-gray-500 cursor-not-allowed focus:outline-none" />
+          </div>
+
+          <!-- Estatus -->
+          <div>
+            <label class="block text-[11px] font-semibold text-gray-500 uppercase mb-1">
+              Estatus *
+            </label>
+            <select
+              formControlName="estado"
+              class="w-full p-2.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-[#d4b88c] focus:outline-none bg-white">
+              <option *ngFor="let e of estados" [value]="e">{{ e }}</option>
+            </select>
+          </div>
+
+          <!-- Juez a Cargo -->
+          <div>
+            <label class="block text-[11px] font-semibold text-gray-500 uppercase mb-1">
+              Juez a Cargo
+            </label>
+            <input
+              type="text"
+              formControlName="juez_cargo"
+              placeholder="Nombre del juez"
+              class="w-full p-2.5 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-[#d4b88c] focus:outline-none bg-white" />
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN PARTES INVOLUCRADAS -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- TARJETA 2: PARTE DEMANDANTE -->
+        <div class="bg-white p-6 rounded shadow-sm border border-gray-200">
+          <h2 class="text-base font-medium text-gray-900 mb-6 border-l-[3px] border-[#4A1525] pl-2">
+            Parte Demandante
+          </h2>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-500 uppercase mb-1">
+                Tipo de Persona
+              </label>
+              <select
+                formControlName="demandante_tipo"
+                class="w-full p-2 text-sm border border-gray-300 rounded bg-white">
+                <option value="Persona Física">Persona Física</option>
+                <option value="Persona Jurídica">Persona Jurídica</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-500 uppercase mb-1">
+                Nombre Completo *
+              </label>
+              <input
+                type="text"
+                formControlName="demandante_nombre"
+                placeholder="Nombre Completo del Demandante"
+                class="w-full p-2 text-sm border border-gray-300 rounded bg-white" />
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-500 uppercase mb-1">
+                Cédula
+              </label>
+              <input
+                type="text"
+                formControlName="demandante_identificacion"
+                placeholder="Ej. 080119994567"
+                class="w-full p-2 text-sm border border-gray-300 rounded bg-white" />
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-500 uppercase mb-1">
+                Correo Electrónico
+              </label>
+              <input
+                type="email"
+                formControlName="demandante_correo"
+                placeholder="correo@ejemplo.com"
+                class="w-full p-2 text-sm border border-gray-300 rounded bg-white" />
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-500 uppercase mb-1">
+                Dirección
+              </label>
+              <input
+                type="text"
+                formControlName="demandante_direccion"
+                placeholder="Dirección Completa"
+                class="w-full p-2 text-sm border border-gray-300 rounded bg-white" />
+            </div>
+          </div>
+        </div>
+
+        <!-- TARJETA 3: PARTE DEMANDADA -->
+        <div class="bg-white p-6 rounded shadow-sm border border-gray-200">
+          <h2 class="text-base font-medium text-gray-900 mb-6 border-l-[3px] border-[#4A1525] pl-2">
+            Parte Demandada
+          </h2>
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-500 uppercase mb-1">
+                Tipo de Persona
+              </label>
+              <select
+                formControlName="demandado_tipo"
+                class="w-full p-2 text-sm border border-gray-300 rounded bg-white">
+                <option value="Persona Física">Persona Física</option>
+                <option value="Persona Jurídica">Persona Jurídica</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-500 uppercase mb-1">
+                Nombre Completo *
+              </label>
+              <input
+                type="text"
+                formControlName="demandado_nombre"
+                placeholder="Nombre Completo del Demandado"
+                class="w-full p-2 text-sm border border-gray-300 rounded bg-white" />
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-500 uppercase mb-1">
+                Cédula
+              </label>
+              <input
+                type="text"
+                formControlName="demandado_identificacion"
+                placeholder="Ej. 080119994567"
+                class="w-full p-2 text-sm border border-gray-300 rounded bg-white" />
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-500 uppercase mb-1">
+                Correo Electrónico
+              </label>
+              <input
+                type="email"
+                formControlName="demandado_correo"
+                placeholder="correo@ejemplo.com"
+                class="w-full p-2 text-sm border border-gray-300 rounded bg-white" />
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-500 uppercase mb-1">
+                Dirección
+              </label>
+              <input
+                type="text"
+                formControlName="demandado_direccion"
+                placeholder="Dirección Completa"
+                class="w-full p-2 text-sm border border-gray-300 rounded bg-white" />
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- TARJETA 4: ASIGNACIÓN DEL EQUIPO -->
+      <div class="bg-white p-6 rounded shadow-sm border border-gray-200">
+        <h2 class="text-base font-medium text-gray-900 mb-6 border-l-[3px] border-[#4A1525] pl-2">
+          Asignación del Equipo
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <!-- Abogado Responsable (1 Solo) -->
+          <div>
+            <label class="block text-[11px] font-semibold text-gray-500 uppercase mb-1">
+              Abogado Responsable
+            </label>
+            <select
+              formControlName="abogado_responsable"
+              class="w-full p-2.5 text-sm border border-gray-300 rounded bg-white focus:ring-1 focus:ring-[#d4b88c] focus:outline-none">
+              <option value="">Seleccione al abogado...</option>
+              <option *ngFor="let abog of listaAbogados" [value]="abog.id_usuario">{{ abog.nombre }}</option>
+            </select>
+          </div>
+
+          <!-- Paralegales (Selección Múltiple) -->
+          <div>
+            <label class="block text-[11px] font-semibold text-gray-500 uppercase mb-1">
+              Paralegal(es) asignado(s)
+            </label>
+            <select
+              formControlName="paralegales_asignados"
+              multiple
+              class="w-full p-2.5 text-sm border border-gray-300 rounded bg-white h-24 focus:ring-1 focus:ring-[#d4b88c] focus:outline-none">
+              <option *ngFor="let paralegal of listaParalegales" [value]="paralegal.id_usuario">
+                {{ paralegal.nombre }}
+              </option>
+            </select>
+            <p class="text-[10px] text-gray-400 mt-1">Presione Ctrl (o Cmd) para seleccionar más de uno.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TARJETA 5: DESCRIPCIÓN DEL CASO -->
+      <div class="bg-white p-6 rounded shadow-sm border border-gray-200">
+        <h2 class="text-base font-medium text-gray-900 mb-6 border-l-[3px] border-[#4A1525] pl-2">
+          Descripción del Caso
+        </h2>
+
+        <div>
+          <textarea
+            formControlName="descripcion_hechos"
+            rows="4"
+            placeholder="Descripción detallada del caso, hechos relevantes y pretensiones..."
+            class="w-full p-3 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-[#d4b88c] focus:outline-none bg-white"></textarea>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,10 +1,12 @@
 import {
   Component,
   OnInit,
-  ChangeDetectorRef
+  ChangeDetectorRef,
+  Inject,
+  PLATFORM_ID
 } from '@angular/core';
 
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { FullCalendarModule } from '@fullcalendar/angular';
@@ -17,12 +19,15 @@ import {
 
 import dayGridPlugin from '@fullcalendar/daygrid';
 import esLocale from '@fullcalendar/core/locales/es';
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { heroPlus, heroMagnifyingGlass } from '@ng-icons/heroicons/outline';
 
 import { CitaService } from '../../../../core/services/cita.service';
 import type { Cita } from '../../../../core/services/cita.service';
 
 import { AuthService } from '../../../../core/services/auth.service';
 import { ExpedienteService, Expediente } from '../../../../core/services/expediente';
+import { SharedHeader } from '../../../../shared/components/shared-header/shared-header';
 
 
 @Component({
@@ -32,8 +37,11 @@ import { ExpedienteService, Expediente } from '../../../../core/services/expedie
   imports: [
     CommonModule,
     FormsModule,
-    FullCalendarModule
+    FullCalendarModule,
+    SharedHeader,
+    NgIconComponent
   ],
+  viewProviders: [provideIcons({ heroPlus, heroMagnifyingGlass })],
 
   templateUrl: './calendario.html',
   styleUrl: './calendario.css'
@@ -45,22 +53,23 @@ export class Calendario implements OnInit {
     private citaService: CitaService,
     private authService: AuthService,
     private cdr: ChangeDetectorRef,
-    private expedienteService: ExpedienteService 
-  ) {}
-
+    private expedienteService: ExpedienteService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
+    this.esNavegador = isPlatformBrowser(this.platformId);
+  }
 
   // Variables
 
   modalNuevaCitaAbierto = false;
-
   modoEdicion = false;
-
   idCitaEditando: string | null = null;
-
   citas: Cita[] = [];
-
   citaSeleccionada: Cita | null = null;
   expedientes: Expediente[] = [];
+  esNavegador: boolean = false;
+  terminoBusqueda: string = '';
+  filtroDias: number = 30;
 
 
   // Usuario actual
@@ -74,6 +83,18 @@ export class Calendario implements OnInit {
 
   get esAdministrador(): boolean {
     return this.usuarioActual?.rol === 'Administrador';
+  }
+
+  // Obtener mes y año actuales dinámicamente para el subtítulo
+  get mesAnioActual(): string {
+    const fecha = new Date();
+    
+    // Obtenemos el mes en texto (ej. "julio")
+    const mes = fecha.toLocaleDateString('es-ES', { month: 'long' });
+    const anio = fecha.getFullYear();
+    
+    // Capitalizamos la primera letra y unimos con el año
+    return `${mes.charAt(0).toUpperCase() + mes.slice(1)} de ${anio}`;
   }
 
 
@@ -187,118 +208,79 @@ export class Calendario implements OnInit {
     }
 
   };
+  
 
 
   // Inicio
 
   ngOnInit(): void {
-
+    this.cargarExpedientes();
     this.cargarCitas();
-    this.cargarExpedientes(); // <-- ¡Esto faltaba!
-
   }
 
 
   // Cargar citas
-
   cargarCitas(): void {
-
-    console.log('CARGANDO CITAS DESDE ANGULAR...');
-
     this.citaService.obtenerCitas().subscribe({
-
       next: (citas: Cita[]) => {
-
-        console.log(
-          'CITAS RECIBIDAS EN ANGULAR:',
-          citas
-        );
-
-        console.log(
-          'CANTIDAD DE CITAS:',
-          citas.length
-        );
-
-        this.citas = citas;
-
-
-        const eventos: EventInput[] =
-          citas.map((cita) => {
-
-            let color = '#4CAF50';
-
-
-            if (cita.tipo_cita === 'Reunión') {
-
-              color = '#2196F3';
-
-            }
-
-            else if (cita.tipo_cita === 'Trámite') {
-
-              color = '#FF9800';
-
-            }
-
-            else if (cita.tipo_cita === 'Audiencia') {
-
-              color = '#4CAF50';
-
-            }
-
-
-            const fecha =
-              cita.fecha.split('T')[0];
-
-
-            return {
-
-              id: cita.id_cita ?? '',
-
-              title: cita.titulo,
-
-              start: fecha,
-
-              allDay: true,
-
-              color: color
-
-            };
-
-          });
-
-
-        console.log(
-          'EVENTOS PARA FULLCALENDAR:',
-          eventos
-        );
-
-
-        this.calendarOptions = {
-
-          ...this.calendarOptions,
-
-          events: eventos
-
-        };
-
-
-        this.cdr.detectChanges();
-
+        // 🔥 EL TRUCO MAESTRO 🔥
+        this.citas = citas.map(cita => {
+          // Extraemos estrictamente el día (Ej: "2026-08-20")
+          const soloFecha = cita.fecha.split('T')[0];
+          return {
+            ...cita,
+            // Le pegamos el mediodía LOCAL. Esto evita que los Pipes de Angular
+            // o FullCalendar te regresen al día 19.
+            fecha: `${soloFecha}T12:00:00`
+          };
+        });
+        
+        this.actualizarEventosCalendario();
       },
-
-
       error: (error) => {
-
-        console.error(
-          'ERROR AL CARGAR CITAS EN ANGULAR:',
-          error
-        );
-
+        console.error('ERROR AL CARGAR CITAS:', error);
       }
+    });
+  }
 
+  // Filtrar y dibujar eventos en el calendario
+  actualizarEventosCalendario(): void {
+    const termino = this.terminoBusqueda.toLowerCase().trim();
+
+    const citasFiltradas = this.citas.filter(cita => {
+      if (!termino) return true;
+      const numeroExpediente = this.obtenerNumeroExpediente(cita.id_expediente).toLowerCase();
+      return numeroExpediente.includes(termino);
     });
 
+    const eventos: EventInput[] = citasFiltradas.map((cita) => {
+      let color = '#4CAF50'; 
+      if (cita.tipo_cita === 'Reunión') color = '#2196F3';
+      else if (cita.tipo_cita === 'Trámite') color = '#FF9800';
+
+      const numeroExpediente = this.obtenerNumeroExpediente(cita.id_expediente);
+      const tituloMostrar = cita.id_expediente ? numeroExpediente : cita.titulo;
+
+      return {
+        id: cita.id_cita ?? '',
+        title: tituloMostrar,
+        // Al hacer split, sacamos exactamente el día "2026-08-20" para el calendario
+        start: cita.fecha.split('T')[0], 
+        allDay: true,
+        color: color
+      };
+    });
+
+    this.calendarOptions = {
+      ...this.calendarOptions,
+      events: eventos
+    };
+    this.cdr.detectChanges();
+  }
+
+  // Método que se dispara cada vez que el usuario escribe en el input
+  filtrarCitas(): void {
+    this.actualizarEventosCalendario();
   }
 
  cargarExpedientes(): void {
@@ -319,75 +301,47 @@ export class Calendario implements OnInit {
           this.expedientes = [];
         }
 
-        this.cdr.detectChanges();
+        // 👇 AHORA SÍ, CARGAMOS LAS CITAS 👇
+        this.cargarCitas();
       },
       error: (error) => {
         console.error('ERROR AL CARGAR EXPEDIENTES:', error);
+        // Si hay error, cargamos las citas de todos modos para no dejar el calendario en blanco
+        this.cargarCitas();
       }
     });
   }
 
 
-  // Próximas citas
-
+ // Próximas citas
   get proximasCitas(): Cita[] {
-
     const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    
+    const fechaLimite = new Date(hoy);
+    fechaLimite.setDate(fechaLimite.getDate() + Number(this.filtroDias)); 
+    fechaLimite.setHours(23, 59, 59, 999);
 
-    hoy.setHours(
-      0,
-      0,
-      0,
-      0
-    );
-
+    const termino = this.terminoBusqueda.toLowerCase().trim();
 
     return this.citas
-
       .filter((cita) => {
+        // Al crear la fecha desde nuestro string con "T12:00:00", es 100% precisa
+        const fechaCita = new Date(cita.fecha);
+        fechaCita.setHours(0,0,0,0);
+        
+        let coincideBusqueda = true;
+        if (termino) {
+          const numeroExpediente = this.obtenerNumeroExpediente(cita.id_expediente).toLowerCase();
+          coincideBusqueda = numeroExpediente.includes(termino);
+        }
 
-        const fecha =
-          cita.fecha.split('T')[0];
-
-
-        const [anio, mes, dia] =
-          fecha
-            .split('-')
-            .map(Number);
-
-
-        const fechaCita =
-          new Date(
-            anio,
-            mes - 1,
-            dia
-          );
-
-
-        return fechaCita >= hoy;
-
+        return fechaCita >= hoy && fechaCita <= fechaLimite && coincideBusqueda;
       })
-
       .sort((a, b) => {
-
-        const fechaA =
-          a.fecha.split('T')[0];
-
-        const fechaB =
-          b.fecha.split('T')[0];
-
-
-        return fechaA.localeCompare(
-          fechaB
-        );
-
+        return new Date(a.fecha).getTime() - new Date(b.fecha).getTime();
       })
-
-      .slice(
-        0,
-        4
-      );
-
+      .slice(0, 4); 
   }
 
 
@@ -683,48 +637,23 @@ export class Calendario implements OnInit {
 
 
   // Preparar cita
-
   prepararCita(): Cita {
+    let fechaSegura = this.nuevaCita.fecha;
+    if (fechaSegura && !fechaSegura.includes('T')) {
+      fechaSegura = `${fechaSegura}T12:00:00.000Z`;
+    }
 
     return {
-
-      id_expediente:
-        this.nuevaCita.id_expediente || null,
-
-
-      titulo:
-        this.nuevaCita.titulo,
-
-
-      tipo_cita:
-        this.nuevaCita.tipo_cita,
-
-
-      lugar_sala:
-        this.nuevaCita.lugar_sala,
-
-
-      fecha:
-        this.nuevaCita.fecha,
-
-
-      hora_inicio:
-        this.nuevaCita.hora_inicio,
-
-
-      duracion_estimada:
-        this.nuevaCita.duracion_estimada,
-
-
-      notas_recordatorio:
-        this.nuevaCita.notas_recordatorio,
-
-
-      recordatorio_automatico:
-        this.nuevaCita.recordatorio_automatico
-
+      id_expediente: this.nuevaCita.id_expediente || null,
+      titulo: this.nuevaCita.titulo,
+      tipo_cita: this.nuevaCita.tipo_cita,
+      lugar_sala: this.nuevaCita.lugar_sala,
+      fecha: fechaSegura,
+      hora_inicio: this.nuevaCita.hora_inicio,
+      duracion_estimada: this.nuevaCita.duracion_estimada,
+      notas_recordatorio: this.nuevaCita.notas_recordatorio,
+      recordatorio_automatico: this.nuevaCita.recordatorio_automatico
     };
-
   }
 
 
@@ -831,143 +760,73 @@ export class Calendario implements OnInit {
 
   }
 
-
-  // Fecha para formulario
-
-  obtenerFechaFormulario(
-    fecha: string
-  ): string {
-
-    if (!fecha) {
-
-      return '';
-
-    }
-
-
-    return fecha.split('T')[0];
-
+// Fecha para formulario
+  obtenerFechaFormulario(fecha: string): string {
+    if (!fecha) return '';
+    const date = new Date(fecha);
+    if (isNaN(date.getTime())) return fecha.split('T')[0]; // Fallback
+    
+    const anio = date.getFullYear();
+    const mes = (date.getMonth() + 1).toString().padStart(2, '0');
+    const dia = date.getDate().toString().padStart(2, '0');
+    return `${anio}-${mes}-${dia}`;
   }
-
 
   // Hora para formulario
-
-  obtenerHoraFormulario(
-    hora: string
-  ): string {
-
-    if (!hora) {
-
-      return '';
-
+  obtenerHoraFormulario(hora: string): string {
+    if (!hora) return '';
+    const date = new Date(hora);
+    if (isNaN(date.getTime())) {
+      return hora.includes('T') ? hora.split('T')[1].substring(0, 5) : hora.substring(0, 5);
     }
-
-
-    if (hora.includes('T')) {
-
-      return hora
-        .split('T')[1]
-        .substring(0, 5);
-
-    }
-
-
-    return hora.substring(
-      0,
-      5
-    );
-
+    
+    const horas = date.getHours().toString().padStart(2, '0');
+    const minutos = date.getMinutes().toString().padStart(2, '0');
+    return `${horas}:${minutos}`;
   }
 
+  // Formatear fecha para la vista de detalle
+  formatearFecha(fecha: string): string {
+    if (!fecha) return '';
+    const date = new Date(fecha);
+    if (isNaN(date.getTime())) return fecha;
 
-  // Formatear fecha
-
-  formatearFecha(
-    fecha: string
-  ): string {
-
-    if (!fecha) {
-
-      return '';
-
-    }
-
-
-    const fechaSinHora =
-      fecha.split('T')[0];
-
-
-    const partes =
-      fechaSinHora.split('-');
-
-
-    const fechaLocal =
-      new Date(
-
-        Number(partes[0]),
-
-        Number(partes[1]) - 1,
-
-        Number(partes[2])
-
-      );
-
-
-    const texto =
-      fechaLocal.toLocaleDateString(
-
-        'es-ES',
-
-        {
-
-          weekday: 'long',
-
-          day: 'numeric',
-
-          month: 'long',
-
-          year: 'numeric'
-
-        }
-
-      );
-
-
-    return (
-      texto.charAt(0).toUpperCase() +
-      texto.slice(1)
-    );
-
+    const texto = date.toLocaleDateString('es-ES', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+    return texto.charAt(0).toUpperCase() + texto.slice(1);
   }
 
-
-  // Formatear hora
-
-  formatearHora(
-    hora: string
-  ): string {
-
-    if (!hora) {
-
-      return '';
-
+  // Formatear hora para la vista de detalle
+  formatearHora(hora: string): string {
+    if (!hora) return '';
+    const date = new Date(hora);
+    if (isNaN(date.getTime())) {
+      return hora.includes('T') ? hora.split('T')[1].substring(0, 5) : hora.substring(0, 5);
     }
-
-
-    if (hora.includes('T')) {
-
-      return hora
-        .split('T')[1]
-        .substring(0, 5);
-
-    }
-
-
-    return hora.substring(
-      0,
-      5
-    );
-
+    
+    // Le damos formato de 12 hrs (ej: 06:00 PM) para que coincida con el Dashboard
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
   }
 
+  // Obtener número de expediente visualmente a partir del ID
+  obtenerNumeroExpediente(idExpediente: string | null | undefined): string {
+    if (!idExpediente) {
+      return 'Sin expediente asociado';
+    }
+
+    const expedienteEncontrado = this.expedientes.find(
+      (exp) => exp.id_expediente === idExpediente
+    );
+
+    return expedienteEncontrado ? expedienteEncontrado.numero_expediente : 'Expediente no encontrado';
+  }
 }
+
