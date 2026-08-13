@@ -13,6 +13,10 @@ import { ListaExpedientes } from './features/expedientes/components/lista-expedi
 import { DetalleExpediente } from './features/expedientes/components/detalle-expediente/detalle-expediente';
 import { ListaDocumentos } from './features/expedientes/components/lista-documentos/lista-documentos';
 import { DocumentosExpediente } from './features/expedientes/components/documentos-expediente/documentos-expediente';
+import { ConfiguracionComponent } from './features/configuracion/configuracion.component';
+import { UsuariosComponent } from './features/usuarios/usuarios.component';
+import { CrearUsuarioComponent } from './features/usuarios/crear-usuario/crear-usuario.component';
+
 import { HistorialComponent } from './features/expedientes/components/historial/historial';
 import { NuevoExpediente } from './features/expedientes/components/nuevo-expediente/nuevo-expediente';
 import { ClienteDashboard } from './features/cliente/components/cliente-dashboard/cliente-dashboard';
@@ -129,6 +133,7 @@ export const routes: Routes = [
     component: Calendario,
     canActivate: [authGuard],
   },
+  // === GESTIÓN DE USUARIOS ===
 
   {
     path: 'usuarios',
@@ -137,10 +142,23 @@ export const routes: Routes = [
   },
 
   {
+    path: 'usuarios/crear',
+    component: CrearUsuarioComponent,
+    canActivate: [authGuard],
+  },
+  // ============================
+  {
     path: 'reportes',
     component: ReportesComponent,
     canActivate: [authGuard],
   },
+  // === CONFIGURACIÓN DEL SISTEMA ===
+  {
+    path: 'configuracion',
+    component: ConfiguracionComponent,
+    canActivate: [authGuard],
+  },
+  // ============================
 
   {
     path: '',

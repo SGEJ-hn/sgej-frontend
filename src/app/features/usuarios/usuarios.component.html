@@ -1,0 +1,140 @@
+<!-- Header con botón de crear -->
+<app-shared-header 
+  titulo="Gestión de Usuarios" 
+  subtitulo="Administrar las cuentas de usuario del sistema">
+  
+  <button class="btn-crear" (click)="irACrearUsuario()">
+    <ng-icon name="heroPlus" size="1.1rem"></ng-icon>
+    Nuevo Usuario
+  </button>
+</app-shared-header>
+
+<!-- Contenido -->
+<div class="usuarios-container">
+
+  <!-- Alertas -->
+  @if (mensajeExito) {
+    <div class="alerta alerta-exito">✅ {{ mensajeExito }}</div>
+  }
+  @if (mensajeError) {
+    <div class="alerta alerta-error">❌ {{ mensajeError }}</div>
+  }
+
+  <!-- Cards de Resumen -->
+  <div class="cards-resumen">
+    <div class="card-resumen">
+      <div class="card-resumen-icon activos">👥</div>
+      <div>
+        <span class="card-resumen-numero">{{ usuarios.length }}</span>
+        <span class="card-resumen-label">Total Usuarios</span>
+      </div>
+    </div>
+    <div class="card-resumen">
+      <div class="card-resumen-icon activos">✅</div>
+      <div>
+        <span class="card-resumen-numero">{{ totalActivos }}</span>
+        <span class="card-resumen-label">Activos</span>
+      </div>
+    </div>
+    <div class="card-resumen">
+      <div class="card-resumen-icon inactivos">⏸️</div>
+      <div>
+        <span class="card-resumen-numero">{{ totalInactivos }}</span>
+        <span class="card-resumen-label">Inactivos</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div class="filtros-bar">
+    <div class="busqueda-wrapper">
+      <ng-icon name="heroMagnifyingGlass" size="1.1rem" class="busqueda-icon"></ng-icon>
+      <input
+        type="text"
+        [(ngModel)]="busqueda"
+        (keyup.enter)="aplicarFiltros()"
+        placeholder="Buscar por nombre o correo..."
+        class="busqueda-input"
+      />
+    </div>
+
+    <select [(ngModel)]="filtroRol" (change)="aplicarFiltros()" class="filtro-select">
+      <option value="">Todos los Roles</option>
+      <option value="Administrador">Administrador</option>
+      <option value="Abogado">Abogado</option>
+      <option value="Cliente">Cliente</option>
+    </select>
+
+    <select [(ngModel)]="filtroEstado" (change)="aplicarFiltros()" class="filtro-select">
+      <option value="">Todos los Estados</option>
+      <option value="Activo">Activo</option>
+      <option value="Inactivo">Inactivo</option>
+    </select>
+
+    @if (busqueda || filtroRol || filtroEstado) {
+      <button class="btn-limpiar" (click)="limpiarFiltros()">✕ Limpiar</button>
+    }
+  </div>
+
+  <!-- Tabla de Usuarios -->
+  <div class="tabla-wrapper">
+    @if (cargando) {
+      <div class="loader-wrapper">
+        <div class="loader-spinner"></div>
+        <p>Cargando usuarios...</p>
+      </div>
+    } @else if (usuarios.length === 0) {
+      <div class="empty-state">
+        <ng-icon name="heroUserGroup" size="3rem" class="empty-icon"></ng-icon>
+        <h3>No se encontraron usuarios</h3>
+        <p>Ajusta los filtros o crea un nuevo usuario.</p>
+      </div>
+    } @else {
+      <table class="tabla-usuarios">
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Correo Electrónico</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th>Último Acceso</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (usuario of usuarios; track usuario.id_usuario) {
+            <tr>
+              <td>
+                <div class="usuario-cell">
+                  <div class="avatar">
+                    {{ usuario.nombre.charAt(0).toUpperCase() }}
+                  </div>
+                  <span class="usuario-nombre">{{ usuario.nombre }}</span>
+                </div>
+              </td>
+              <td class="correo-cell">{{ usuario.correo }}</td>
+              <td>
+                <span class="rol-badge">
+                  {{ getRolIcon(usuario.rol) }} {{ usuario.rol }}
+                </span>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getBadgeClass(usuario.estado)">
+                  {{ usuario.estado }}
+                </span>
+              </td>
+              <td class="fecha-cell">{{ formatearFecha(usuario.ultimo_acceso) }}</td>
+              <td>
+                <div class="acciones-cell">
+                  <button class="btn-accion btn-eliminar" (click)="eliminarUsuario(usuario)" title="Eliminar usuario">
+                    <ng-icon name="heroTrash" size="1rem"></ng-icon>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>
