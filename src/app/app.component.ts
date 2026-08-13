@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { Sidebar } from './shared/components/sidebar/sidebar';
-import { fadeAnimation } from './shared/animations/route-animations'; // <-- Ajusta la ruta a donde guardaste el archivo
+import { fadeAnimation } from './shared/animations/route-animations';
 
 @Component({
   selector: 'app-root',

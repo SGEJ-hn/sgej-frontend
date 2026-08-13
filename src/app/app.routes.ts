@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { Component } from '@angular/core';
 import { LoginComponent } from './features/auth/login/login.component';
 import { authGuard } from './core/guards/auth.guard';
+import { DashboardAdmin } from './features/dashboard/components/dashboard-admin/dashboard-admin';
 import { Calendario } from './features/Calendario/components/calendario/calendario'; 
 import { ExpedientesComponent } from './features/expedientes/pages/expedientes.component';
 import { UsuariosComponent } from './features/usuarios/usuarios.component';
@@ -9,26 +10,6 @@ import { ReportesComponent } from './features/reportes/reportes.component';
 import { ListaDocumentos } from './features/expedientes/components/lista-documentos/lista-documentos';
 import { DocumentosExpediente } from './features/expedientes/components/documentos-expediente/documentos-expediente';
 import { HistorialComponent } from './features/expedientes/components/historial/historial';
-
-
-@Component({
-  selector: 'app-dashboard-dummy',
-  standalone: true,
-  template: `
-    <div class="p-6">
-      <h1 class="text-3xl font-bold text-[#4B1623] mb-4">
-        Dashboard Principal
-      </h1>
-      <p class="text-[#64748B]">
-        Bienvenido al Sistema de Gestión de Expedientes Jurídicos (SGEJ).
-      </p>
-    </div>
-  `
-})
-export class DashboardDummyComponent {
-  titulo = '';
-}
-
 
 @Component({
   selector: 'app-page-dummy',
@@ -53,7 +34,7 @@ export const routes: Routes = [
   },
   {
     path: 'dashboard',
-    component: DashboardDummyComponent,
+    component: DashboardAdmin,
     canActivate: [authGuard],
   },
   // === FLUJO DE EXPEDIENTES ===
