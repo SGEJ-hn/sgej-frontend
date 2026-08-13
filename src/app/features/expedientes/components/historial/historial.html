@@ -1,0 +1,130 @@
+<div class="min-h-screen bg-[#f8f7f5] font-sans custom-font relative flex flex-col">
+  
+  <!-- =============================== -->
+  <!-- HEADER COMPARTIDO               -->
+  <!-- =============================== -->
+  <app-shared-header 
+    titulo="Historial del Expediente" 
+    [subtitulo]="numeroExpediente">
+    
+    <!-- Botón proyectado hacia la derecha -->
+    <a [routerLink]="['/expedientes']" class="text-gray-500 hover:text-gray-800 flex items-center gap-2 text-sm transition-colors cursor-pointer mr-2">
+      <ng-icon name="heroArrowLeft"></ng-icon>
+      Volver al Expediente
+    </a>
+  </app-shared-header>
+
+  <!-- =============================== -->
+  <!-- CONTENEDOR PRINCIPAL            -->
+  <!-- =============================== -->
+  <div class="p-8 flex justify-center">
+    
+    <!-- Limitamos el ancho para que no abarque toda la pantalla (como en el prototipo) -->
+    <div class="w-full max-w-4xl">
+      
+      <!-- Pestañas de Filtrado (Adaptadas a Tailwind para coincidir con el diseño) -->
+      <div class="flex justify-between items-center mb-10 border-b border-gray-200 pb-4">
+        <div class="flex gap-3">
+          <button 
+            *ngFor="let tab of pestanas"
+            class="px-5 py-2 text-sm border rounded transition-colors cursor-pointer"
+            [ngClass]="{
+              'bg-[#4a1525] text-white border-[#4a1525] hover:bg-[#38101c]': categoriaActiva === tab, 
+              'bg-white text-gray-600 border-gray-300 hover:bg-gray-50': categoriaActiva !== tab
+            }"
+            (click)="cambiarPestana(tab)">
+            {{ tab }}
+          </button>
+        </div>
+        <span class="text-sm text-gray-400">{{ totalEntradas }} Entradas</span>
+      </div>
+
+      <!-- Estado de Carga -->
+      <div *ngIf="cargando" class="text-center py-10 text-gray-500">
+        Cargando eventos del historial...
+      </div>
+
+      <!-- Sin Eventos -->
+      <div *ngIf="!cargando && historial.length === 0" class="text-center py-10 text-gray-500 bg-white border border-gray-200 rounded-lg shadow-sm">
+        No se encontraron registros en la categoría seleccionada.
+      </div>
+
+      <!-- Línea de Tiempo (Timeline) -->
+      <div class="timeline" *ngIf="!cargando && historial.length > 0">
+        <div class="timeline-item" *ngFor="let item of historial">
+          
+          <!-- Indicador visual (punto en la línea) -->
+          <div class="timeline-marker"></div>
+
+          <!-- Tarjeta del Evento -->
+          <div class="timeline-card bg-white border border-gray-200 shadow-sm rounded-lg p-5 w-full">
+            <div class="card-header flex justify-between items-start mb-2">
+              <h3 class="card-title text-lg font-medium text-gray-900">{{ item.titulo_evento }}</h3>
+              <span class="badge px-3 py-1 text-xs text-white rounded bg-[#4a1525]">
+                {{ item.categoria_evento }}
+              </span>
+            </div>
+
+            <div class="card-meta text-xs text-gray-500 mb-3 flex items-center gap-2" style="font-family: DM Sans;">
+              <span>{{ item.fecha_modificacion | date:'d MMM yyyy · HH:mm' }} hrs</span>
+              <span class="dot">•</span>
+              <span>{{ item.autor?.nombre || 'Sistema' }}</span>
+            </div>
+
+            <p class="card-description text-sm text-gray-700 texto-sec">
+              {{ item.descripcion }}
+            </p>
+          </div>
+          
+        </div>
+      </div>
+      <!-- Controles de Paginación -->
+<div class="flex items-center justify-between border-t border-gray-200 px-4 py-3 sm:px-6 mt-6" *ngIf="totalPaginas > 1">
+  <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+    <div>
+      <p class="text-sm text-gray-700">
+        Mostrando página <span class="font-medium">{{ paginaActual }}</span> de <span class="font-medium">{{ totalPaginas }}</span>
+        (Total: {{ totalEntradas }} registros)
+      </p>
+    </div>
+    <div>
+      <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+        
+        <!-- Botón Anterior -->
+        <button 
+          (click)="paginaAnterior()" 
+          [disabled]="paginaActual === 1"
+          [ngClass]="{'opacity-50 cursor-not-allowed': paginaActual === 1}"
+          class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+          <span class="sr-only">Anterior</span>
+          <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
+          </svg>
+        </button>
+
+        <!-- Indicador estático (opcional si prefieres botones numéricos) -->
+        <span class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 focus:outline-offset-0">
+          {{ paginaActual }}
+        </span>
+
+        <!-- Botón Siguiente -->
+        <button 
+          (click)="paginaSiguiente()" 
+          [disabled]="paginaActual === totalPaginas"
+          [ngClass]="{'opacity-50 cursor-not-allowed': paginaActual === totalPaginas}"
+          class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+          <span class="sr-only">Siguiente</span>
+          <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+          </svg>
+        </button>
+
+      </nav>
+    </div>
+  </div>
+</div>
+      
+
+    </div>
+  </div>
+</div>

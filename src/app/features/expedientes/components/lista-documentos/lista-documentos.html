@@ -1,11 +1,9 @@
 <div class="min-h-screen bg-[#f8f7f5] font-sans custom-font relative flex flex-col">
   
   <app-shared-header 
-    titulo="Documentos del Expediente" 
-    subtitulo="EXP-2026-0142 • Grupo Empresarial Vidal S.A.">
-    
-    <!-- Botones proyectados hacia la derecha -->
-    <a [routerLink]="['/expedientes', expedienteId]" class="text-gray-500 hover:text-gray-800 flex items-center gap-2 text-sm transition-colors cursor-pointer mr-2">
+  titulo="Documentos del Expediente" 
+  [subtitulo]="subtituloDinamico">    
+    <a [routerLink]="['/expedientes', ]" class="text-gray-500 hover:text-gray-800 flex items-center gap-2 text-sm transition-colors cursor-pointer mr-2">
       <ng-icon name="heroArrowLeft"></ng-icon>
       Volver al Expediente
     </a>
@@ -13,26 +11,25 @@
       <ng-icon name="heroPlus"></ng-icon>
       Subir Documento
     </a>
-    
   </app-shared-header>
 
-  <!-- Contenedor Principal del Contenido (le ponemos el padding p-8 aquí) -->
   <div class="p-8">
-    
-    <!-- Caja Blanca Principal (Buscador y Tabla) -->
-    <div class="bg-white border border-gray-200">
-
-  <!-- Caja Blanca Principal -->
   <div class="bg-white border border-gray-200">
     
-    <!-- Buscador -->
     <div class="p-6 border-b border-gray-200 flex justify-between items-center">
-      <input 
-        type="text" 
-        [(ngModel)]="terminoBusqueda" 
-        placeholder="Buscar documento..." 
-        class="w-1/3 border border-gray-300 p-2 text-sm focus:outline-none focus:border-[#d4b88c]">
-      <span class="text-sm text-gray-400">{{ documentosFiltrados.length }} Resultados</span>
+      <div class="relative w-1/3">
+        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+          <ng-icon name="heroMagnifyingGlass" class="text-[1.1rem]"></ng-icon>
+        </div>
+    
+        <input 
+          type="text" 
+          [ngModel]="terminoBusqueda" 
+          (ngModelChange)="onSearchChange($event)"
+          placeholder="Buscar documento..." 
+          class="w-full border border-gray-300 py-2 pl-10 pr-3 text-sm focus:outline-none focus:border-[#d4b88c] transition-colors">
+      </div>
+      <span class="text-sm text-gray-400">{{ totalEntradas }} Resultados</span>
     </div>
 
     <!-- Tabla de Documentos -->
@@ -49,7 +46,7 @@
         </thead>
         <tbody class="divide-y divide-gray-100">
           
-          <tr *ngFor="let doc of documentosFiltrados" class="hover:bg-gray-50 transition-colors group">
+          <tr *ngFor="let doc of documentos" class="hover:bg-gray-50 transition-colors group">
             <td class="py-4 pl-8 pr-4 flex items-center gap-3">
               <div class="bg-red-50 text-red-400 p-1.5 rounded">
                 <ng-icon name="heroDocumentText"></ng-icon>
@@ -86,7 +83,7 @@
           </tr>
 
           <!-- Mensaje si no hay documentos -->
-          <tr *ngIf="documentosFiltrados.length === 0">
+          <tr *ngIf="documentos.length === 0">
             <td colspan="5" class="p-8 text-center text-gray-500">
               No se encontraron documentos.
             </td>
@@ -94,6 +91,54 @@
 
         </tbody>
       </table>
+    </div>
+    <!-- Controles de Paginación -->
+<div class="flex items-center justify-between border-t border-gray-200 px-4 py-3 sm:px-6 mt-6" *ngIf="totalPaginas > 1">
+  <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+    <div>
+      <p class="text-sm text-gray-700">
+        Mostrando página <span class="font-medium">{{ paginaActual }}</span> de <span class="font-medium">{{ totalPaginas }}</span>
+        (Total: {{ totalEntradas }} registros)
+      </p>
+    </div>
+    <div>
+      <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+        
+        <!-- Botón Anterior -->
+        <button 
+          (click)="paginaAnterior()" 
+          [disabled]="paginaActual === 1"
+          [ngClass]="{'opacity-50 cursor-not-allowed': paginaActual === 1}"
+          class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+          <span class="sr-only">Anterior</span>
+          <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
+          </svg>
+        </button>
+
+        <!-- Indicador estático (opcional si prefieres botones numéricos) -->
+        <span class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 focus:outline-offset-0">
+          {{ paginaActual }}
+        </span>
+
+        <!-- Botón Siguiente -->
+        <button 
+          (click)="paginaSiguiente()" 
+          [disabled]="paginaActual === totalPaginas"
+          [ngClass]="{'opacity-50 cursor-not-allowed': paginaActual === totalPaginas}"
+          class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+          <span class="sr-only">Siguiente</span>
+          <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+          </svg>
+        </button>
+
+      </nav>
+    </div>
+  </div>
+</div>
+      
+
     </div>
   </div>
 

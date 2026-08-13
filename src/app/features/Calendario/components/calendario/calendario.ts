@@ -1,10 +1,12 @@
 import {
   Component,
   OnInit,
-  ChangeDetectorRef
+  ChangeDetectorRef,
+  Inject,
+  PLATFORM_ID
 } from '@angular/core';
 
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { FullCalendarModule } from '@fullcalendar/angular';
@@ -17,12 +19,15 @@ import {
 
 import dayGridPlugin from '@fullcalendar/daygrid';
 import esLocale from '@fullcalendar/core/locales/es';
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { heroPlus, heroMagnifyingGlass } from '@ng-icons/heroicons/outline';
 
 import { CitaService } from '../../../../core/services/cita.service';
 import type { Cita } from '../../../../core/services/cita.service';
 
 import { AuthService } from '../../../../core/services/auth.service';
 import { ExpedienteService, Expediente } from '../../../../core/services/expediente';
+import { SharedHeader } from '../../../../shared/components/shared-header/shared-header';
 
 
 @Component({
@@ -32,8 +37,11 @@ import { ExpedienteService, Expediente } from '../../../../core/services/expedie
   imports: [
     CommonModule,
     FormsModule,
-    FullCalendarModule
+    FullCalendarModule,
+    SharedHeader,
+    NgIconComponent
   ],
+  viewProviders: [provideIcons({ heroPlus, heroMagnifyingGlass })],
 
   templateUrl: './calendario.html',
   styleUrl: './calendario.css'
@@ -45,22 +53,23 @@ export class Calendario implements OnInit {
     private citaService: CitaService,
     private authService: AuthService,
     private cdr: ChangeDetectorRef,
-    private expedienteService: ExpedienteService 
-  ) {}
-
+    private expedienteService: ExpedienteService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
+    this.esNavegador = isPlatformBrowser(this.platformId);
+  }
 
   // Variables
 
   modalNuevaCitaAbierto = false;
-
   modoEdicion = false;
-
   idCitaEditando: string | null = null;
-
   citas: Cita[] = [];
-
   citaSeleccionada: Cita | null = null;
   expedientes: Expediente[] = [];
+  esNavegador: boolean = false;
+  terminoBusqueda: string = '';
+  filtroDias: number = 30;
 
 
   // Usuario actual
@@ -74,6 +83,18 @@ export class Calendario implements OnInit {
 
   get esAdministrador(): boolean {
     return this.usuarioActual?.rol === 'Administrador';
+  }
+
+  // Obtener mes y año actuales dinámicamente para el subtítulo
+  get mesAnioActual(): string {
+    const fecha = new Date();
+    
+    // Obtenemos el mes en texto (ej. "julio")
+    const mes = fecha.toLocaleDateString('es-ES', { month: 'long' });
+    const anio = fecha.getFullYear();
+    
+    // Capitalizamos la primera letra y unimos con el año
+    return `${mes.charAt(0).toUpperCase() + mes.slice(1)} de ${anio}`;
   }
 
 
@@ -192,113 +213,76 @@ export class Calendario implements OnInit {
   // Inicio
 
   ngOnInit(): void {
-
+    this.cargarExpedientes();
     this.cargarCitas();
-    this.cargarExpedientes(); // <-- ¡Esto faltaba!
-
   }
 
 
   // Cargar citas
-
   cargarCitas(): void {
-
     console.log('CARGANDO CITAS DESDE ANGULAR...');
-
     this.citaService.obtenerCitas().subscribe({
-
       next: (citas: Cita[]) => {
-
-        console.log(
-          'CITAS RECIBIDAS EN ANGULAR:',
-          citas
-        );
-
-        console.log(
-          'CANTIDAD DE CITAS:',
-          citas.length
-        );
-
+        // Guardamos todas las citas originales
         this.citas = citas;
-
-
-        const eventos: EventInput[] =
-          citas.map((cita) => {
-
-            let color = '#4CAF50';
-
-
-            if (cita.tipo_cita === 'Reunión') {
-
-              color = '#2196F3';
-
-            }
-
-            else if (cita.tipo_cita === 'Trámite') {
-
-              color = '#FF9800';
-
-            }
-
-            else if (cita.tipo_cita === 'Audiencia') {
-
-              color = '#4CAF50';
-
-            }
-
-
-            const fecha =
-              cita.fecha.split('T')[0];
-
-
-            return {
-
-              id: cita.id_cita ?? '',
-
-              title: cita.titulo,
-
-              start: fecha,
-
-              allDay: true,
-
-              color: color
-
-            };
-
-          });
-
-
-        console.log(
-          'EVENTOS PARA FULLCALENDAR:',
-          eventos
-        );
-
-
-        this.calendarOptions = {
-
-          ...this.calendarOptions,
-
-          events: eventos
-
-        };
-
-
-        this.cdr.detectChanges();
-
+        
+        // Llamamos a la función que dibuja el calendario (y aplica filtros si los hay)
+        this.actualizarEventosCalendario();
       },
-
-
       error: (error) => {
-
-        console.error(
-          'ERROR AL CARGAR CITAS EN ANGULAR:',
-          error
-        );
-
+        console.error('ERROR AL CARGAR CITAS EN ANGULAR:', error);
       }
+    });
+  }
 
+  // Filtrar y dibujar eventos en el calendario
+  actualizarEventosCalendario(): void {
+    const termino = this.terminoBusqueda.toLowerCase().trim();
+
+    // 1. Filtramos la lista de citas basándonos en el texto
+    const citasFiltradas = this.citas.filter(cita => {
+      if (!termino) return true; // Si no hay búsqueda, pasan todas
+
+      const numeroExpediente = this.obtenerNumeroExpediente(cita.id_expediente).toLowerCase();
+      // Buscamos si el número de expediente incluye lo que escribió el usuario
+      return numeroExpediente.includes(termino);
     });
 
+    // 2. Mapeamos las citas filtradas para FullCalendar
+    const eventos: EventInput[] = citasFiltradas.map((cita) => {
+      let color = '#4CAF50'; // Color por defecto (Audiencia)
+
+      if (cita.tipo_cita === 'Reunión') {
+        color = '#2196F3';
+      } else if (cita.tipo_cita === 'Trámite') {
+        color = '#FF9800';
+      }
+
+      const fecha = cita.fecha.split('T')[0];
+      const numeroExpediente = this.obtenerNumeroExpediente(cita.id_expediente);
+      const tituloMostrar = cita.id_expediente ? numeroExpediente : cita.titulo;
+
+      return {
+        id: cita.id_cita ?? '',
+        title: tituloMostrar,
+        start: fecha,
+        allDay: true,
+        color: color
+      };
+    });
+
+    // 3. Actualizamos el calendario
+    this.calendarOptions = {
+      ...this.calendarOptions,
+      events: eventos
+    };
+
+    this.cdr.detectChanges();
+  }
+
+  // Método que se dispara cada vez que el usuario escribe en el input
+  filtrarCitas(): void {
+    this.actualizarEventosCalendario();
   }
 
  cargarExpedientes(): void {
@@ -319,75 +303,53 @@ export class Calendario implements OnInit {
           this.expedientes = [];
         }
 
-        this.cdr.detectChanges();
+        // 👇 AHORA SÍ, CARGAMOS LAS CITAS 👇
+        this.cargarCitas();
       },
       error: (error) => {
         console.error('ERROR AL CARGAR EXPEDIENTES:', error);
+        // Si hay error, cargamos las citas de todos modos para no dejar el calendario en blanco
+        this.cargarCitas();
       }
     });
   }
 
 
-  // Próximas citas
-
+ // Próximas citas
   get proximasCitas(): Cita[] {
-
     const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    
+    // 👇 Calculamos el límite dinámicamente según lo que seleccione el usuario
+    const fechaLimite = new Date(hoy);
+    // Aseguramos que se trate como número sumándolo
+    fechaLimite.setDate(fechaLimite.getDate() + Number(this.filtroDias)); 
+    fechaLimite.setHours(23, 59, 59, 999);
 
-    hoy.setHours(
-      0,
-      0,
-      0,
-      0
-    );
-
+    const termino = this.terminoBusqueda.toLowerCase().trim();
 
     return this.citas
-
       .filter((cita) => {
+        const fecha = cita.fecha.split('T')[0];
+        const [anio, mes, dia] = fecha.split('-').map(Number);
+        const fechaCita = new Date(anio, mes - 1, dia);
 
-        const fecha =
-          cita.fecha.split('T')[0];
+        // Filtro por texto
+        let coincideBusqueda = true;
+        if (termino) {
+          const numeroExpediente = this.obtenerNumeroExpediente(cita.id_expediente).toLowerCase();
+          coincideBusqueda = numeroExpediente.includes(termino);
+        }
 
-
-        const [anio, mes, dia] =
-          fecha
-            .split('-')
-            .map(Number);
-
-
-        const fechaCita =
-          new Date(
-            anio,
-            mes - 1,
-            dia
-          );
-
-
-        return fechaCita >= hoy;
-
+        // Filtro por fecha (Entre hoy y el rango seleccionado)
+        return fechaCita >= hoy && fechaCita <= fechaLimite && coincideBusqueda;
       })
-
       .sort((a, b) => {
-
-        const fechaA =
-          a.fecha.split('T')[0];
-
-        const fechaB =
-          b.fecha.split('T')[0];
-
-
-        return fechaA.localeCompare(
-          fechaB
-        );
-
+        const fechaA = a.fecha.split('T')[0];
+        const fechaB = b.fecha.split('T')[0];
+        return fechaA.localeCompare(fechaB);
       })
-
-      .slice(
-        0,
-        4
-      );
-
+      .slice(0, 4); // Mantiene el máximo de 4 citas en la vista
   }
 
 
@@ -970,4 +932,17 @@ export class Calendario implements OnInit {
 
   }
 
+  // Obtener número de expediente visualmente a partir del ID
+  obtenerNumeroExpediente(idExpediente: string | null | undefined): string {
+    if (!idExpediente) {
+      return 'Sin expediente asociado';
+    }
+
+    const expedienteEncontrado = this.expedientes.find(
+      (exp) => exp.id_expediente === idExpediente
+    );
+
+    return expedienteEncontrado ? expedienteEncontrado.numero_expediente : 'Expediente no encontrado';
+  }
 }
+

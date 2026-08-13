@@ -1,0 +1,259 @@
+<div class="p-6 bg-gray-50 min-h-screen">
+
+  <!-- Cargando -->
+  <div
+    *ngIf="cargando"
+    class="flex justify-center items-center py-20"
+  >
+    <p class="text-gray-500 text-lg">
+      Cargando expediente...
+    </p>
+  </div>
+
+  <!-- Error -->
+  <div
+    *ngIf="!cargando && error"
+    class="bg-red-50 border border-red-200 rounded-lg p-6"
+  >
+    <h2 class="text-xl font-bold text-red-700 mb-2">
+      No se pudo cargar el expediente
+    </h2>
+
+    <p class="text-red-600">
+      {{ error }}
+    </p>
+
+    <a
+      routerLink="/expedientes"
+      class="inline-block mt-4 px-4 py-2 bg-[#4B1623] text-white rounded-lg"
+    >
+      Volver a expedientes
+    </a>
+  </div>
+
+  <!-- Detalle del expediente -->
+  <div
+    *ngIf="!cargando && expediente"
+    class="max-w-6xl mx-auto"
+  >
+
+    <!-- Encabezado -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+
+      <div class="flex justify-between items-start gap-4">
+
+        <div>
+          <p class="text-sm text-gray-500 mb-1">
+            Expediente
+          </p>
+
+          <h1 class="text-3xl font-bold text-[#4B1623]">
+            {{ expediente.numero_expediente }}
+          </h1>
+
+          <p class="text-gray-500 mt-2">
+            {{ expediente.materia }}
+          </p>
+        </div>
+
+        <span
+          class="px-4 py-2 rounded-full text-sm font-semibold bg-gray-100 text-gray-700"
+        >
+          {{ expediente.estado }}
+        </span>
+
+      </div>
+    </div>
+
+
+    <!-- Información principal -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <!-- Datos del expediente -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+
+        <h2 class="text-xl font-bold text-[#4B1623] mb-5">
+          Información del expediente
+        </h2>
+
+        <div class="space-y-4">
+
+          <div>
+            <p class="text-sm text-gray-500">
+              Número de expediente
+            </p>
+
+            <p class="font-medium text-gray-800">
+              {{ expediente.numero_expediente }}
+            </p>
+          </div>
+
+          <div>
+            <p class="text-sm text-gray-500">
+              Materia
+            </p>
+
+            <p class="font-medium text-gray-800">
+              {{ expediente.materia }}
+            </p>
+          </div>
+
+          <div>
+            <p class="text-sm text-gray-500">
+              Tribunal / Juzgado
+            </p>
+
+            <p class="font-medium text-gray-800">
+              {{ expediente.tribunal_juzgado }}
+            </p>
+          </div>
+
+          <div>
+            <p class="text-sm text-gray-500">
+              Juez / Cargo
+            </p>
+
+            <p class="font-medium text-gray-800">
+              {{ expediente.juez_cargo || 'No especificado' }}
+            </p>
+          </div>
+
+          <div>
+            <p class="text-sm text-gray-500">
+              Cuantía del litigio
+            </p>
+
+            <p class="font-medium text-gray-800">
+              {{ expediente.cuantia_litigio || 'No especificada' }}
+            </p>
+          </div>
+
+          <div>
+            <p class="text-sm text-gray-500">
+              Fecha de apertura
+            </p>
+
+            <p class="font-medium text-gray-800">
+              {{ expediente.fecha_apertura | date:'dd/MM/yyyy' }}
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- Cliente -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+
+        <h2 class="text-xl font-bold text-[#4B1623] mb-5">
+          Cliente
+        </h2>
+
+        <div *ngIf="expediente.cliente; else sinCliente">
+
+          <div class="space-y-4">
+
+            <div>
+              <p class="text-sm text-gray-500">
+                Nombre
+              </p>
+
+              <p class="font-medium text-gray-800">
+                {{ expediente.cliente.nombre }}
+              </p>
+            </div>
+
+            <div>
+              <p class="text-sm text-gray-500">
+                Correo
+              </p>
+
+              <p class="font-medium text-gray-800">
+                {{ expediente.cliente.correo }}
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
+        <ng-template #sinCliente>
+          <p class="text-gray-500">
+            No hay información del cliente.
+          </p>
+        </ng-template>
+
+      </div>
+
+    </div>
+
+
+    <!-- Descripción de hechos -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-6">
+
+      <h2 class="text-xl font-bold text-[#4B1623] mb-4">
+        Descripción de los hechos
+      </h2>
+
+      <p class="text-gray-700 leading-relaxed whitespace-pre-line">
+        {{ expediente.descripcion_hechos }}
+      </p>
+
+    </div>
+
+
+    <!-- Equipo asignado -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-6">
+
+      <h2 class="text-xl font-bold text-[#4B1623] mb-5">
+        Equipo asignado
+      </h2>
+
+      <div
+        *ngIf="expediente.equipo?.length; else sinEquipo"
+        class="space-y-3"
+      >
+
+        <div
+          *ngFor="let integrante of expediente.equipo"
+          class="border border-gray-200 rounded-lg p-4"
+        >
+
+          <p class="font-semibold text-gray-800">
+            {{ integrante.user?.nombre || 'Usuario' }}
+          </p>
+
+          <p class="text-sm text-gray-500">
+            {{ integrante.user?.rol || 'Sin rol' }}
+          </p>
+
+        </div>
+
+      </div>
+
+      <ng-template #sinEquipo>
+        <p class="text-gray-500">
+          No hay integrantes asignados.
+        </p>
+      </ng-template>
+
+    </div>
+
+
+    <!-- Botón volver -->
+    <div class="mt-6">
+
+      <a
+        routerLink="/expedientes"
+        class="inline-block px-5 py-3 bg-[#4B1623] text-white rounded-lg hover:opacity-90"
+      >
+        ← Volver a expedientes
+      </a>
+
+    </div>
+
+  </div>
+
+</div>
+
