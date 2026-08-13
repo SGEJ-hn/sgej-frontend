@@ -1,259 +1,326 @@
-<div class="p-6 bg-gray-50 min-h-screen">
+<div class="min-h-screen bg-[#f8f7f5] font-sans custom-font relative flex flex-col">
+  
+  <!-- =============================== -->
+  <!-- HEADER COMPARTIDO               -->
+  <!-- =============================== -->
+  <app-shared-header 
+    [titulo]="'Expediente ' + (expediente?.numero_expediente || 'Cargando...')" 
+    [subtitulo]="obtenerNombreDemandante()">
+    
+    <!-- Botón Volver -->
+    <a [routerLink]="['/expedientes']" class="text-gray-500 hover:text-gray-800 flex items-center gap-2 text-sm transition-colors cursor-pointer mr-4">
+      <ng-icon name="heroArrowLeft"></ng-icon>
+      Volver a Expedientes
+    </a>
+    
+    <!-- Botón Editar -->
+    <button *ngIf="expediente" (click)="abrirModalEditar()" class="px-4 py-1.5 bg-[#4a1525] hover:bg-[#38101c] text-white text-xs font-medium rounded flex items-center gap-2 transition-colors cursor-pointer">
+      <ng-icon name="heroPencilSquare"></ng-icon>
+      Editar
+    </button>
+  </app-shared-header>
 
-  <!-- Cargando -->
-  <div
-    *ngIf="cargando"
-    class="flex justify-center items-center py-20"
-  >
-    <p class="text-gray-500 text-lg">
-      Cargando expediente...
-    </p>
+  <!-- =============================== -->
+  <!-- CONTENIDO PRINCIPAL             -->
+  <!-- =============================== -->
+  <div class="p-8 space-y-6">
+    
+    <!-- Mensaje de Error -->
+    <div *ngIf="error" class="bg-red-50 border border-red-200 text-red-700 p-6 rounded text-center mb-6">
+      <p class="font-semibold">{{ error }}</p>
+      <button (click)="ngOnInit()" class="mt-4 px-4 py-2 bg-[#4a1525] text-white rounded text-sm hover:bg-[#38101c] transition-colors">
+        Reintentar
+      </button>
+    </div>
+
+    <!-- Spinner de carga (opcional) -->
+    <div *ngIf="cargando" class="flex justify-center items-center py-20">
+      <p class="text-gray-500">Cargando información del expediente...</p>
+    </div>
+
+    <!-- Contenedor Principal -->
+    <ng-container *ngIf="expediente && !cargando">
+      
+      <!-- 1. TARJETA SUPERIOR: Resumen Principal -->
+      <div class="bg-white border border-gray-200 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <div class="flex items-center gap-3">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#4a1525]"></span>
+            <h2 class="text-xl text-gray-800">{{ obtenerNombreDemandante() }}</h2>
+            <span class="px-2 py-0.5 text-xs font-medium border rounded text-green-600 bg-green-50 border-green-200">
+              {{ expediente.estado || 'Activo' }}
+            </span>
+          </div>
+          <div class="flex items-center gap-3 mt-3 text-sm text-gray-500">
+            <span>{{ expediente.materia }}</span>
+            <span class="w-1 h-1 rounded-full bg-[#4a1525]"></span>
+            <span>{{ expediente.tribunal_juzgado || 'Sin tribunal asignado' }}</span>
+            <span class="w-1 h-1 rounded-full bg-[#4a1525]"></span>
+            <span>Apertura: {{ expediente.fecha_apertura | date:'d MMMM yyyy' }}</span>
+          </div>
+        </div>
+        <div class="flex gap-3">
+          <a [routerLink]="['/expedientes', expediente.id_expediente, 'historial']" class="bg-[#4a1525] hover:bg-[#38101c] text-white px-4 py-2 text-sm flex items-center gap-2 transition-colors cursor-pointer rounded-sm">
+            <ng-icon name="heroClock"></ng-icon> Historial
+          </a>
+          <a [routerLink]="['/expedientes', expediente.id_expediente, 'documentos']" class="bg-[#4a1525] hover:bg-[#38101c] text-white px-4 py-2 text-sm flex items-center gap-2 transition-colors cursor-pointer rounded-sm">
+            <ng-icon name="heroDocumentText"></ng-icon> Documentos
+          </a>
+        </div>
+      </div>
+
+      <!-- 2. GRID PRINCIPAL (3 Columnas) -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- =============================== -->
+        <!-- COLUMNA IZQUIERDA (2/3)         -->
+        <!-- =============================== -->
+        <div class="lg:col-span-2 space-y-6">
+          
+          <!-- Descripción del Caso -->
+          <div class="bg-white border border-gray-200 p-6">
+            <h3 class="text-gray-500 text-[14px] font-medium border-l-2 border-[#4a1525] pl-2 mb-4">Descripción del Caso</h3>
+            <p class="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap ml-3">
+              {{ expediente.descripcion_hechos || 'No se ha registrado una descripción detallada de los hechos para este caso.' }}
+            </p>
+          </div>
+
+          <!-- Información Judicial -->
+          <div class="bg-white border border-gray-200 p-6">
+            <h3 class="text-gray-500 text-sm font-medium border-l-2 border-[#4a1525] pl-2 mb-6">Información Judicial</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8 ml-3">
+              <div>
+                <p class="text-xs text-gray-400 mb-1 texto-sec">Tribunal</p>
+                <p class="text-sm  text-gray-800">{{ expediente.tribunal_juzgado || 'No asignado' }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-400 mb-1 texto-sec">Juez a Cargo</p>
+                <p class="text-sm  text-gray-800">{{ expediente.juez_cargo || 'No asignado' }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-400 mb-1 texto-sec">Abogado Titular</p>
+                <p class="text-sm  text-gray-800">
+                  {{ expediente.equipo?.[0]?.user?.nombre || expediente.equipo?.[0]?.usuario?.nombre || 'Pendiente de asignación' }}
+                </p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-400 mb-1 texto-sec">Cuantía del litigio</p>
+                <p class="text-sm  text-gray-800">
+                  {{ expediente.cuantia_litigio ? (expediente.cuantia_litigio | currency:'USD':'symbol':'1.2-2') : 'No aplicable' }}
+                </p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-400 mb-1 texto-sec">Fecha de Apertura</p>
+                <p class="text-sm  text-gray-800">{{ expediente.fecha_apertura | date:'d MMMM yyyy' }}</p>
+              </div>
+              <div>
+                <p class="text-xs text-gray-400 mb-1 texto-sec">Próxima cita</p>
+                <p class="text-sm  text-gray-800">
+                  {{ expediente.proxima_cita ? (expediente.proxima_cita | date:'d MMMM yyyy') : 'Pendiente de agendar' }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Partes Involucradas (Demandante / Demandado) -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div *ngFor="let parte of obtenerPartes()" class="bg-white border border-gray-200 p-6 flex flex-col">
+              <h3 class="text-gray-500 text-sm font-medium border-l-2 border-[#4a1525] pl-2 mb-4">{{ parte.clasificacion || 'Parte' }}</h3>
+              
+              <div class="flex items-start gap-4 ml-3">
+                <!-- Avatar Circular (Iniciales) -->
+                <div class="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-light text-sm shrink-0"
+                     [ngClass]="{'bg-[#6c8ab7]': parte.clasificacion === 'Demandante', 'bg-[#7ebc79]': parte.clasificacion === 'Demandado'}">
+                  {{ parte.nombre_completo | slice:0:2 | uppercase }}
+                </div>
+                
+                <div class="w-full">
+                  <p class="text-sm  text-gray-900">{{ parte.nombre_completo }}</p>
+                  <p class="text-xs text-gray-400 mb-4 texto-sec">{{ parte.tipo_persona || 'Persona Jurídica' }}</p>
+                  
+                  <div class="space-y-2 mt-2 border-t border-gray-100 pt-3">
+                    <p class="text-[12px] text-gray-500 flex items-center gap-2 texto-sec" *ngIf="parte.identificacion">
+                      <span class="text-gray-400">ID:</span> {{ parte.identificacion }}
+                    </p>
+                    <p class="text-[12px] text-gray-500 flex items-center gap-2 texto-sec" *ngIf="parte.correo_contacto">
+                      <span class="text-gray-400">✉</span> {{ parte.correo_contacto }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Fallback visual si no hay partes para mantener el prototipo -->
+            <div *ngIf="obtenerPartes().length === 0" class="bg-white border border-gray-200 p-6 text-center text-gray-400 flex flex-col justify-center items-center min-h-37.5 col-span-2">
+              <ng-icon name="heroUsers" class="text-3xl mb-2"></ng-icon>
+              <p class="text-sm">No hay partes registradas en este expediente.</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- =============================== -->
+        <!-- COLUMNA DERECHA (1/3)           -->
+        <!-- =============================== -->
+        <div class="space-y-6">
+          
+          <div class="bg-white border border-gray-200 p-6">
+            <h3 class="text-gray-500 text-sm font-medium border-l-2 border-[#4a1525] pl-2 mb-6">Actividad reciente</h3>
+            <ul class="space-y-5 ml-3" *ngIf="actividadesRecientes.length > 0; else sinActividad">
+              <li *ngFor="let actividad of actividadesRecientes">
+                <div class="flex items-center gap-2">
+                  <span class="w-1.5 h-1.5 rounded-full bg-[#4a1525]"></span>
+                  <p class="text-[14px]  text-gray-800">{{ actividad.titulo_evento }}</p>
+                </div>
+                <!-- Usamos el pipe date para formatear la fecha dinámicamente -->
+                <p class="text-[12px] text-gray-400 ml-3.5 mt-0.5 texto-sec">{{ actividad.fecha_modificacion | date:'d MMMM yyyy' }}</p>
+              </li>
+            </ul>
+
+            <!-- Mensaje por si no hay historial -->
+            <ng-template #sinActividad>
+              <div class="ml-3 text-sm text-gray-400 py-2">
+                No hay actividad reciente registrada en este caso.
+              </div>
+            </ng-template>
+          </div>
+
+          <!-- Equipo Asignado -->
+          <div class="bg-white border border-gray-200 p-6">
+            <h3 class="text-gray-500 text-sm font-medium border-l-2 border-[#4a1525] pl-2 mb-6">Equipo Asignado</h3>
+            
+            <ul class="space-y-5 ml-3">
+              <li *ngFor="let miembro of expediente.equipo; let i = index" class="flex items-center gap-4">
+                
+                <!-- Colores alternados para los avatares -->
+                <div class="w-9 h-9 rounded-full text-white flex items-center justify-center text-sm font-light shrink-0"
+                     [ngClass]="{
+                       'bg-[#198754]': i % 3 === 0, 
+                       'bg-[#4a1525]': i % 3 === 1, 
+                       'bg-[#a35e65]': i % 3 === 2
+                     }">
+                  {{ (miembro.user?.nombre || miembro.usuario?.nombre || 'X') | slice:0:2 | uppercase }}
+                </div>
+                
+                <div>
+                    <p class="text-sm text-gray-900">{{ miembro.user?.nombre || miembro.usuario?.nombre || 'Desconocido' }}</p>
+                  <p class="text-xs text-gray-400">{{ miembro.rol_en_caso || 'Asignado' }}</p>
+                </div>
+              </li>
+
+              <li *ngIf="!expediente.equipo || expediente.equipo.length === 0" class="text-center text-xs text-gray-400 py-4">
+                No hay equipo legal asignado.
+              </li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </ng-container>
   </div>
-
-  <!-- Error -->
-  <div
-    *ngIf="!cargando && error"
-    class="bg-red-50 border border-red-200 rounded-lg p-6"
-  >
-    <h2 class="text-xl font-bold text-red-700 mb-2">
-      No se pudo cargar el expediente
+  <!-- =============================== -->
+<!-- MODAL DE EDICIÓN DE EXPEDIENTE  -->
+<!-- =============================== -->
+<div *ngIf="mostrarModalEdicion" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-lg w-full max-w-2xl p-6 shadow-xl border border-gray-200 max-h-[90vh] overflow-y-auto">
+    
+    <!-- Encabezado del Modal -->
+    <h2 class="text-xl text-gray-900 border-l-[3px] border-[#4a1525] pl-3 mb-6 font-semibold">
+      Editar Expediente {{ expediente?.numero_expediente }}
     </h2>
 
-    <p class="text-red-600">
-      {{ error }}
-    </p>
-
-    <a
-      routerLink="/expedientes"
-      class="inline-block mt-4 px-4 py-2 bg-[#4B1623] text-white rounded-lg"
-    >
-      Volver a expedientes
-    </a>
-  </div>
-
-  <!-- Detalle del expediente -->
-  <div
-    *ngIf="!cargando && expediente"
-    class="max-w-6xl mx-auto"
-  >
-
-    <!-- Encabezado -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-
-      <div class="flex justify-between items-start gap-4">
-
-        <div>
-          <p class="text-sm text-gray-500 mb-1">
-            Expediente
-          </p>
-
-          <h1 class="text-3xl font-bold text-[#4B1623]">
-            {{ expediente.numero_expediente }}
-          </h1>
-
-          <p class="text-gray-500 mt-2">
-            {{ expediente.materia }}
-          </p>
-        </div>
-
-        <span
-          class="px-4 py-2 rounded-full text-sm font-semibold bg-gray-100 text-gray-700"
-        >
-          {{ expediente.estado }}
-        </span>
-
-      </div>
-    </div>
-
-
-    <!-- Información principal -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-      <!-- Datos del expediente -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-
-        <h2 class="text-xl font-bold text-[#4B1623] mb-5">
-          Información del expediente
-        </h2>
-
-        <div class="space-y-4">
-
-          <div>
-            <p class="text-sm text-gray-500">
-              Número de expediente
-            </p>
-
-            <p class="font-medium text-gray-800">
-              {{ expediente.numero_expediente }}
-            </p>
-          </div>
-
-          <div>
-            <p class="text-sm text-gray-500">
-              Materia
-            </p>
-
-            <p class="font-medium text-gray-800">
-              {{ expediente.materia }}
-            </p>
-          </div>
-
-          <div>
-            <p class="text-sm text-gray-500">
-              Tribunal / Juzgado
-            </p>
-
-            <p class="font-medium text-gray-800">
-              {{ expediente.tribunal_juzgado }}
-            </p>
-          </div>
-
-          <div>
-            <p class="text-sm text-gray-500">
-              Juez / Cargo
-            </p>
-
-            <p class="font-medium text-gray-800">
-              {{ expediente.juez_cargo || 'No especificado' }}
-            </p>
-          </div>
-
-          <div>
-            <p class="text-sm text-gray-500">
-              Cuantía del litigio
-            </p>
-
-            <p class="font-medium text-gray-800">
-              {{ expediente.cuantia_litigio || 'No especificada' }}
-            </p>
-          </div>
-
-          <div>
-            <p class="text-sm text-gray-500">
-              Fecha de apertura
-            </p>
-
-            <p class="font-medium text-gray-800">
-              {{ expediente.fecha_apertura | date:'dd/MM/yyyy' }}
-            </p>
-          </div>
-
-        </div>
-
+    <!-- Formulario de Campos -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+      
+      <!-- Materia -->
+      <div>
+        <label class="block text-gray-700 font-medium mb-1">Materia</label>
+        <input 
+          type="text" 
+          [(ngModel)]="expedienteEdicion.materia" 
+          class="w-full border border-gray-300 p-2 text-sm rounded focus:outline-none focus:border-[#d4b88c]">
       </div>
 
+      <!-- Estado -->
+      <div>
+        <label class="block text-gray-700 font-medium mb-1">Estado</label>
+        <select 
+          [(ngModel)]="expedienteEdicion.estado" 
+          class="w-full border border-gray-300 p-2 text-sm rounded focus:outline-none focus:border-[#d4b88c]">
+          <option value="Abierto">Abierto</option>
+          <option value="En Trámite">En Trámite</option>
+          <option value="En Espera">En Espera</option>
+          <option value="Cerrado">Cerrado</option>
+          <option value="Archivado">Archivado</option>
+        </select>
+      </div>
 
-      <!-- Cliente -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <!-- Tribunal / Juzgado -->
+      <div>
+        <label class="block text-gray-700 font-medium mb-1">Tribunal / Juzgado</label>
+        <input 
+          type="text" 
+          [(ngModel)]="expedienteEdicion.tribunal_juzgado" 
+          class="w-full border border-gray-300 p-2 text-sm rounded focus:outline-none focus:border-[#d4b88c]">
+      </div>
 
-        <h2 class="text-xl font-bold text-[#4B1623] mb-5">
-          Cliente
-        </h2>
+      <!-- Juez a Cargo -->
+      <div>
+        <label class="block text-gray-700 font-medium mb-1">Juez a Cargo</label>
+        <input 
+          type="text" 
+          [(ngModel)]="expedienteEdicion.juez_cargo" 
+          class="w-full border border-gray-300 p-2 text-sm rounded focus:outline-none focus:border-[#d4b88c]">
+      </div>
 
-        <div *ngIf="expediente.cliente; else sinCliente">
+      <!-- Cuantía del Litigio -->
+      <div>
+        <label class="block text-gray-700 font-medium mb-1">Cuantía del Litigio ($)</label>
+        <input 
+          type="number" 
+          [(ngModel)]="expedienteEdicion.cuantia_litigio" 
+          class="w-full border border-gray-300 p-2 text-sm rounded focus:outline-none focus:border-[#d4b88c]">
+      </div>
 
-          <div class="space-y-4">
+      <!-- Próxima Cita -->
+      <div>
+        <label class="block text-gray-700 font-medium mb-1">Próxima Cita</label>
+        <input 
+          type="date" 
+          [(ngModel)]="expedienteEdicion.proxima_cita" 
+          class="w-full border border-gray-300 p-2 text-sm rounded focus:outline-none focus:border-[#d4b88c]">
+      </div>
 
-            <div>
-              <p class="text-sm text-gray-500">
-                Nombre
-              </p>
-
-              <p class="font-medium text-gray-800">
-                {{ expediente.cliente.nombre }}
-              </p>
-            </div>
-
-            <div>
-              <p class="text-sm text-gray-500">
-                Correo
-              </p>
-
-              <p class="font-medium text-gray-800">
-                {{ expediente.cliente.correo }}
-              </p>
-            </div>
-
-          </div>
-
-        </div>
-
-        <ng-template #sinCliente>
-          <p class="text-gray-500">
-            No hay información del cliente.
-          </p>
-        </ng-template>
-
+      <!-- Descripción de los Hechos (Ancho completo) -->
+      <div class="md:col-span-2">
+        <label class="block text-gray-700 font-medium mb-1">Descripción de los Hechos</label>
+        <textarea 
+          rows="4" 
+          [(ngModel)]="expedienteEdicion.descripcion_hechos" 
+          class="w-full border border-gray-300 p-2 text-sm rounded focus:outline-none focus:border-[#d4b88c] resize-y"></textarea>
       </div>
 
     </div>
 
-
-    <!-- Descripción de hechos -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-6">
-
-      <h2 class="text-xl font-bold text-[#4B1623] mb-4">
-        Descripción de los hechos
-      </h2>
-
-      <p class="text-gray-700 leading-relaxed whitespace-pre-line">
-        {{ expediente.descripcion_hechos }}
-      </p>
-
-    </div>
-
-
-    <!-- Equipo asignado -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-6">
-
-      <h2 class="text-xl font-bold text-[#4B1623] mb-5">
-        Equipo asignado
-      </h2>
-
-      <div
-        *ngIf="expediente.equipo?.length; else sinEquipo"
-        class="space-y-3"
-      >
-
-        <div
-          *ngFor="let integrante of expediente.equipo"
-          class="border border-gray-200 rounded-lg p-4"
-        >
-
-          <p class="font-semibold text-gray-800">
-            {{ integrante.user?.nombre || 'Usuario' }}
-          </p>
-
-          <p class="text-sm text-gray-500">
-            {{ integrante.user?.rol || 'Sin rol' }}
-          </p>
-
-        </div>
-
-      </div>
-
-      <ng-template #sinEquipo>
-        <p class="text-gray-500">
-          No hay integrantes asignados.
-        </p>
-      </ng-template>
-
-    </div>
-
-
-    <!-- Botón volver -->
-    <div class="mt-6">
-
-      <a
-        routerLink="/expedientes"
-        class="inline-block px-5 py-3 bg-[#4B1623] text-white rounded-lg hover:opacity-90"
-      >
-        ← Volver a expedientes
-      </a>
-
+    <!-- Botones de Acción -->
+    <div class="flex justify-end gap-3 mt-6 border-t border-gray-100 pt-4">
+      <button 
+        (click)="cerrarModalEditar()" 
+        [disabled]="guardandoEdicion" 
+        class="px-4 py-2 text-sm text-gray-500 hover:text-gray-800 transition-colors cursor-pointer">
+        Cancelar
+      </button>
+      
+      <button 
+        (click)="guardarEdicion()" 
+        [disabled]="guardandoEdicion" 
+        class="px-4 py-2 text-sm bg-[#4a1525] hover:bg-[#38101c] text-white rounded transition-colors cursor-pointer flex items-center gap-2">
+        <span *ngIf="guardandoEdicion">Guardando...</span>
+        <span *ngIf="!guardandoEdicion">Guardar Cambios</span>
+      </button>
     </div>
 
   </div>
-
 </div>
-
+</div>

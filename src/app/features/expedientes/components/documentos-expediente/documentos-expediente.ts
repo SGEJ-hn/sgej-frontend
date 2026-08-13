@@ -8,6 +8,7 @@ import { heroArrowUpTray, heroDocumentText} from '@ng-icons/heroicons/outline';
 import { DragDrop } from '../../../../shared/directives/drag-drop';
 import { Documentos } from '../../services/documentos';
 import { SharedHeader } from '../../../../shared/components/shared-header/shared-header';
+import { ExpedienteService } from '../../../../core/services/expediente';
 
 
 @Component({
@@ -25,12 +26,17 @@ export class DocumentosExpediente implements OnInit {
   private route = inject(ActivatedRoute);
   private cdr = inject(ChangeDetectorRef); 
   private router = inject(Router); 
+  private expedienteService = inject(ExpedienteService);
 
   // Variables del formulario
   nombreDocumento: string = '';
   categoriaSeleccionada: string = 'Escritos';
   expedienteAsociadoId = '';
-  numeroExpedienteVisual: string = 'EXP-2026-0146';
+  
+  // 3. VARIABLES DINÁMICAS PARA LA VISTA
+  numeroExpedienteVisual: string = 'Cargando...';
+  nombreClienteVisual: string = '';
+  
   archivoSeleccionado: File | null = null;
   documentosRecientes: any[] = [];
   estaSubiendo: boolean = false;
@@ -42,7 +48,33 @@ export class DocumentosExpediente implements OnInit {
     this.expedienteAsociadoId = this.route.snapshot.paramMap.get('id_expediente') ?? '';
     if (this.expedienteAsociadoId) {
       this.cargarDocumentos();
+      this.cargarDetalleExpediente();
     }
+  }
+  // 5. FUNCIÓN PARA OBTENER EL EXPEDIENTE
+  cargarDetalleExpediente() {
+    this.expedienteService.obtenerExpediente(this.expedienteAsociadoId).subscribe({
+      next: (exp: any) => {
+        this.numeroExpedienteVisual = exp.numero_expediente;
+        this.nombreClienteVisual = this.obtenerNombreMostrar(exp);
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error cargando detalles del expediente', err)
+    });
+  }
+
+  // 6. REUTILIZAMOS TU LÓGICA PARA SACAR EL NOMBRE CORRECTO
+  obtenerNombreMostrar(expediente: any): string {
+    const partes = expediente.partes_involucradas || expediente.partes;
+    if (partes && partes.length > 0) {
+      const demandante = partes.find(
+        (p: any) => p.clasificacion?.toLowerCase() === 'demandante'
+      );
+      if (demandante && demandante.nombre_completo) {
+        return demandante.nombre_completo;
+      }
+    }
+    return expediente.cliente?.nombre || 'Sin registro';
   }
 
   cargarDocumentos() {

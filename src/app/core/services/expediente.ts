@@ -3,34 +3,55 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
+export interface ClienteExpediente {
+  id_usuario?: string;
+  nombre: string;
+  correo: string;
+}
+
+export interface UsuarioEquipo {
+  id_usuario?: string;
+  nombre: string;
+  correo?: string;
+  rol?: string;
+}
+
+export interface ExpedienteEquipo {
+  id_usuario?: string;
+  rol_en_caso?: string;
+  user?: UsuarioEquipo;      // Agregado para resolver el error 'user'
+  usuario?: UsuarioEquipo;   // Por si tu backend responde como 'usuario' o 'user'
+}
+
+export interface ParteInvolucrada {
+  clasificacion: string;
+  tipo_persona: string;
+  nombre_completo: string;
+  identificacion?: string;
+  correo_contacto?: string;
+  direccion?: string;
+}
+
 export interface Expediente {
-  id_expediente: string;
+  id_expediente?: string;
   numero_expediente: string;
-  id_cliente: string;
+  id_cliente?: string;
   materia: string;
   estado: string;
   tribunal_juzgado: string;
   juez_cargo?: string;
-  cuantia_litigio?: number | string;
+  cuantia_litigio?: number;
   fecha_apertura: string;
   descripcion_hechos: string;
 
-  cliente?: {
-    id_usuario: string;
-    nombre: string;
-    correo: string;
-  };
-
-  equipo?: {
-    id_usuario?: string;
-    user?: {
-      id_usuario: string;
-      nombre: string;
-      rol: string;
-    };
-  }[];
+  // JOINs
+  cliente?: ClienteExpediente;  
+  equipo?: ExpedienteEquipo[];
+  partes?: ParteInvolucrada[];
+  proxima_cita?: string;
 }
 
+// ¡Faltaba esta interfaz!
 export interface ExpedientesResponse {
   total: number;
   expedientes: Expediente[];
@@ -82,4 +103,3 @@ export class ExpedienteService {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
 }
-
