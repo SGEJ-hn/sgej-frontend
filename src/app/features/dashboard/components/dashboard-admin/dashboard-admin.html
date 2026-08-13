@@ -1,0 +1,196 @@
+<div class="min-h-screen bg-[#F3F2EE] font-sans flex flex-col custom-font">
+  
+  <app-shared-header 
+    [titulo]="saludo" 
+    [subtitulo]="fechaActual"
+    [mostrarIconos]="true">
+  </app-shared-header>
+
+  <!-- Contenedor Principal -->
+  <div class="p-8 mx-auto w-full max-w-[1600px]">
+
+    <div *ngIf="cargando" class="flex justify-center items-center h-64">
+      <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-[#4B1623]"></div>
+    </div>
+
+    <div *ngIf="error" class="bg-white border border-red-200 p-6 mb-6">
+      <h2 class="text-base text-red-700 border-l-[3px] border-red-700 pl-3 mb-2">Error</h2>
+      <p class="text-sm text-gray-600">{{ error }}</p>
+    </div>
+
+    <div *ngIf="!cargando && !error && dashboardData">
+      
+      <!-- FILA 1: KPIs -->
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-6">
+        
+        <div class="bg-white border border-[#E5E7EB] p-6 shadow-sm">
+          <div class="flex justify-between items-center mb-4 text-[#4B1623]">
+            <ng-icon name="heroFolderSolid"></ng-icon>
+            <span class="text-[11px] text-gray-500 font-medium texto-sec">+ 6 este mes</span>
+          </div>
+          <h3 class="text-4xl font-bold text-gray-900 mb-1">{{ dashboardData.kpis.expedientesActivos }}</h3>
+          <p class="text-[16px] text-gray-700 font-medium mt-2">Expedientes Globales Activos</p>
+        </div>
+
+        <div class="bg-white border border-[#E5E7EB] p-6 shadow-sm">
+          <div class="flex justify-between items-center mb-4 text-[#4B1623]">
+            <ng-icon name="heroBriefcaseSolid"></ng-icon>
+            <span class="text-[11px] text-gray-500 font-medium texto-sec">En el sistema</span>
+          </div>
+          <h3 class="text-4xl font-bold text-gray-900 mb-1">{{ dashboardData.kpis.abogadosActivos }}</h3>
+          <p class="text-[16px] text-gray-700 font-medium mt-2">Abogados Activos</p>
+        </div>
+
+        <div class="bg-white border border-[#E5E7EB] p-6 shadow-sm">
+          <div class="flex justify-between items-center mb-4 text-[#4B1623]">
+            <ng-icon name="heroUserGroupSolid"></ng-icon>
+            <span class="text-[11px] text-gray-500 font-medium texto-sec">+ 20 este mes</span>
+          </div>
+          <h3 class="text-4xl font-bold text-gray-900 mb-1">{{ dashboardData.kpis.clientesRegistrados }}</h3>
+          <p class="text-[16px] text-gray-700 font-medium mt-2">Clientes Registrados</p>
+        </div>
+
+        <div class="bg-white border border-[#E5E7EB] p-6 shadow-sm">
+          <div class="flex justify-between items-center mb-4 text-[#4B1623]">
+            <ng-icon name="heroCheckCircleSolid"></ng-icon>
+            <span class="text-[11px] text-gray-500 font-medium texto-sec">+ 22 este año</span>
+          </div>
+          <h3 class="text-4xl font-bold text-gray-900 mb-1">{{ dashboardData.kpis.casosResueltos }}</h3>
+          <p class="text-[16px] text-gray-700 font-medium mt-2">Casos Resueltos</p>
+        </div>
+      </div>
+
+      <!-- FILA 2: GRÁFICOS (Proporción 60% / 40%) -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        
+        <!-- Contenedor Gráfica Barras -->
+        <div class="lg:col-span-2 bg-white border border-[#E5E7EB] p-6 shadow-sm flex flex-col h-100">
+          <div class="flex justify-between items-start mb-6">
+            <div>
+              <h2 class="text-[15px] text-gray-900 border-l-2 border-[#4B1623] pl-3 ">Actividad Mensual</h2>
+              <p class="text-[11px] text-gray-500 mt-1 pl-4 texto-sec">Expedientes abiertos y cerrados por mes este año</p>
+            </div>
+            <a routerLink="/reportes" class="text-[13px] text-[#d4b88c] hover:text-[#b89e78] cursor-pointer font-medium">Reporte Completo →</a>
+          </div>
+          <!-- INYECCIÓN GRÁFICA DE BARRAS -->
+          <div class="flex-1 relative w-full h-full pb-2">
+            <canvas baseChart
+              [data]="barChartData"
+              [options]="barChartOptions"
+              type="bar">
+            </canvas>
+          </div>
+        </div>
+
+        <!-- Contenedor Gráfica Pastel -->
+        <div class="lg:col-span-1 bg-white border border-[#E5E7EB] p-6 shadow-sm flex flex-col h-100">
+          <div class="mb-4">
+            <h2 class="text-[15px] text-gray-900 border-l-2 border-[#4B1623] pl-3">Tipos de expedientes este mes</h2>
+            <p class="text-[11px] text-gray-500 mt-1 pl-4 texto-sec">Distribución por materia</p>
+          </div>
+          <!-- INYECCIÓN GRÁFICA DE DONA -->
+          <div class="flex-1 relative w-full h-full pb-2">
+            <canvas baseChart
+              [data]="doughnutChartData"
+              [options]="doughnutChartOptions"
+              type="doughnut"> 
+            </canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- FILA 3: LISTAS -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Expedientes Recientes -->
+        <div class="lg:col-span-2 bg-white border border-[#E5E7EB] p-6 shadow-sm flex flex-col">
+          <div class="flex justify-between items-end mb-4">
+            <h2 class="text-[15px] text-gray-900 border-l-2 border-[#4B1623] pl-3">Expedientes Recientes - {{mesActual}}</h2>
+            <a routerLink="/expedientes" class="text-[13px] text-[#d4b88c] hover:text-[#b89e78] cursor-pointer font-medium">Ver todos →</a>
+          </div>
+          
+          <div class="flex-1 overflow-y-auto">
+            <div *ngFor="let exp of dashboardData.expedientesRecientes" class="flex items-center justify-between py-4 border-b border-gray-100 last:border-0">
+              
+              <!-- Icono y Título -->
+              <div class="flex items-start gap-4 flex-1 min-w-0">
+                <div class="w-8 h-8 shrink-0 bg-gray-50 border border-gray-200 flex items-center justify-center text-[#4B1623] rounded-sm mt-0.5">
+                   <ng-icon name="heroFolderSolid"></ng-icon>
+                </div>
+                <div class="truncate">
+                  <p class="text-[15px] font-light text-gray-900 truncate">{{ exp.cliente.nombre }}</p>
+                  <p class="text-[13px] text-[#6E7A8A]/96 mt-0.5 truncate">{{ exp.numero_expediente }} • {{ exp.materia }}</p>
+                </div>
+              </div>
+
+              <!-- Píldora Estado -->
+              <div class="w-24 shrink-0 mx-2 text-center">
+                <span class="px-3 py-1 text-[10px] font-medium rounded-sm border"
+                      [ngClass]="{
+                        'bg-[#E8F5E9] text-[#2E7D32] border-[#C8E6C9]': exp.estado === 'Activo' || exp.estado === 'En proceso', 
+                        'bg-[#FFF8E1] text-[#F57F17] border-[#FFECB3]': exp.estado === 'Pendiente', 
+                        'bg-gray-100 text-gray-600 border-gray-200': exp.estado === 'Finalizado'
+                      }">
+                  {{ exp.estado }}
+                </span>
+              </div>
+
+              <div class="w-40 shrink-0 hidden md:block text-center mx-2">
+                <p class="text-[13px] text-[#6E7A8A]/96 truncate" 
+                  [title]="exp.equipo && exp.equipo.length > 0 ? 'Dr(a). ' + exp.equipo[0].user.nombre : 'Sin asignar'">
+                  {{ exp.equipo && exp.equipo.length > 0 ? 'Dr(a). ' + exp.equipo[0].user.nombre : 'Sin asignar' }}
+                </p>
+              </div>
+
+              <!-- Fechas -->
+              <div class="w-32 shrink-0 hidden lg:block text-right">
+                <p class="text-[12px] text-[#6E7A8A]/96 leading-tight">Apertura {{ exp.fecha_apertura | date:'d MMM yyyy' }}</p>
+                <!-- Omitimos Ult. Aud porque no viene en el backend actualmente -->
+              </div>
+            </div>
+            
+            <div *ngIf="dashboardData.expedientesRecientes.length === 0" class="py-6 text-center text-gray-400 text-sm">
+              No hay expedientes en este mes.
+            </div>
+          </div>
+        </div>
+
+        <!-- Próximas Citas -->
+        <div class="lg:col-span-1 bg-white border border-[#E5E7EB] p-6 shadow-sm flex flex-col">
+          <div class="flex justify-between items-end mb-4">
+            <h2 class="text-[15px] text-gray-900 border-l-2 border-[#4B1623] pl-3">Próximas Citas - {{mesActual}}</h2>
+            <a routerLink="/calendario" class="text-[13px] text-[#d4b88c] hover:text-[#b89e78] cursor-pointer font-medium">Calendario →</a>
+          </div>
+          
+          <div class="flex-1 overflow-y-auto">
+            <div *ngFor="let cita of dashboardData.proximasCitas" class="flex items-center py-4 border-b border-gray-100 last:border-0">
+              
+              <!-- Fecha Cuadro -->
+              <div class="flex flex-col items-center justify-center min-w-12 border-r border-gray-200 pr-3">
+                <span class="text-xl font-bold text-gray-900 leading-none">{{ cita.fecha | date:'dd' }}</span>
+                <span class="text-[12px] text-gray-900 capitalize font-medium mt-1">{{ cita.fecha | date:'MMMM' }}</span>
+              </div>
+              
+              <!-- Info Cita -->
+              <div class="ml-3 flex-1 min-w-0">
+                <p class="text-[15px] font-light text-gray-900 truncate">• {{ cita.titulo }}</p>
+                <p class="text-[13px] text-gray-500 mt-0.5 truncate">{{ cita.expediente.numero_expediente }}</p>
+              </div>
+              
+              <!-- Hora -->
+              <div class="text-right shrink-0 ml-2">
+                <p class="text-[13px] text-[#6E7A8A]/96 font-medium">{{ cita.hora_inicio | date:'shortTime' }}</p>
+              </div>
+            </div>
+
+            <div *ngIf="dashboardData.proximasCitas.length === 0" class="py-6 text-center text-gray-400 text-sm">
+              No hay citas programadas para este mes.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>

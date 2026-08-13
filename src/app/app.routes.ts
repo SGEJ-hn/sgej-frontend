@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 
 import { LoginComponent } from './features/auth/login/login.component';
 import { authGuard } from './core/guards/auth.guard';
-
+import { DashboardAdmin } from './features/dashboard/components/dashboard-admin/dashboard-admin';
 import { Calendario } from './features/Calendario/components/calendario/calendario';
 import { ExpedientesComponent } from './features/expedientes/pages/expedientes.component';
 import { UsuariosComponent } from './features/usuarios/usuarios.component';
@@ -64,7 +64,7 @@ export const routes: Routes = [
 
   {
     path: 'dashboard',
-    component: DashboardDummyComponent,
+    component: DashboardAdmin,
     canActivate: [authGuard],
   },
 
