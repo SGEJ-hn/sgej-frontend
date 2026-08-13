@@ -3,6 +3,10 @@
   padding: 24px 32px 40px;
 }
 
+.custom-font {
+  font-family: 'Fenix', sans-serif;
+}
+
 /* ========== BOTÓN CREAR (inyectado en el header) ========== */
 :host ::ng-deep .btn-crear {
   display: flex;

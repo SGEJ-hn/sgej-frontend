@@ -1,140 +1,264 @@
-<!-- Header con botón de crear -->
-<app-shared-header 
-  titulo="Gestión de Usuarios" 
-  subtitulo="Administrar las cuentas de usuario del sistema">
-  
-  <button class="btn-crear" (click)="irACrearUsuario()">
-    <ng-icon name="heroPlus" size="1.1rem"></ng-icon>
-    Nuevo Usuario
-  </button>
-</app-shared-header>
+<div class="min-h-screen bg-[#F3F2EE] font-sans custom-font">
+  <!-- Header con botón de crear (Color del sistema puro) -->
+  <app-shared-header 
+    titulo="Gestión de Usuarios" 
+    subtitulo="Administrar las cuentas de usuario del sistema">
+    
+    <button class="px-5 py-2.5 bg-[#4B1623] hover:bg-[#38101c] text-white text-sm font-medium transition-colors flex items-center gap-2 cursor-pointer" (click)="irACrearUsuario()">
+      <ng-icon name="heroPlus" size="1.1rem"></ng-icon>
+      Nuevo Usuario
+    </button>
+  </app-shared-header>
 
-<!-- Contenido -->
-<div class="usuarios-container">
+  <!-- Contenido -->
+  <div class="p-8 max-w-7xl mx-auto">
 
-  <!-- Alertas -->
-  @if (mensajeExito) {
-    <div class="alerta alerta-exito">✅ {{ mensajeExito }}</div>
-  }
-  @if (mensajeError) {
-    <div class="alerta alerta-error">❌ {{ mensajeError }}</div>
-  }
-
-  <!-- Cards de Resumen -->
-  <div class="cards-resumen">
-    <div class="card-resumen">
-      <div class="card-resumen-icon activos">👥</div>
-      <div>
-        <span class="card-resumen-numero">{{ usuarios.length }}</span>
-        <span class="card-resumen-label">Total Usuarios</span>
+    <!-- Alertas -->
+    @if (mensajeExito) {
+      <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-600 text-green-800 flex items-center gap-3 shadow-sm">
+        <ng-icon name="heroCheckCircle" size="1.4rem" class="text-green-600"></ng-icon>
+        {{ mensajeExito }}
       </div>
-    </div>
-    <div class="card-resumen">
-      <div class="card-resumen-icon activos">✅</div>
-      <div>
-        <span class="card-resumen-numero">{{ totalActivos }}</span>
-        <span class="card-resumen-label">Activos</span>
-      </div>
-    </div>
-    <div class="card-resumen">
-      <div class="card-resumen-icon inactivos">⏸️</div>
-      <div>
-        <span class="card-resumen-numero">{{ totalInactivos }}</span>
-        <span class="card-resumen-label">Inactivos</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Filtros -->
-  <div class="filtros-bar">
-    <div class="busqueda-wrapper">
-      <ng-icon name="heroMagnifyingGlass" size="1.1rem" class="busqueda-icon"></ng-icon>
-      <input
-        type="text"
-        [(ngModel)]="busqueda"
-        (keyup.enter)="aplicarFiltros()"
-        placeholder="Buscar por nombre o correo..."
-        class="busqueda-input"
-      />
-    </div>
-
-    <select [(ngModel)]="filtroRol" (change)="aplicarFiltros()" class="filtro-select">
-      <option value="">Todos los Roles</option>
-      <option value="Administrador">Administrador</option>
-      <option value="Abogado">Abogado</option>
-      <option value="Cliente">Cliente</option>
-    </select>
-
-    <select [(ngModel)]="filtroEstado" (change)="aplicarFiltros()" class="filtro-select">
-      <option value="">Todos los Estados</option>
-      <option value="Activo">Activo</option>
-      <option value="Inactivo">Inactivo</option>
-    </select>
-
-    @if (busqueda || filtroRol || filtroEstado) {
-      <button class="btn-limpiar" (click)="limpiarFiltros()">✕ Limpiar</button>
     }
-  </div>
-
-  <!-- Tabla de Usuarios -->
-  <div class="tabla-wrapper">
-    @if (cargando) {
-      <div class="loader-wrapper">
-        <div class="loader-spinner"></div>
-        <p>Cargando usuarios...</p>
+    @if (mensajeError) {
+      <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-600 text-red-800 flex items-center gap-3 shadow-sm">
+        <ng-icon name="heroMinusCircle" size="1.4rem" class="text-red-600"></ng-icon>
+        {{ mensajeError }}
       </div>
-    } @else if (usuarios.length === 0) {
-      <div class="empty-state">
-        <ng-icon name="heroUserGroup" size="3rem" class="empty-icon"></ng-icon>
-        <h3>No se encontraron usuarios</h3>
-        <p>Ajusta los filtros o crea un nuevo usuario.</p>
-      </div>
-    } @else {
-      <table class="tabla-usuarios">
-        <thead>
-          <tr>
-            <th>Usuario</th>
-            <th>Correo Electrónico</th>
-            <th>Rol</th>
-            <th>Estado</th>
-            <th>Último Acceso</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (usuario of usuarios; track usuario.id_usuario) {
-            <tr>
-              <td>
-                <div class="usuario-cell">
-                  <div class="avatar">
-                    {{ usuario.nombre.charAt(0).toUpperCase() }}
-                  </div>
-                  <span class="usuario-nombre">{{ usuario.nombre }}</span>
-                </div>
-              </td>
-              <td class="correo-cell">{{ usuario.correo }}</td>
-              <td>
-                <span class="rol-badge">
-                  {{ getRolIcon(usuario.rol) }} {{ usuario.rol }}
-                </span>
-              </td>
-              <td>
-                <span class="badge" [ngClass]="getBadgeClass(usuario.estado)">
-                  {{ usuario.estado }}
-                </span>
-              </td>
-              <td class="fecha-cell">{{ formatearFecha(usuario.ultimo_acceso) }}</td>
-              <td>
-                <div class="acciones-cell">
-                  <button class="btn-accion btn-eliminar" (click)="eliminarUsuario(usuario)" title="Eliminar usuario">
-                    <ng-icon name="heroTrash" size="1rem"></ng-icon>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
     }
+
+    <!-- Cards de Resumen -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <!-- Total Usuarios -->
+      <div class="bg-white p-6 border border-gray-200 flex items-center gap-5">
+        <div class="w-12 h-12 bg-[#4B1623] text-white rounded-lg flex items-center justify-center">
+          <ng-icon name="heroUserGroup" size="1.5rem"></ng-icon>
+        </div>
+        <div>
+          <p class="text-2xl font-semibold text-gray-900">{{ usuarios.length }}</p>
+          <p class="text-sm text-gray-500 font-medium">Total Usuarios</p>
+        </div>
+      </div>
+
+      <!-- Activos -->
+      <div class="bg-white p-6 border border-gray-200 flex items-center gap-5">
+        <div class="w-12 h-12 bg-green-700 text-white rounded-lg flex items-center justify-center">
+          <ng-icon name="heroCheckCircle" size="1.5rem"></ng-icon>
+        </div>
+        <div>
+          <p class="text-2xl font-semibold text-gray-900">{{ totalActivos }}</p>
+          <p class="text-sm text-gray-500 font-medium">Activos</p>
+        </div>
+      </div>
+
+      <!-- Inactivos -->
+      <div class="bg-white p-6 border border-gray-200 flex items-center gap-5">
+        <div class="w-12 h-12 bg-blue-500 text-white rounded-lg flex items-center justify-center">
+          <ng-icon name="heroMinusCircle" size="1.5rem"></ng-icon>
+        </div>
+        <div>
+          <p class="text-2xl font-semibold text-gray-900">{{ totalInactivos }}</p>
+          <p class="text-sm text-gray-500 font-medium">Inactivos</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="bg-white border border-gray-200 p-4 mb-6 flex flex-wrap gap-4 items-center justify-between">
+      <div class="flex-1 min-w-62.5 relative">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+          <ng-icon name="heroMagnifyingGlass" size="1.1rem"></ng-icon>
+        </div>
+        <input
+          type="text"
+          [(ngModel)]="busqueda"
+          (ngModelChange)="aplicarFiltros()"
+          placeholder="Buscar por nombre o correo..."
+          class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-sm text-sm focus:outline-none focus:border-[#d4b88c] focus:ring-1 focus:ring-[#d4b88c]"
+        />
+      </div>
+
+      <div class="flex gap-4 items-center">
+        <select [(ngModel)]="filtroRol" (change)="aplicarFiltros()" class="border border-gray-300 py-2 px-3 rounded-sm text-sm focus:outline-none focus:border-[#d4b88c] bg-white">
+          <option value="">Todos los Roles</option>
+          <option value="Administrador">Administrador</option>
+          <option value="Abogado">Abogado</option>
+          <option value="Cliente">Cliente</option>
+        </select>
+
+        <select [(ngModel)]="filtroEstado" (change)="aplicarFiltros()" class="border border-gray-300 py-2 px-3 rounded-sm text-sm focus:outline-none focus:border-[#d4b88c] bg-white">
+          <option value="">Todos los Estados</option>
+          <option value="Activo">Activo</option>
+          <option value="Inactivo">Inactivo</option>
+        </select>
+
+        @if (busqueda || filtroRol || filtroEstado) {
+          <button class="text-gray-500 hover:text-gray-800 text-sm font-medium px-3 py-2 cursor-pointer transition-colors" (click)="limpiarFiltros()">
+            ✕ Limpiar
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Tabla de Usuarios -->
+    <div class="bg-white border border-gray-200 overflow-hidden">
+      @if (cargando) {
+        <div class="p-12 flex flex-col items-center justify-center text-gray-500">
+          <div class="w-8 h-8 border-4 border-[#d4b88c] border-t-[#4B1623] rounded-full animate-spin mb-4"></div>
+          <p class="text-sm font-medium">Cargando usuarios...</p>
+        </div>
+      } @else if (usuarios.length === 0) {
+        <div class="p-16 flex flex-col items-center justify-center text-center">
+          <ng-icon name="heroUserGroup" size="3rem" class="text-gray-300 mb-4"></ng-icon>
+          <h3 class="text-lg font-medium text-gray-900 mb-1">No se encontraron usuarios</h3>
+          <p class="text-sm text-gray-500">Ajusta los filtros o crea un nuevo usuario para empezar.</p>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 tracking-wider">
+                <th class="p-4">USUARIO</th>
+                <th class="p-4">CORREO ELECTRÓNICO</th>
+                <th class="p-4">ROL</th>
+                <th class="p-4">ESTADO</th>
+                <th class="p-4">ÚLTIMO ACCESO</th>
+                <th class="p-4 text-center">ACCIONES</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              @for (usuario of usuarios; track usuario.id_usuario) {
+                <tr class="hover:bg-gray-50 transition-colors group">
+                  <td class="p-4">
+                    <div class="flex items-center gap-3">
+                      <div class="w-9 h-9 rounded-full bg-[#4B1623] text-white flex items-center justify-center text-sm font-medium">
+                        {{ usuario.nombre.charAt(0).toUpperCase() }}
+                      </div>
+                      <span class="text-sm font-medium text-gray-900">{{ usuario.nombre }}</span>
+                    </div>
+                  </td>
+                  <td class="p-4 text-sm text-gray-500">{{ usuario.correo }}</td>
+                  <td class="p-4">
+                    <span class="text-sm text-gray-700 font-medium">{{ usuario.rol }}</span>
+                  </td>
+                  <td class="p-4">
+                    <span [ngClass]="getBadgeClass(usuario.estado)">
+                      {{ usuario.estado }}
+                    </span>
+                  </td>
+                  <td class="p-4 text-sm text-gray-400">{{ formatearFecha(usuario.ultimo_acceso) }}</td>
+                  <td class="p-4 text-center">
+                    <div class="flex items-center justify-center gap-2">
+                      <!-- Botón Editar -->
+                      <button 
+                        class="p-2 text-white bg-[#4B1623] hover:bg-[#474344]  rounded transition-colors cursor-pointer inline-flex items-center justify-center" 
+                        (click)="abrirModalEdicion(usuario)" 
+                        title="Editar usuario">
+                        <ng-icon name="heroPencilSquare" size="1.1rem"></ng-icon>
+                      </button>
+                      
+                      <!-- Botón Eliminar -->
+                      <button 
+                        class="p-2 text-white bg-[#4B1623] hover:bg-red-800 rounded transition-colors cursor-pointer inline-flex items-center justify-center" 
+                        (click)="eliminarUsuario(usuario)" 
+                        title="Eliminar usuario">
+                        <ng-icon name="heroTrash" size="1.1rem"></ng-icon>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
   </div>
+  <!-- MODAL DE EDICIÓN -->
+  @if (mostrarModalEdicion) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity">
+      <div class="bg-white rounded-md shadow-xl w-full max-w-md overflow-hidden flex flex-col">
+        
+        <!-- Header del Modal -->
+        <div class="bg-[#4B1623] px-6 py-4 flex items-center justify-between">
+          <h3 class="text-white font-medium text-lg">Editar Usuario</h3>
+          <button (click)="cerrarModalEdicion()" class="text-white/70 hover:text-white cursor-pointer transition-colors">
+            ✕
+          </button>
+        </div>
+
+        <!-- Cuerpo del Modal -->
+        <div class="p-6 flex flex-col gap-4">
+          <!-- Campo: Nombre -->
+          <div>
+            <label class="block text-xs font-medium text-gray-500 mb-1">Nombre Completo</label>
+            <input 
+              type="text" 
+              [(ngModel)]="usuarioEnEdicion.nombre" 
+              class="w-full border border-gray-300 p-2.5 text-sm focus:outline-none focus:border-[#d4b88c] focus:ring-1 focus:ring-[#d4b88c] rounded-sm"
+            />
+          </div>
+
+          <!-- Campo: Correo -->
+          <div>
+            <label class="block text-xs font-medium text-gray-500 mb-1">Correo Electrónico</label>
+            <input 
+              type="email" 
+              [(ngModel)]="usuarioEnEdicion.correo" 
+              class="w-full border border-gray-300 p-2.5 text-sm focus:outline-none focus:border-[#d4b88c] focus:ring-1 focus:ring-[#d4b88c] rounded-sm"
+            />
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <!-- Campo: Rol -->
+            <div>
+              <label class="block text-xs font-medium text-gray-500 mb-1">Rol en el sistema</label>
+              <select 
+                [(ngModel)]="usuarioEnEdicion.rol" 
+                class="w-full border border-gray-300 p-2.5 text-sm focus:outline-none focus:border-[#d4b88c] bg-white rounded-sm">
+                <option value="Administrador">Administrador</option>
+                <option value="Abogado">Abogado</option>
+                <option value="Cliente">Cliente</option>
+              </select>
+            </div>
+
+            <!-- Campo: Estado -->
+            <div>
+              <label class="block text-xs font-medium text-gray-500 mb-1">Estado</label>
+              <select 
+                [(ngModel)]="usuarioEnEdicion.estado" 
+                class="w-full border border-gray-300 p-2.5 text-sm focus:outline-none focus:border-[#d4b88c] bg-white rounded-sm">
+                <option value="Activo">Activo</option>
+                <option value="Inactivo">Inactivo</option>
+                <option value="Suspendido">Suspendido</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer del Modal -->
+        <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
+          <button 
+            (click)="cerrarModalEdicion()" 
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-sm hover:bg-gray-50 cursor-pointer transition-colors"
+            [disabled]="guardandoEdicion">
+            Cancelar
+          </button>
+          
+          <button 
+            (click)="guardarEdicion()" 
+            class="px-4 py-2 text-sm font-medium text-white bg-[#4B1623] hover:bg-[#38101c] rounded-sm cursor-pointer transition-colors flex items-center justify-center gap-2 min-w-30"
+            [disabled]="guardandoEdicion">
+            @if (guardandoEdicion) {
+              <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              Guardando...
+            } @else {
+              Guardar Cambios
+            }
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
 </div>

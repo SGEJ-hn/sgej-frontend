@@ -5,13 +5,13 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { SharedHeader } from '../../../shared/components/shared-header/shared-header';
 import { UsuarioService } from '../../../core/services/usuario.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { heroArrowLeft } from '@ng-icons/heroicons/outline';
+import { heroArrowLeft, heroMinusCircle, heroUser,heroEye, heroEyeSlash } from '@ng-icons/heroicons/outline';
 
 @Component({
   selector: 'app-crear-usuario',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, SharedHeader, NgIconComponent],
-  viewProviders: [provideIcons({ heroArrowLeft })],
+  viewProviders: [provideIcons({ heroArrowLeft, heroMinusCircle,heroUser,heroEye, heroEyeSlash })],
   templateUrl: './crear-usuario.component.html',
   styleUrl: './crear-usuario.component.css',
 })
