@@ -52,3 +52,22 @@ export interface ProximaCita {
     cliente: { nombre: string };
   };
 }
+
+// ==========================================
+// INTERFACES PARA EL ABOGADO / PARALEGAL
+// ==========================================
+export interface KpisLawyer {
+  expedientesActivos: number;
+  audienciasSemana: number;
+  documentosRevision: number;
+  casosResueltos: number;
+  nuevosMes: number;
+  resueltosAnio: number;
+}
+
+export interface LawyerDashboardData {
+  kpis: KpisLawyer;
+  graficas: Graficas; 
+  expedientesRecientes: ExpedienteReciente[];
+  proximasCitas: ProximaCita[]; 
+}

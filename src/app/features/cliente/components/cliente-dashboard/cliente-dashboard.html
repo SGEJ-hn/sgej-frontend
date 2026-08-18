@@ -2,93 +2,82 @@
   <!-- ENCABEZADO DE BIENVENIDA -->
   <app-shared-header
     [titulo]="'Bienvenido, ' + (usuario?.nombre || 'Cliente')"
-    subtitulo="Portal de autoservicio y seguimiento de sus trámites legales (Solo lectura)">
+    subtitulo="Portal de autoservicio y seguimiento de sus trámites legales">
   </app-shared-header>
 
   <div class="max-w-7xl mx-auto p-6 md:p-8 space-y-8">
-
-    <!-- MENSAJE INFORMATIVO DE SEGURIDAD Y SOLO LECTURA -->
-    <div class="bg-[#4A1525]/5 border-l-4 border-[#4A1525] p-4 rounded-r-lg flex items-center justify-between">
-      <div class="flex items-center gap-3 text-sm text-[#4A1525]">
-        <span class="text-xl">🔒</span>
-        <div>
-          <span class="font-semibold">Modo Transparencia y Solo Lectura:</span>
-          <span> Sus datos y documentos están protegidos. Esta vista le permite consultar en tiempo real el avance de sus expedientes.</span>
-        </div>
-      </div>
-      <span class="text-xs bg-[#4A1525] text-white px-2.5 py-1 rounded-full font-medium">Cliente Acceso Seguro</span>
-    </div>
-
     <!-- TARJETAS DE INDICADORES (KPIs CLAVE DEL CLIENTE) -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
 
       <!-- CARD 1: ESTADO DEL CASO PRINCIPAL -->
       <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
-        <div class="w-12 h-12 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center text-2xl shrink-0">
-          📁
+        <div class="w-12 h-12 rounded-lg bg-[#fdf8f3] border border-[#f5e6d3] text-[#d4b88c] flex items-center justify-center text-2xl shrink-0">
+          <ng-icon name="heroFolderSolid"></ng-icon>
         </div>
-        <div>
+        <div class="min-w-0 flex-1">
           <span class="text-xs font-semibold uppercase text-gray-400 tracking-wider">Estado del Caso</span>
           <div class="flex items-center gap-2 mt-0.5">
             <span
-              class="inline-flex px-2.5 py-0.5 text-xs font-semibold rounded-full"
+              class="inline-flex px-2.5 py-0.5 text-xs font-semibold rounded-full truncate "
               [ngClass]="{
-                'bg-green-100 text-green-800': expedientePrincipal?.estado === 'En proceso',
-                'bg-blue-100 text-blue-800': expedientePrincipal?.estado === 'Abierto',
-                'bg-purple-100 text-purple-800': expedientePrincipal?.estado === 'En audiencia',
-                'bg-gray-100 text-gray-700': expedientePrincipal?.estado === 'Cerrado'
+                'bg-green-100 text-green-800 border border-green-200': expedientePrincipal?.estado === 'En proceso' || expedientePrincipal?.estado === 'Activo',
+                'bg-blue-100 text-blue-800 border border-blue-200': expedientePrincipal?.estado === 'Abierto',
+                'bg-[#FFF8E1] text-[#F57F17] border border-[#FFECB3]': expedientePrincipal?.estado === 'Pendiente',
+                'bg-gray-100 text-gray-700 border border-gray-200': expedientePrincipal?.estado === 'Cerrado' || expedientePrincipal?.estado === 'Finalizado'
               }">
-              {{ expedientePrincipal?.estado || 'En proceso' }}
+              {{ expedientePrincipal?.estado || 'Sin expedientes' }}
             </span>
           </div>
-          <p class="text-xs text-gray-500 mt-1 font-mono">
-            {{ expedientePrincipal?.numero_expediente || 'EXP-001-2026' }}
+          <p class="text-[11px] text-gray-500 mt-1  truncate texto-sec">
+            {{ expedientePrincipal?.numero_expediente || 'N/A' }}
           </p>
         </div>
       </div>
 
       <!-- CARD 2: PRÓXIMA CITA -->
       <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
-        <div class="w-12 h-12 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center text-2xl shrink-0">
-          📅
+        <div class="w-12 h-12 rounded-lg bg-blue-50/50 border border-blue-100 text-[#4A1525] flex items-center justify-center text-2xl shrink-0">
+          <ng-icon name="heroCalendarSolid"></ng-icon>
         </div>
-        <div>
+        <div class="min-w-0 flex-1">
           <span class="text-xs font-semibold uppercase text-gray-400 tracking-wider">Próxima Cita</span>
-          <p class="text-sm font-bold text-gray-900 mt-0.5">
-            {{ proximasCitas[0]?.fecha || 'Sin citas' }}
+          <p class="text-sm font-bold text-gray-900 mt-0.5 truncate">
+            {{ proximasCitas.length > 0 ? proximasCitas[0].fecha : 'Sin citas' }}
           </p>
-          <p class="text-xs text-gray-500">
-            {{ proximasCitas[0]?.hora || 'Pendiente de agendar' }}
+          <p class="text-[11px] text-gray-500 mt-1  truncate texto-sec">
+            {{ proximasCitas.length > 0 ? proximasCitas[0].hora : 'Pendiente de agendar' }}
           </p>
         </div>
       </div>
 
       <!-- CARD 3: NOTIFICACIONES -->
       <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
-        <div class="w-12 h-12 rounded-lg bg-red-50 text-red-700 flex items-center justify-center text-2xl shrink-0 relative">
-          🔔
-          <span *ngIf="notificacionesSinLeer > 0" class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold">
+        <div class="w-12 h-12 rounded-lg bg-gray-50 border border-gray-100 text-[#4A1525] flex items-center justify-center text-2xl shrink-0 relative">
+          <ng-icon name="heroBellSolid"></ng-icon>
+          <span *ngIf="notificacionesSinLeer > 0" class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold shadow-sm">
             {{ notificacionesSinLeer }}
           </span>
         </div>
-        <div>
+        <div class="min-w-0 flex-1">
           <span class="text-xs font-semibold uppercase text-gray-400 tracking-wider">Notificaciones</span>
-          <p class="text-sm font-bold text-gray-900 mt-0.5">
+          <p class="text-sm font-bold text-gray-900 mt-0.5 truncate">
             {{ notificacionesSinLeer }} {{ notificacionesSinLeer === 1 ? 'nueva' : 'nuevas' }}
           </p>
-          <p class="text-xs text-gray-500">Actualizaciones del expediente</p>
+          <p class="text-[11px] text-gray-500 mt-1  truncate texto-sec">Últimas actualizaciones</p>
         </div>
       </div>
 
-      <!-- CARD 4: ABOGADO ASIGNADO -->
+      <!-- CARD 4: ABOGADO ASIGNADO (HTML más limpio gracias al Helper) -->
       <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex items-center gap-4">
-        <div class="w-12 h-12 rounded-lg bg-amber-50 text-[#4A1525] flex items-center justify-center text-2xl shrink-0 font-bold">
-          ⚖️
+        <div class="w-12 h-12 rounded-lg bg-[#4A1525]/5 border border-[#4A1525]/10 text-[#4A1525] flex items-center justify-center text-2xl shrink-0">
+          <ng-icon name="heroScaleSolid"></ng-icon>
         </div>
-        <div>
+        <div class="min-w-0 flex-1">
           <span class="text-xs font-semibold uppercase text-gray-400 tracking-wider">Especialista Asignado</span>
-          <p class="text-sm font-bold text-gray-900 mt-0.5">Dra. Ana López</p>
-          <p class="text-xs text-[#4A1525] font-medium">Abogada Titular</p>
+          <p class="text-sm font-bold text-gray-900 mt-0.5 truncate" [title]="abogadoPrincipal?.nombre ? 'Dr(a). ' + abogadoPrincipal!.nombre : 'Pendiente de asignar'">
+            {{ abogadoPrincipal?.nombre ? 'Dr(a). ' + abogadoPrincipal!.nombre : 'Sin asignar' }}
+          </p>
+          <p class="text-[11px] text-[#d4b88c] font-medium truncate texto-sec">Abogado(a) Principal</p>
         </div>
       </div>
 
@@ -97,32 +86,33 @@
     <!-- CONTENIDO PRINCIPAL: DOS COLUMNAS -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-      <!-- COLUMNA IZQUIERDA (2/3): MIS EXPEDIENTES (SOLO LECTURA) -->
+      <!-- COLUMNA IZQUIERDA (2/3): MIS EXPEDIENTES Y CITAS -->
       <div class="lg:col-span-2 space-y-6">
 
+        <!-- MIS EXPEDIENTES -->
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
           <div class="p-6 border-b border-gray-100 flex items-center justify-between">
             <div>
               <h2 class="text-lg font-bold text-[#4A1525] flex items-center gap-2">
-                <span>📁</span> Mis Expedientes Asignados
+                <ng-icon name="heroFolderSolid" class="text-[#d4b88c]"></ng-icon>
+                Mis Expedientes Asignados
               </h2>
-              <p class="text-xs text-gray-500 mt-0.5">Consulte el estado actual y detalles de sus procesos legales</p>
+              <p class="text-xs text-gray-500 mt-0.5 texto-sec">Consulte el estado actual y detalles de sus procesos legales</p>
             </div>
-            <span class="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full font-medium">
+            <span class="text-xs bg-gray-100 border border-gray-200 text-gray-600 px-3 py-1 rounded-full font-medium">
               {{ expedientes.length }} {{ expedientes.length === 1 ? 'Caso' : 'Casos' }}
             </span>
           </div>
 
-          <!-- MENSAJE DE CARGA -->
           <div *ngIf="cargando" class="p-8 text-center text-gray-500 text-sm">
             Cargando información de sus expedientes...
           </div>
 
-          <!-- TABLA SIMPLIFICADA DE SOLO LECTURA -->
-          <div *ngIf="!cargando" class="overflow-x-auto">
+          <!-- TABLA CON SCROLL: Agregado max-h-96 y custom-scrollbar -->
+          <div *ngIf="!cargando" class="overflow-auto max-h-96 custom-scrollbar">
             <table class="w-full text-left border-collapse">
-              <thead>
-                <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
+              <thead class="sticky top-0 bg-gray-50 z-10">
+                <tr class="text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
                   <th class="py-3.5 px-6 font-semibold">Expediente</th>
                   <th class="p-3.5 font-semibold">Materia</th>
                   <th class="p-3.5 font-semibold">Abogado</th>
@@ -138,43 +128,43 @@
                     <div class="font-medium text-gray-900 text-sm">
                       {{ exp.numero_expediente }}
                     </div>
-                    <div class="text-xs text-gray-400 mt-0.5 truncate max-w-xs">
-                      {{ exp.tribunal_juzgado }}
+                    <div class="text-xs text-gray-400 mt-0.5 truncate max-w-40" [title]="exp.tribunal_juzgado || 'Tribunal no especificado'">
+                      {{ exp.tribunal_juzgado || 'Sin tribunal asignado' }}
                     </div>
                   </td>
 
                   <!-- MATERIA -->
                   <td class="p-3.5 text-sm text-gray-600">
-                    <span class="bg-gray-100 text-gray-800 text-xs px-2.5 py-1 rounded">
+                    <span class="bg-gray-100 border border-gray-200 text-gray-800 text-xs px-2.5 py-1 rounded whitespace-nowrap">
                       {{ exp.materia }}
                     </span>
                   </td>
 
-                  <!-- ABOGADO -->
-                  <td class="p-3.5 text-sm text-gray-600">
-                    Dra. Ana López
+                  <!-- ABOGADO DINÁMICO (Usando Helper) -->
+                  <td class="p-3.5 text-sm text-gray-600 truncate max-w-32" [title]="getAbogadoNombre(exp)">
+                    {{ getAbogadoNombre(exp) }}
                   </td>
 
                   <!-- ESTADO -->
                   <td class="p-3.5">
                     <span
-                      class="inline-flex px-2.5 py-1 text-xs font-medium rounded-full"
+                      class="inline-flex px-2.5 py-1 text-[11px] font-medium rounded-full border whitespace-nowrap"
                       [ngClass]="{
-                        'bg-green-100 text-green-800': exp.estado === 'En proceso',
-                        'bg-blue-100 text-blue-800': exp.estado === 'Abierto',
-                        'bg-purple-100 text-purple-800': exp.estado === 'En audiencia',
-                        'bg-gray-100 text-gray-700': exp.estado === 'Cerrado'
+                        'bg-green-50 text-green-700 border-green-200': exp.estado === 'En proceso' || exp.estado === 'Activo',
+                        'bg-blue-50 text-blue-700 border-blue-200': exp.estado === 'Abierto',
+                        'bg-[#FFF8E1] text-[#F57F17] border-[#FFECB3]': exp.estado === 'Pendiente',
+                        'bg-gray-50 text-gray-600 border-gray-200': exp.estado === 'Cerrado' || exp.estado === 'Finalizado'
                       }">
                       {{ exp.estado }}
                     </span>
                   </td>
 
-                  <!-- ACCIÓN: UNICAMENTE VER (SOLO LECTURA) -->
+                  <!-- ACCIÓN -->
                   <td class="py-4 px-6 text-right">
                     <a
                       [routerLink]="['/expedientes', exp.id_expediente]"
-                      class="inline-flex items-center gap-1 px-3 py-1.5 bg-[#4A1525] hover:bg-[#38101c] text-white text-xs rounded font-medium transition cursor-pointer">
-                      <span>👁️</span>
+                      class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-[#4A1525] hover:bg-[#38101c] text-white text-xs rounded font-medium transition cursor-pointer shadow-sm">
+                      <ng-icon name="heroEyeSolid"></ng-icon>
                       <span>Ver</span>
                     </a>
                   </td>
@@ -194,22 +184,32 @@
         <!-- PRÓXIMAS CITAS DEL CLIENTE -->
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
           <h2 class="text-base font-bold text-[#4A1525] mb-4 flex items-center gap-2">
-            <span>📅</span> Próximas Citas y Audiencias
+            <ng-icon name="heroCalendarSolid" class="text-[#d4b88c]"></ng-icon>
+            Próximas Citas y Audiencias
           </h2>
 
-          <div class="space-y-3">
+          <!-- CONTENEDOR DE CITAS CON SCROLL: Agregado max-h-96 y custom-scrollbar -->
+          <div class="space-y-3 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
             <div *ngFor="let cita of proximasCitas" class="p-4 bg-gray-50 rounded-lg border border-gray-200/60 flex items-start justify-between">
               <div>
                 <h4 class="text-sm font-semibold text-gray-900">{{ cita.titulo }}</h4>
                 <p class="text-xs text-gray-500 mt-1">Con: {{ cita.abogado }}</p>
-                <p class="text-xs text-gray-400 mt-0.5">📍 {{ cita.modalidad }}</p>
+                <p class="text-xs text-gray-400 mt-0.5 flex items-center gap-1">
+                  <ng-icon name="heroMapPinSolid"></ng-icon>
+                  {{ cita.modalidad }}
+                </p>
               </div>
               <div class="text-right">
-                <span class="text-xs font-bold text-[#4A1525] bg-amber-50 px-2.5 py-1 rounded border border-amber-200">
+                <span class="text-xs font-bold text-[#4A1525] bg-[#fdf8f3] px-2.5 py-1 rounded border border-[#f5e6d3]">
                   {{ cita.fecha }}
                 </span>
-                <p class="text-xs text-gray-500 mt-1">{{ cita.hora }}</p>
+                <!-- AHORA HORA SE MOSTRARÁ CORRECTAMENTE -->
+                <p class="text-xs text-gray-500 mt-1 font-mono">{{ cita.hora }}</p>
               </div>
+            </div>
+            
+            <div *ngIf="proximasCitas.length === 0" class="py-4 text-center text-gray-400 text-sm">
+              No tiene citas programadas próximamente.
             </div>
           </div>
         </div>
@@ -222,20 +222,21 @@
         <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
           <div class="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">
             <h2 class="text-base font-bold text-[#4A1525] flex items-center gap-2">
-              <span>🔔</span> Notificaciones del Caso
+              <ng-icon name="heroBellSolid" class="text-[#d4b88c]"></ng-icon>
+              Notificaciones del Caso
             </h2>
-            <span *ngIf="notificacionesSinLeer > 0" class="text-[11px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-bold">
+            <span *ngIf="notificacionesSinLeer > 0" class="text-[11px] bg-red-100 text-red-700 border border-red-200 px-2 py-0.5 rounded-full font-bold">
               {{ notificacionesSinLeer }} nuevas
             </span>
           </div>
 
-          <div class="space-y-4">
+          <div class="space-y-4 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
             <div
               *ngFor="let n of notificaciones"
               (click)="marcarComoLeida(n)"
               class="p-3.5 rounded-lg border text-xs transition-all cursor-pointer relative"
               [ngClass]="{
-                'bg-amber-50/40 border-amber-200': !n.leida,
+                'bg-[#fdf8f3] border-[#f5e6d3]': !n.leida,
                 'bg-white border-gray-100 text-gray-500': n.leida
               }">
 
@@ -251,21 +252,39 @@
                 {{ n.descripcion }}
               </p>
             </div>
+            
+            <div *ngIf="notificaciones.length === 0" class="py-4 text-center text-gray-400 text-sm">
+              No tiene notificaciones recientes.
+            </div>
           </div>
         </div>
 
-        <!-- ATENCIÓN AL CLIENTE -->
-        <div class="bg-[#4A1525] text-white rounded-xl p-6 shadow-md">
-          <h3 class="text-base font-bold mb-2 flex items-center gap-2">
-            <span>💬</span> ¿Tiene alguna duda sobre su caso?
+        <!-- ATENCIÓN AL CLIENTE DINÁMICA -->
+        <div class="bg-[#4A1525] text-white rounded-xl p-6 shadow-md relative overflow-hidden">
+          <div class="absolute -right-6 -top-6 text-white/5 text-9xl pointer-events-none">
+            <ng-icon name="heroScaleSolid"></ng-icon>
+          </div>
+
+          <h3 class="text-base font-bold mb-2 flex items-center gap-2 relative z-10">
+            <ng-icon name="heroChatBubbleLeftEllipsisSolid" class="text-[#d4b88c]"></ng-icon>
+            ¿Tiene alguna duda?
           </h3>
-          <p class="text-xs text-amber-100 leading-relaxed mb-4">
+          <p class="text-xs text-[#eaddd1] leading-relaxed mb-4 relative z-10">
             Su especialista legal está disponible para responder sus consultas. Puede comunicarse vía correo o en su próxima cita.
           </p>
-          <div class="bg-white/10 p-3 rounded-lg text-xs space-y-1">
-            <p class="font-medium text-white">Dra. Ana López</p>
-            <p class="text-gray-300">✉️ alopez@justice.law</p>
-            <p class="text-gray-300">📞 +504 2239-0000 ext. 104</p>
+          <div class="bg-white/10 border border-white/10 p-3 rounded-lg text-xs space-y-2 relative z-10">
+            
+            <!-- NOMBRE DEL ABOGADO -->
+            <p class="font-medium text-white flex items-center gap-1.5 truncate texto-sec">
+              <ng-icon name="heroUserSolid" class="text-[#d4b88c]"></ng-icon>
+              {{ abogadoPrincipal?.nombre ? 'Dr(a). ' + abogadoPrincipal!.nombre : 'Soporte Legal' }}
+            </p>
+            
+            <!-- CORREO  -->
+            <p class="text-gray-300 flex items-center gap-1.5 truncate texto-sec">
+              <ng-icon name="heroEnvelopeSolid" class="text-[#d4b88c]"></ng-icon>
+              {{ abogadoPrincipal?.correo || 'contacto@tubufete.com' }}
+            </p>
           </div>
         </div>
 

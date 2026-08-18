@@ -1,38 +1,59 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { Dashboard } from '../../../../core/services/dashboard';
-import { DashboardData } from '../../../../core/models/dashboard.interface'; 
-import { SharedHeader } from '../../../../shared/components/shared-header/shared-header'; 
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
-import { heroFolderSolid, heroBriefcaseSolid, heroUserGroupSolid, heroCheckCircleSolid} from '@ng-icons/heroicons/solid';
+import { 
+  heroFolderSolid, 
+  heroCalendarSolid, 
+  heroDocumentTextSolid, 
+  heroCheckCircleSolid 
+} from '@ng-icons/heroicons/solid';
 import { BaseChartDirective } from 'ng2-charts';
-import { ChartConfiguration, ChartData, ChartType, ChartOptions, Chart, registerables } from 'chart.js';
+import { ChartData, ChartOptions, Chart, registerables } from 'chart.js';
+
+
+import { Dashboard } from '../../../../core/services/dashboard'; 
+import { AuthService } from '../../../../core/services/auth.service'; 
+import { LawyerDashboardData } from '../../../../core/models/dashboard.interface';
+import { SharedHeader } from '../../../../shared/components/shared-header/shared-header'; 
+
 Chart.register(...registerables);
 
 @Component({
-  selector: 'app-dashboard-admin',
+  selector: 'app-dashboard-abogado',
   standalone: true,
   imports: [CommonModule, SharedHeader, NgIconComponent, BaseChartDirective, RouterModule], 
   viewProviders: [provideIcons({ 
-    heroFolderSolid, heroBriefcaseSolid, heroUserGroupSolid, heroCheckCircleSolid })],
-  templateUrl: './dashboard-admin.html',
-  styleUrl: './dashboard-admin.css',
+    heroFolderSolid, 
+    heroCalendarSolid, 
+    heroDocumentTextSolid, 
+    heroCheckCircleSolid 
+  })],
+  templateUrl: './dashboard-abogado.html',
+  styleUrl: './dashboard-abogado.css',
 })
-export class DashboardAdmin implements OnInit {
+export class DashboardAbogado implements OnInit {
   
-  dashboardData: DashboardData | null = null;
+  // Tipado estricto con la interfaz que creamos
+  dashboardData: LawyerDashboardData | null = null;
   cargando: boolean = true;
   error: string = '';
 
   saludo: string = ''; 
   fechaActual: string = '';
   mesActual: string = '';
+  nombreAbogado: string = ''; 
+  proximaAudienciaTexto: string = 'Sin citas';
+
+  // Inyección de dependencias
+  private dashboardService = inject(Dashboard);
+  private authService = inject(AuthService);
+  private cdr = inject(ChangeDetectorRef);
 
   // ==========================================
   // CONFIGURACIÓN GRÁFICA 1: BARRAS
   // ==========================================
-    public barChartOptions: ChartOptions<'bar'> = {
+  public barChartOptions: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
@@ -52,10 +73,10 @@ export class DashboardAdmin implements OnInit {
   };
   
   public barChartData: ChartData<'bar'> = {
-    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'], 
+    labels: [], 
     datasets: [
       { 
-        data: [3, 9, 5, 2, 6, 5], 
+        data: [], 
         label: 'Abiertos', 
         backgroundColor: '#D2B48C',
         borderRadius: 2,
@@ -63,7 +84,7 @@ export class DashboardAdmin implements OnInit {
         categoryPercentage: 0.7
       },
       { 
-        data: [5, 3, 7, 5, 5, 8], 
+        data: [], 
         label: 'Cerrados', 
         backgroundColor: '#374151', 
         borderRadius: 2,
@@ -89,29 +110,27 @@ export class DashboardAdmin implements OnInit {
   };
 
   public doughnutChartData: ChartData<'doughnut'> = {
-    labels: ['Civil', 'Mercantil', 'Familia', 'Laboral', 'Penal'], 
+    labels: [], 
     datasets: [
       {
-        data: [21, 14, 11, 9, 5], 
-        backgroundColor: [
-          '#D2B48C', 
-          '#1F2937', 
-          '#9CA3AF', 
-          '#4B5563', 
-          '#2563EB'  
-        ],
+        data: [], 
+        backgroundColor: ['#D2B48C', '#1F2937', '#9CA3AF', '#4B5563', '#2563EB'],
         borderWidth: 0,
         hoverOffset: 4
       }
     ]
   };
 
-  constructor(
-    private dashboardService: Dashboard,
-    private cdr: ChangeDetectorRef
-  ) {}
-
   ngOnInit(): void {
+    // 1. Obtener datos del usuario desde el AuthService
+    const usuario = this.authService.getUser();
+    if (usuario && usuario.nombre) {
+      // Extraer solo el primer nombre y apellido si es necesario, o usarlo completo
+      this.nombreAbogado = usuario.nombre;
+    } else {
+      this.nombreAbogado = 'Abogado';
+    }
+    
     this.configurarFechaYSaludo();
     this.cargarDashboard();
   }
@@ -121,11 +140,11 @@ export class DashboardAdmin implements OnInit {
     const hora = fecha.getHours();
 
     if (hora >= 0 && hora < 12) {
-      this.saludo = 'Buenos días, Administrador';
+      this.saludo = `Buenos días, ${this.nombreAbogado}`;
     } else if (hora >= 12 && hora < 19) {
-      this.saludo = 'Buenas tardes, Administrador';
+      this.saludo = `Buenas tardes, ${this.nombreAbogado}`;
     } else {
-      this.saludo = 'Buenas noches, Administrador';
+      this.saludo = `Buenas noches, ${this.nombreAbogado}`;
     }
 
     const opciones: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
@@ -138,37 +157,20 @@ export class DashboardAdmin implements OnInit {
 
   cargarDashboard(): void {
     this.cargando = true;
-    this.dashboardService.getAdminDashboard().subscribe({
-      next: (data) => {
-        console.log('✅ Datos reales del backend:', data); 
+    
+    this.dashboardService.getLawyerDashboard().subscribe({
+      next: (data: LawyerDashboardData) => {
+        this.dashboardData = data;
 
-        // 1. FILTRADO DE CITAS (Mes actual y rango de 15 días)
-        const hoy = new Date();
-        hoy.setHours(0, 0, 0, 0);
-        
-        const limite15Dias = new Date(hoy);
-        limite15Dias.setDate(hoy.getDate() + 15);
-        
-        const mesActual = hoy.getMonth();
-        const anioActual = hoy.getFullYear();
+        // Establecer el texto de la próxima audiencia para el KPI
+        if (data.proximasCitas && data.proximasCitas.length > 0) {
+           const proxCita = new Date(data.proximasCitas[0].fecha);
+           this.proximaAudienciaTexto = `${proxCita.getDate()} ${proxCita.toLocaleString('es-ES', { month: 'short' })}`;
+        } else {
+           this.proximaAudienciaTexto = 'Sin citas';
+        }
 
-        const citasFiltradas = data.proximasCitas.filter(cita => {
-          const fechaCita = new Date(cita.fecha);
-          
-          const esMayorOIgualAHoy = fechaCita >= hoy;
-          const estaEnRango15Dias = fechaCita <= limite15Dias;
-          const esDelMesYAnioActual = fechaCita.getMonth() === mesActual && fechaCita.getFullYear() === anioActual;
-
-          return esMayorOIgualAHoy && estaEnRango15Dias && esDelMesYAnioActual;
-        });
-
-        // 2. ASIGNACIÓN AL DASHBOARD (Aquí usamos la variable recién declarada)
-        this.dashboardData = {
-          ...data,
-          proximasCitas: citasFiltradas
-        };
-
-        // 3. GRÁFICA DE DONA (Materias)
+        // 1. GRÁFICA DE DONA (Materias del Abogado)
         if (data.graficas && data.graficas.expedientesPorMateria) {
           const nombresMaterias = data.graficas.expedientesPorMateria.map(m => m.materia);
           const cantidadesMaterias = data.graficas.expedientesPorMateria.map(m => m._count.materia);
@@ -184,7 +186,7 @@ export class DashboardAdmin implements OnInit {
           };
         }
 
-        // 4. GRÁFICA DE BARRAS (Actividad Mensual)
+        // 2. GRÁFICA DE BARRAS (Actividad Mensual del Abogado)
         if (data.graficas && data.graficas.actividadMensual) {
           this.barChartData = {
             labels: data.graficas.actividadMensual.meses,
@@ -204,17 +206,15 @@ export class DashboardAdmin implements OnInit {
         this.cargando = false;
         this.cdr.detectChanges(); 
       },
-      error: (err) => {
-        console.error('Error al cargar dashboard', err);
-        this.error = 'No se pudo cargar la información del dashboard.';
+      error: (err: any) => {
+        console.error('Error al cargar el dashboard del abogado:', err);
+        this.error = 'No se pudo cargar la información de tu panel. Verifica tu conexión o permisos.';
         this.cargando = false;
         this.cdr.detectChanges(); 
       }
     });
   }
-  // Agrega estos métodos dentro de la clase de tus componentes Dashboard
-
-obtenerNombreMostrar(expediente: any): string {
+  obtenerNombreMostrar(expediente: any): string {
   const partes = expediente.partes_involucradas || expediente.partes;
   if (partes && partes.length > 0) {
     const demandante = partes.find(
@@ -226,4 +226,6 @@ obtenerNombreMostrar(expediente: any): string {
   }
   return expediente.cliente?.nombre || 'Sin registro';
 }
+
+  
 }

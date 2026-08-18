@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 // 1. Definimos las interfaces para que TypeScript nos ayude con el autocompletado
 export interface Notificacion {
@@ -24,7 +25,7 @@ export interface NotificacionResponse {
 })
 export class NotificationService {
   // Ajusta esta URL si tu backend corre en otro puerto
-  private apiUrl = 'http://localhost:3000/api/notificaciones'; 
+  private apiUrl = `${environment.apiUrl}/notificaciones`;
 
   // 2. Estado reactivo para el contador de notificaciones sin leer
   private unreadCountSubject = new BehaviorSubject<number>(0);

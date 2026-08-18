@@ -19,8 +19,8 @@ export interface UsuarioEquipo {
 export interface ExpedienteEquipo {
   id_usuario?: string;
   rol_en_caso?: string;
-  user?: UsuarioEquipo;      // Agregado para resolver el error 'user'
-  usuario?: UsuarioEquipo;   // Por si tu backend responde como 'usuario' o 'user'
+  user?: UsuarioEquipo;
+  usuario?: UsuarioEquipo; 
 }
 
 export interface ParteInvolucrada {
@@ -47,7 +47,7 @@ export interface Expediente {
   // JOINs
   cliente?: ClienteExpediente;  
   equipo?: ExpedienteEquipo[];
-  partes?: ParteInvolucrada[];
+  partes_involucradas?: ParteInvolucrada[];
   proxima_cita?: string;
 }
 

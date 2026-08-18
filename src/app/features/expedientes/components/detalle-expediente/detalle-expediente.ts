@@ -4,6 +4,7 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms'; // 1. IMPORTAR FORMSMODULE
 import { ExpedienteService, Expediente, ParteInvolucrada } from '../../../../core/services/expediente'; 
 import { HistorialService, EventoHistorial } from '../../../../core/services/historial.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { SharedHeader } from '../../../../shared/components/shared-header/shared-header';
 import { 
@@ -48,8 +49,13 @@ export class DetalleExpediente implements OnInit {
     private route: ActivatedRoute,
     private expedienteService: ExpedienteService,
     private historialService: HistorialService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private authService: AuthService
   ) {}
+
+  get esAdministrador(): boolean {
+    return this.authService.getUser()?.rol === 'Administrador';
+  }
 
   ngOnInit(): void {
     this.route.paramMap.subscribe({

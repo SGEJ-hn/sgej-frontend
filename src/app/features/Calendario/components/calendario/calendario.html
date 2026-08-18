@@ -265,6 +265,48 @@
           class="w-full border border-gray-300 p-2 text-sm focus:outline-none focus:border-[#d4b88c] rounded custom-font">
       </div>
 
+      <!-- Participantes -->
+      <div>
+        <label class="block text-sm text-gray-700 mb-1">Participantes</label>
+        
+        <!-- Lista de etiquetas (Tags) de participantes agregados -->
+        <div class="flex flex-wrap gap-2 mb-2" *ngIf="nuevaCita.participantes && nuevaCita.participantes.length > 0">
+          <div *ngFor="let p of nuevaCita.participantes; let i = index" 
+               class="bg-[#d4b88c] text-[#4a1525] px-3 py-1 rounded flex items-center gap-2 text-sm font-medium">
+            <span>{{ p }}</span>
+            <button 
+              type="button" 
+              (click)="removerParticipante(i)" 
+              class="text-[#4a1525] hover:text-black font-bold text-lg leading-none cursor-pointer focus:outline-none">
+              &times;
+            </button>
+          </div>
+        </div>
+
+        <!-- Dropdown para agregar participantes del expediente -->
+        <div class="flex gap-2">
+          <select 
+            (ngModelChange)="cargarPersonasExpediente()" 
+            name="personaSeleccionada"
+            class="w-full border border-gray-300 p-2 text-sm focus:outline-none focus:border-[#d4b88c] rounded custom-font bg-white disabled:bg-gray-100 disabled:text-gray-400"
+            [disabled]="personasDisponibles.length === 0">
+            <option value="" disabled selected>
+              {{ personasDisponibles.length === 0 ? 'Selecciona un expediente primero...' : 'Seleccione un participante...' }}
+            </option>
+            <option *ngFor="let persona of personasDisponibles" [value]="persona">
+              {{ persona }}
+            </option>
+          </select>
+          <button 
+            type="button" 
+            (click)="agregarParticipante()"
+            [disabled]="!personaSeleccionada"
+            class="bg-[#4a1525] text-white px-3 py-2 rounded hover:bg-[#38101c] transition-colors flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
+            <ng-icon name="heroPlus" class="text-lg"></ng-icon>
+          </button>
+        </div>
+      </div>
+
       <!-- Notas -->
       <div>
         <label class="block text-sm text-gray-700 mb-1">Notas / Recordatorio</label>

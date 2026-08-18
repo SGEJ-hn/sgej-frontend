@@ -14,7 +14,7 @@
     </a>
     
     <!-- Botón Editar -->
-    <button *ngIf="expediente" (click)="abrirModalEditar()" class="px-4 py-1.5 bg-[#4a1525] hover:bg-[#38101c] text-white text-xs font-medium rounded flex items-center gap-2 transition-colors cursor-pointer">
+    <button *ngIf="expediente && esAdministrador" (click)="abrirModalEditar()" class="px-4 py-1.5 bg-[#4a1525] hover:bg-[#38101c] text-white text-xs font-medium rounded flex items-center gap-2 transition-colors cursor-pointer">
       <ng-icon name="heroPencilSquare"></ng-icon>
       Editar
     </button>

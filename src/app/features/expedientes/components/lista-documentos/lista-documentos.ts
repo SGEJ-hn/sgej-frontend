@@ -17,6 +17,7 @@ import {
 } from '@ng-icons/heroicons/outline';
 import { Documentos } from '../../services/documentos';
 import { SharedHeader } from '../../../../shared/components/shared-header/shared-header';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-lista-documentos',
@@ -33,6 +34,7 @@ export class ListaDocumentos implements OnInit {
   private documentosService = inject(Documentos);
   private route = inject(ActivatedRoute);
   private cdr = inject(ChangeDetectorRef); 
+  private authService = inject(AuthService);
 
   expedienteId: string = '';
   documentos: any[] = [];
@@ -48,6 +50,10 @@ export class ListaDocumentos implements OnInit {
   limite: number = 7;
   totalPaginas: number = 1;
   totalEntradas: number = 0;
+
+  get puedeGestionarDocumentos(): boolean {
+    return ['Administrador', 'Abogado', 'Paralegal'].includes(this.authService.getUser()?.rol ?? '');
+  }
   
   ngOnInit() {
     this.expedienteId = this.route.snapshot.paramMap.get('id_expediente') || '';

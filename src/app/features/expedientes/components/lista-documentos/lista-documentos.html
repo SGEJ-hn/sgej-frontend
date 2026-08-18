@@ -7,7 +7,7 @@
       <ng-icon name="heroArrowLeft"></ng-icon>
       Volver al Expediente
     </a>
-    <a [routerLink]="['/expedientes', expedienteId, 'documentos', 'subir']" class="px-5 py-2 bg-[#4a1525] hover:bg-[#38101c] text-white font-medium flex items-center gap-2 transition-colors cursor-pointer">
+    <a *ngIf="puedeGestionarDocumentos" [routerLink]="['/expedientes', expedienteId, 'documentos', 'subir']" class="px-5 py-2 bg-[#4a1525] hover:bg-[#38101c] text-white font-medium flex items-center gap-2 transition-colors cursor-pointer">
       <ng-icon name="heroPlus"></ng-icon>
       Subir Documento
     </a>
@@ -70,12 +70,12 @@
               </button>
               
               <!-- Botón Editar -->
-              <button (click)="abrirModalEditar(doc)" class="bg-[#4a1525] hover:bg-[#38101c] text-white p-1.5 rounded transition-colors cursor-pointer">
+              <button *ngIf="puedeGestionarDocumentos" (click)="abrirModalEditar(doc)" class="bg-[#4a1525] hover:bg-[#38101c] text-white p-1.5 rounded transition-colors cursor-pointer">
                 <ng-icon name="heroPencilSquare"></ng-icon>
               </button>
               
               <!-- Botón Eliminar -->
-              <button (click)="eliminar(doc.id_documento)" class="bg-[#4a1525] hover:bg-red-700 text-white p-1.5 rounded transition-colors cursor-pointer">
+              <button *ngIf="puedeGestionarDocumentos" (click)="eliminar(doc.id_documento)" class="bg-[#4a1525] hover:bg-red-700 text-white p-1.5 rounded transition-colors cursor-pointer">
                 <ng-icon name="heroTrash"></ng-icon>
               </button>
               

@@ -18,6 +18,7 @@ export interface Cita {
   duracion_estimada: string;
   notas_recordatorio?: string;
   recordatorio_automatico: boolean;
+  participantes?: string[];
 }
 
 @Injectable({

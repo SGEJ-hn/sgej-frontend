@@ -82,18 +82,18 @@ export class Sidebar implements OnInit, OnDestroy {
       nombre: 'Inicio',
       ruta: '/dashboard',
       icono: 'heroHome',
-      roles: ['Administrador', 'Abogado', 'Paralegal', 'Cliente'] 
+      roles: ['Administrador', 'Abogado', 'Paralegal']
+    },
+    {
+      nombre: 'Mi portal',
+      ruta: '/cliente',
+      icono: 'heroHome',
+      roles: ['Cliente']
     },
     {
       nombre: 'Expedientes',
       ruta: '/expedientes',
       icono: 'heroFolder',
-      roles: ['Administrador', 'Abogado', 'Paralegal', 'Cliente']
-    },
-    {
-      nombre: 'Documentos',
-      ruta: '/documentos', 
-      icono: 'heroDocument',
       roles: ['Administrador', 'Abogado', 'Paralegal', 'Cliente']
     },
     {
