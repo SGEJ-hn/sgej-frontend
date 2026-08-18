@@ -70,6 +70,7 @@ export class Calendario implements OnInit {
   esNavegador: boolean = false;
   terminoBusqueda: string = '';
   filtroDias: number = 30;
+  nuevoParticipante: string = '';
 
 
   // Usuario actual
@@ -97,30 +98,89 @@ export class Calendario implements OnInit {
     return `${mes.charAt(0).toUpperCase() + mes.slice(1)} de ${anio}`;
   }
 
+// Se ejecuta cuando el usuario cambia el expediente
+  cargarPersonasExpediente(): void {
+    const idExp = this.nuevaCita.id_expediente;
+    this.personaSeleccionada = ''; 
+    this.personasDisponibles = []; 
+
+    if (!idExp) {
+      return;
+    }
+
+    // Buscamos directamente en el arreglo que ya se descargó al inicio
+    const expedienteEncontrado = this.expedientes.find(
+      (exp: any) => exp.id_expediente === idExp
+    );
+
+    if (expedienteEncontrado) {
+      const nombresSet = new Set<string>(); 
+
+      // 1. Extraer Cliente (Gisela Perez, según tu consola)
+      if (expedienteEncontrado.cliente && expedienteEncontrado.cliente.nombre) {
+        nombresSet.add(`${expedienteEncontrado.cliente.nombre} (Cliente)`);
+      }
+
+      // 2. Extraer Equipo (Pedro Martinez, según tu consola)
+      if (expedienteEncontrado.equipo && expedienteEncontrado.equipo.length > 0) {
+        expedienteEncontrado.equipo.forEach((miembro: any) => {
+          const nombre = miembro.user?.nombre || miembro.usuario?.nombre; 
+          const rol = miembro.rol_en_caso ? ` (${miembro.rol_en_caso})` : ' (Equipo)';
+          if (nombre) nombresSet.add(`${nombre}${rol}`);
+        });
+      }
+
+      // 3. Extraer Partes Involucradas (Corregimos el nombre de la variable aquí)
+      if (expedienteEncontrado.partes_involucradas && expedienteEncontrado.partes_involucradas.length > 0) {
+        expedienteEncontrado.partes_involucradas.forEach((parte: any) => {
+          if (parte.nombre_completo) {
+            const clasificacion = parte.clasificacion ? ` (${parte.clasificacion})` : ' (Parte)';
+            nombresSet.add(`${parte.nombre_completo}${clasificacion}`);
+          }
+        });
+      }
+
+      // Pasamos los nombres encontrados a la lista desplegable
+      this.personasDisponibles = Array.from(nombresSet);
+      
+      // Le decimos a Angular que refresque la pantalla
+      this.cdr.detectChanges();
+    }
+  }
 
   // Formulario
 
   nuevaCita = {
 
     id_expediente: '',
-
     titulo: '',
-
     tipo_cita: '',
-
     lugar_sala: '',
-
     fecha: '',
-
     hora_inicio: '',
-
     duracion_estimada: '',
-
     notas_recordatorio: '',
-
-    recordatorio_automatico: true
+    recordatorio_automatico: true,
+    participantes: [] as string[]
 
   };
+
+  // Variables para la lista desplegable de participantes
+  personasDisponibles: string[] = []; 
+  personaSeleccionada: string = '';
+
+  // Agregar un participante desde la lista desplegable
+  agregarParticipante(): void {
+    if (this.personaSeleccionada && !this.nuevaCita.participantes.includes(this.personaSeleccionada)) {
+      this.nuevaCita.participantes.push(this.personaSeleccionada);
+      this.personaSeleccionada = ''; 
+    }
+  }
+
+  // Quitar un participante de la lista
+  removerParticipante(index: number): void {
+    this.nuevaCita.participantes.splice(index, 1);
+  }
 
 
   // Calendario
@@ -453,10 +513,14 @@ export class Calendario implements OnInit {
 
 
       recordatorio_automatico:
-        this.citaSeleccionada.recordatorio_automatico
-
+        this.citaSeleccionada.recordatorio_automatico,
+      
+      participantes: 
+        this.citaSeleccionada.participantes ? [...this.citaSeleccionada.participantes] : []
     };
 
+    // 🔥 Agrega esta línea para que cargue la lista si la cita tiene expediente
+    this.cargarPersonasExpediente(); 
 
     this.modalNuevaCitaAbierto = true;
 
@@ -754,10 +818,13 @@ export class Calendario implements OnInit {
 
       notas_recordatorio: '',
 
-      recordatorio_automatico: true
-
+      recordatorio_automatico: true,
+      participantes: []
     };
 
+    this.nuevoParticipante = '';    
+    this.personasDisponibles = [];
+    this.personaSeleccionada = '';
   }
 
 // Fecha para formulario

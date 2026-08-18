@@ -23,37 +23,41 @@
       <!-- FILA 1: KPIs -->
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-6">
         
+        <!-- KPI 1: Expedientes Activos -->
         <div class="bg-white border border-[#E5E7EB] p-6 shadow-sm">
           <div class="flex justify-between items-center mb-4 text-[#4B1623]">
             <ng-icon name="heroFolderSolid"></ng-icon>
-            <span class="text-[11px] text-gray-500 font-medium texto-sec">+ 6 este mes</span>
+            <span class="text-[11px] text-gray-500 font-medium texto-sec">+ {{ dashboardData.kpis.nuevosMes || 0 }} este mes</span>
           </div>
           <h3 class="text-4xl font-bold text-gray-900 mb-1">{{ dashboardData.kpis.expedientesActivos }}</h3>
-          <p class="text-[16px] text-gray-700 font-medium mt-2">Expedientes Globales Activos</p>
+          <p class="text-[16px] text-gray-700 font-medium mt-2">Expedientes Activos</p>
         </div>
 
+        <!-- KPI 2: Audiencias esta semana -->
         <div class="bg-white border border-[#E5E7EB] p-6 shadow-sm">
           <div class="flex justify-between items-center mb-4 text-[#4B1623]">
-            <ng-icon name="heroBriefcaseSolid"></ng-icon>
-            <span class="text-[11px] text-gray-500 font-medium texto-sec">En el sistema</span>
+            <ng-icon name="heroCalendarSolid"></ng-icon>
+            <span class="text-[11px] text-gray-500 font-medium texto-sec">Próx. {{ proximaAudienciaTexto }}</span>
           </div>
-          <h3 class="text-4xl font-bold text-gray-900 mb-1">{{ dashboardData.kpis.abogadosActivos }}</h3>
-          <p class="text-[16px] text-gray-700 font-medium mt-2">Abogados Activos</p>
+          <h3 class="text-4xl font-bold text-gray-900 mb-1">{{ dashboardData.kpis.audienciasSemana || 0 }}</h3>
+          <p class="text-[16px] text-gray-700 font-medium mt-2">Audiencias esta semana</p>
         </div>
 
+        <!-- KPI 3: Documentos por revisar -->
         <div class="bg-white border border-[#E5E7EB] p-6 shadow-sm">
           <div class="flex justify-between items-center mb-4 text-[#4B1623]">
-            <ng-icon name="heroUserGroupSolid"></ng-icon>
-            <span class="text-[11px] text-gray-500 font-medium texto-sec">+ 20 este mes</span>
+            <ng-icon name="heroDocumentTextSolid"></ng-icon>
+            <span class="text-[11px] text-[#D97706] font-medium texto-sec">Requieren Acción</span>
           </div>
-          <h3 class="text-4xl font-bold text-gray-900 mb-1">{{ dashboardData.kpis.clientesRegistrados }}</h3>
-          <p class="text-[16px] text-gray-700 font-medium mt-2">Clientes Registrados</p>
+          <h3 class="text-4xl font-bold text-gray-900 mb-1">{{ dashboardData.kpis.documentosRevision || 0 }}</h3>
+          <p class="text-[16px] text-gray-700 font-medium mt-2">Docs. por revisar</p>
         </div>
 
+        <!-- KPI 4: Casos Resueltos -->
         <div class="bg-white border border-[#E5E7EB] p-6 shadow-sm">
           <div class="flex justify-between items-center mb-4 text-[#4B1623]">
             <ng-icon name="heroCheckCircleSolid"></ng-icon>
-            <span class="text-[11px] text-gray-500 font-medium texto-sec">+ 22 este año</span>
+            <span class="text-[11px] text-gray-500 font-medium texto-sec">+ {{ dashboardData.kpis.resueltosAnio || 0 }} este año</span>
           </div>
           <h3 class="text-4xl font-bold text-gray-900 mb-1">{{ dashboardData.kpis.casosResueltos }}</h3>
           <p class="text-[16px] text-gray-700 font-medium mt-2">Casos Resueltos</p>
@@ -68,11 +72,10 @@
           <div class="flex justify-between items-start mb-6">
             <div>
               <h2 class="text-[15px] text-gray-900 border-l-2 border-[#4B1623] pl-3 ">Actividad Mensual</h2>
-              <p class="text-[11px] text-gray-500 mt-1 pl-4 texto-sec">Expedientes abiertos y cerrados por mes este año</p>
+              <p class="text-[11px] text-gray-500 mt-1 pl-4 texto-sec">Expedientes abiertos y cerrados por mes</p>
             </div>
-            <a routerLink="/reportes" class="text-[13px] text-[#d4b88c] hover:text-[#b89e78] cursor-pointer font-medium">Reporte Completo →</a>
+            <!-- Ocultamos el enlace a reportes si el abogado no tiene acceso a ese módulo -->
           </div>
-          <!-- INYECCIÓN GRÁFICA DE BARRAS -->
           <div class="flex-1 relative w-full h-full pb-2">
             <canvas baseChart
               [data]="barChartData"
@@ -85,10 +88,9 @@
         <!-- Contenedor Gráfica Pastel -->
         <div class="lg:col-span-1 bg-white border border-[#E5E7EB] p-6 shadow-sm flex flex-col h-100">
           <div class="mb-4">
-            <h2 class="text-[15px] text-gray-900 border-l-2 border-[#4B1623] pl-3">Tipos de expedientes este mes</h2>
+            <h2 class="text-[15px] text-gray-900 border-l-2 border-[#4B1623] pl-3">Tipos de expedientes</h2>
             <p class="text-[11px] text-gray-500 mt-1 pl-4 texto-sec">Distribución por materia</p>
           </div>
-          <!-- INYECCIÓN GRÁFICA DE DONA -->
           <div class="flex-1 relative w-full h-full pb-2">
             <canvas baseChart
               [data]="doughnutChartData"
@@ -118,7 +120,6 @@
                 <div class="w-8 h-8 shrink-0 bg-gray-50 border border-gray-200 flex items-center justify-center text-[#4B1623] rounded-sm mt-0.5">
                    <ng-icon name="heroFolderSolid"></ng-icon>
                 </div>
-                <!-- Donde mostrábamos el nombre del cliente -->
                 <div class="truncate">
                   <p class="text-[15px] font-light text-gray-900 truncate">
                     {{ obtenerNombreMostrar(exp) }}
@@ -140,21 +141,17 @@
               </div>
 
               <div class="w-40 shrink-0 hidden md:block text-center mx-2">
-                <p class="text-[13px] text-[#6E7A8A]/96 truncate" 
-                  [title]="exp.equipo && exp.equipo.length > 0 ? 'Dr(a). ' + exp.equipo[0].user.nombre : 'Sin asignar'">
-                  {{ exp.equipo && exp.equipo.length > 0 ? 'Dr(a). ' + exp.equipo[0].user.nombre : 'Sin asignar' }}
-                </p>
+                <p class="text-[13px] text-[#6E7A8A]/96 truncate">Dr(a). {{ nombreAbogado }}</p>
               </div>
 
               <!-- Fechas -->
               <div class="w-32 shrink-0 hidden lg:block text-right">
                 <p class="text-[12px] text-[#6E7A8A]/96 leading-tight">Apertura {{ exp.fecha_apertura | date:'d MMM yyyy' }}</p>
-                <!-- Omitimos Ult. Aud porque no viene en el backend actualmente -->
               </div>
             </div>
             
             <div *ngIf="dashboardData.expedientesRecientes.length === 0" class="py-6 text-center text-gray-400 text-sm">
-              No hay expedientes en este mes.
+              No hay expedientes recientes asignados a ti.
             </div>
           </div>
         </div>
@@ -172,13 +169,13 @@
               <!-- Fecha Cuadro -->
               <div class="flex flex-col items-center justify-center min-w-12 border-r border-gray-200 pr-3">
                 <span class="text-xl font-bold text-gray-900 leading-none">{{ cita.fecha | date:'dd' }}</span>
-                <span class="text-[12px] text-gray-900 capitalize font-medium mt-1">{{ cita.fecha | date:'MMMM' }}</span>
+                <span class="text-[12px] text-gray-900 capitalize font-medium mt-1">{{ cita.fecha | date:'MMM' }}</span>
               </div>
               
               <!-- Info Cita -->
               <div class="ml-3 flex-1 min-w-0">
                 <p class="text-[15px] font-light text-gray-900 truncate">• {{ cita.titulo }}</p>
-                <p class="text-[13px] text-gray-500 mt-0.5 truncate">{{ cita.expediente.numero_expediente }}</p>
+                <p class="text-[13px] text-gray-500 mt-0.5 truncate">{{ cita.expediente?.numero_expediente || 'Sin expediente' }}</p>
               </div>
               
               <!-- Hora -->
@@ -188,7 +185,7 @@
             </div>
 
             <div *ngIf="dashboardData.proximasCitas.length === 0" class="py-6 text-center text-gray-400 text-sm">
-              No hay citas programadas para este mes.
+              No tienes citas programadas próximamente.
             </div>
           </div>
         </div>

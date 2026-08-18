@@ -6,6 +6,7 @@ import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import { heroMagnifyingGlass, heroTrash } from '@ng-icons/heroicons/outline';
 import { ExpedienteService, Expediente } from '../../../../core/services/expediente';
 import { SharedHeader } from '../../../../shared/components/shared-header/shared-header';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-lista-expedientes',
@@ -25,11 +26,16 @@ export class ListaExpedientes implements OnInit {
 
   private expedienteService = inject(ExpedienteService);
   private cdr = inject(ChangeDetectorRef);
+  private authService = inject(AuthService);
 
   expedientes: Expediente[] = [];
   terminoBusqueda = '';
   cargando = true;
   error = '';
+
+  get esAdministrador(): boolean {
+    return this.authService.getUser()?.rol === 'Administrador';
+  }
 
   ngOnInit(): void {
     this.cargarExpedientes();
@@ -68,7 +74,6 @@ export class ListaExpedientes implements OnInit {
     });
   }
   obtenerNombreMostrar(expediente: any): string {
-    // Buscar en partes_involucradas (o partes como fallback)
     const partes = expediente.partes_involucradas || expediente.partes;
 
     if (partes && partes.length > 0) {
@@ -82,7 +87,6 @@ export class ListaExpedientes implements OnInit {
     return expediente.cliente?.nombre || 'Sin registro';
   }
 
-  // 2. Función mejorada para obtener el abogado
   obtenerAbogadoResponsable(expediente: Expediente): string {
     if (!expediente.equipo || expediente.equipo.length === 0) {
       return 'Sin asignar';
@@ -92,7 +96,6 @@ export class ListaExpedientes implements OnInit {
       integrante => integrante.rol_en_caso?.toLowerCase() === 'abogado'
     );
 
-    // Cubrimos las opciones de que el backend devuelva 'user' o 'usuario'
     return abogado?.user?.nombre || abogado?.usuario?.nombre || 'Sin asignar';
   }
 
@@ -115,7 +118,7 @@ export class ListaExpedientes implements OnInit {
     this.terminoBusqueda = '';
   }
 
-  // NUEVO MÉTODO: Eliminar expediente con confirmación
+  //Eliminar expediente con confirmación
   eliminarExpediente(id: string | undefined): void {
     if (!id) return;
 
@@ -125,10 +128,8 @@ export class ListaExpedientes implements OnInit {
     if (confirmacion) {
       this.expedienteService.eliminarExpediente(id).subscribe({
         next: () => {
-          // Filtramos el arreglo para quitar el expediente eliminado sin recargar la página
           this.expedientes = this.expedientes.filter(e => e.id_expediente !== id);
           
-          // Actualizamos la vista
           this.cdr.detectChanges();
         },
         error: (err) => {

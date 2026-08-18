@@ -1,3 +1,25 @@
 .custom-font {
   font-family: 'Fenix', sans-serif;
 }
+
+.texto-sec {
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* Estilo personalizado para la barra de desplazamiento */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px; /* Barra delgada y elegante */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent; /* Fondo invisible */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #E5E7EB; /* Gris clarito para que no distraiga */
+  border-radius: 10px; /* Bordes redondeados */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #d4b88c; /* Tu color dorado cuando pasen el mouse */
+}

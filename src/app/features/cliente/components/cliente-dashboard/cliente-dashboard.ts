@@ -1,8 +1,13 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { heroLockClosedSolid, heroFolderSolid, heroCalendarSolid, heroBellSolid, heroScaleSolid, heroEyeSolid, heroMapPinSolid, heroChatBubbleLeftEllipsisSolid, heroEnvelopeSolid, heroUserSolid } from '@ng-icons/heroicons/solid';
+
 import { AuthService, User } from '../../../../core/services/auth.service';
 import { ExpedienteService, Expediente } from '../../../../core/services/expediente';
+import { Cita, CitaService } from '../../../../core/services/cita.service';
+import { NotificationService } from '../../../../core/services/notification';
 import { SharedHeader } from '../../../../shared/components/shared-header/shared-header';
 
 export interface NotificacionCliente {
@@ -20,14 +25,21 @@ export interface NotificacionCliente {
   imports: [
     CommonModule,
     RouterModule,
-    SharedHeader
+    SharedHeader,
+    NgIconComponent
   ],
+  viewProviders: [provideIcons({
+    heroLockClosedSolid, heroFolderSolid, heroCalendarSolid, heroBellSolid, heroScaleSolid, heroEyeSolid, heroMapPinSolid, heroChatBubbleLeftEllipsisSolid, heroEnvelopeSolid, heroUserSolid
+  })],
   templateUrl: './cliente-dashboard.html',
   styleUrl: './cliente-dashboard.css'
 })
 export class ClienteDashboard implements OnInit {
   public authService = inject(AuthService);
   private expedienteService = inject(ExpedienteService);
+  private citaService = inject(CitaService);
+  private notificationService = inject(NotificationService);
+  private cdr = inject(ChangeDetectorRef);
 
   usuario: User | null = null;
   expedientes: Expediente[] = [];
@@ -35,49 +47,8 @@ export class ClienteDashboard implements OnInit {
   cargando = true;
   error = '';
 
-  notificaciones: NotificacionCliente[] = [
-    {
-      id: '1',
-      titulo: 'Documento disponible',
-      descripcion: 'El documento Contrato_Compraventa.pdf está disponible para consulta y descarga.',
-      fecha: '12 Julio 2026',
-      leida: false,
-      tipo: 'documento'
-    },
-    {
-      id: '2',
-      titulo: 'Cita programada',
-      descripcion: 'Su cita con la Dra. Ana López fue confirmada para el 15 de Julio a las 10:00 AM.',
-      fecha: '10 Julio 2026',
-      leida: false,
-      tipo: 'cita'
-    },
-    {
-      id: '3',
-      titulo: 'Actualización de estado',
-      descripcion: 'El expediente EXP-001-2026 cambió al estado En Proceso.',
-      fecha: '08 Julio 2026',
-      leida: true,
-      tipo: 'actualizacion'
-    }
-  ];
-
-  proximasCitas = [
-    {
-      titulo: 'Consulta de seguimiento del caso',
-      abogado: 'Dra. Ana López',
-      fecha: '15 Julio 2026',
-      hora: '10:00 AM',
-      modalidad: 'Presencial - Oficina Principal'
-    },
-    {
-      titulo: 'Revisión de documentación preliminar',
-      abogado: 'Dra. Ana López',
-      fecha: '28 Julio 2026',
-      hora: '02:00 PM',
-      modalidad: 'Virtual - Zoom'
-    }
-  ];
+  notificaciones: NotificacionCliente[] = [];
+  proximasCitas: Array<{ titulo: string; abogado: string; fecha: string; hora: string; modalidad: string }> = [];
 
   ngOnInit(): void {
     this.usuario = this.authService.getUser();
@@ -90,50 +61,78 @@ export class ClienteDashboard implements OnInit {
 
     this.expedienteService.obtenerExpedientes().subscribe({
       next: (res) => {
-        // Filtrar expedientes pertenecientes al cliente logueado
-        if (this.usuario) {
-          const userId = this.usuario.id_usuario;
-          this.expedientes = res.expedientes.filter(
-            exp => exp.id_cliente === userId || exp.cliente?.id_usuario === userId
-          );
+        this.expedientes = res.expedientes;
 
-          // Si no hay filtro estricto (ej. mock data en desarrollo), mostrar los expedientes devueltos
-          if (this.expedientes.length === 0 && res.expedientes.length > 0) {
-            this.expedientes = res.expedientes;
-          }
-        } else {
-          this.expedientes = res.expedientes;
-        }
-
-        if (this.expedientes.length > 0) {
+       if (this.expedientes.length > 0) {
           this.expedientePrincipal = this.expedientes[0];
         }
 
         this.cargando = false;
+        this.cargarCitas();
+        this.cargarNotificaciones();        
+        this.cdr.detectChanges(); 
       },
       error: (err) => {
         console.error('Error al cargar datos del cliente:', err);
         this.cargando = false;
-        // Datos demostrativos de respaldo para el cliente
-        this.expedientes = [
-          {
-            id_expediente: 'exp-001',
-            numero_expediente: 'EXP-001-2026',
-            id_cliente: this.usuario?.id_usuario || 'usr-1',
-            materia: 'Civil',
-            estado: 'En proceso',
-            tribunal_juzgado: 'Juzgado de Letras de lo Civil',
-            fecha_apertura: '2026-06-10',
-            descripcion_hechos: 'Proceso legal relacionado con contrato de compraventa.',
-            cliente: {
-              id_usuario: this.usuario?.id_usuario || 'usr-1',
-              nombre: this.usuario?.nombre || 'Juan López',
-              correo: this.usuario?.correo || 'juan.lopez@gmail.com'
+        this.error = 'No se pudo cargar la información de sus expedientes.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private cargarCitas(): void {
+    this.citaService.obtenerCitas().subscribe({
+      next: (citas: any[]) => { 
+        
+        const idsMisExpedientes = this.expedientes.map(e => e.id_expediente);
+        const citasDelCliente = citas.filter(c => idsMisExpedientes.includes(c.id_expediente));
+
+        this.proximasCitas = citasDelCliente.slice(0, 5).map(cita => {
+          let horaLimpia = 'Sin hora';
+          if (cita.hora_inicio) {
+            if (cita.hora_inicio.includes('T')) {
+              horaLimpia = cita.hora_inicio.split('T')[1].substring(0, 5);
+            } else {
+              horaLimpia = cita.hora_inicio.substring(0, 5);
             }
           }
-        ];
-        this.expedientePrincipal = this.expedientes[0];
-      }
+
+          return {
+            titulo: cita.titulo,
+            abogado: 'Equipo legal asignado',
+            fecha: new Date(cita.fecha).toLocaleDateString('es-HN'),
+            hora: horaLimpia,
+            modalidad: cita.lugar_sala || 'Pendiente de confirmar',
+          };
+        });
+
+        this.cdr.detectChanges(); 
+      },
+      error: () => { 
+        this.proximasCitas = []; 
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  private cargarNotificaciones(): void {
+    this.notificationService.getMisNotificaciones().subscribe({
+      next: respuesta => {
+        this.notificaciones = respuesta.notificaciones.map(n => ({
+          id: n.id_notificacion,
+          titulo: n.titulo,
+          descripcion: n.mensaje,
+          fecha: new Date(n.fecha_creacion).toLocaleDateString('es-HN'),
+          leida: n.leida,
+          tipo: n.tipo === 'cita' ? 'cita' : n.tipo === 'documento' ? 'documento' : 'actualizacion',
+        }));
+        this.cdr.detectChanges(); 
+      },
+      error: () => { 
+        this.notificaciones = []; 
+        this.cdr.detectChanges();
+      },
     });
   }
 
@@ -142,6 +141,23 @@ export class ClienteDashboard implements OnInit {
   }
 
   marcarComoLeida(notificacion: NotificacionCliente): void {
-    notificacion.leida = true;
+    if (notificacion.leida) return;
+    this.notificationService.marcarComoLeida(notificacion.id).subscribe({
+      next: () => { 
+        notificacion.leida = true; 
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  get abogadoPrincipal() {
+    if (!this.expedientePrincipal?.equipo || this.expedientePrincipal.equipo.length === 0) return null;
+    return this.expedientePrincipal.equipo[0].usuario || this.expedientePrincipal.equipo[0].user || null;
+  }
+
+  getAbogadoNombre(exp: Expediente): string {
+    if (!exp.equipo || exp.equipo.length === 0) return 'Sin asignar';
+    const u = exp.equipo[0].usuario || exp.equipo[0].user;
+    return u?.nombre ? 'Dr(a). ' + u.nombre : 'Sin asignar';
   }
 }

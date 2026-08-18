@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { DashboardData } from '../models/dashboard.interface'; 
+import { DashboardData, LawyerDashboardData } from '../models/dashboard.interface'; 
 import { environment } from '../../../environments/environment'
 
 @Injectable({
@@ -14,5 +14,9 @@ export class Dashboard {
 
   getAdminDashboard(): Observable<DashboardData> {
     return this.http.get<DashboardData>(`${this.apiUrl}/admin`);
+  }
+
+  getLawyerDashboard(): Observable<LawyerDashboardData> {
+    return this.http.get<LawyerDashboardData>(`${this.apiUrl}/abogado`);
   }
 }
