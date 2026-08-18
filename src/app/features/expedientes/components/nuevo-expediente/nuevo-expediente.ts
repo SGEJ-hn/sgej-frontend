@@ -174,7 +174,7 @@ export class NuevoExpediente implements OnInit {
       fecha_apertura: formValues.fecha_apertura,
       descripcion_hechos: formValues.descripcion_hechos,
       equipo: equipoAsignado,
-      partes: partesDelCaso
+      partes_involucradas: partesDelCaso
     };
 
     this.expedienteService.crearExpediente(payload).subscribe({
