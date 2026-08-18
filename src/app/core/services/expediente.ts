@@ -48,6 +48,7 @@ export interface Expediente {
   cliente?: ClienteExpediente;  
   equipo?: ExpedienteEquipo[];
   partes_involucradas?: ParteInvolucrada[];
+  partes?: ParteInvolucrada[];
   proxima_cita?: string;
 }
 

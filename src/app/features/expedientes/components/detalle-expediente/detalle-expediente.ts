@@ -147,7 +147,7 @@ export class DetalleExpediente implements OnInit {
 
   obtenerPartes(): ParteInvolucrada[] {
     if (!this.expediente) return [];
-    return (this.expediente as any).partes_involucradas || this.expediente.partes || [];
+    return this.expediente.partes_involucradas || this.expediente.partes || [];
   }
 
   obtenerNombreDemandante(): string {
