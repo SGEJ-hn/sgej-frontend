@@ -38,16 +38,17 @@ export interface EstadisticasReportes {
 })
 export class ReporteService {
 
-  private apiUrl = 'http://localhost:3000/api/reportes/estadisticas';
+  // 1. Usamos la variable del environment en lugar del texto fijo
+  private apiUrl = `${environment.apiUrl}/reportes/estadisticas`;
 
   constructor(
     private http: HttpClient
   ) {}
 
   // ─────────────────────────────────────────
-// Obtener estadísticas generales
-// ─────────────────────────────────────────
-obtenerEstadisticas(): Observable<EstadisticasReportes> {
-  return this.http.get<EstadisticasReportes>(this.apiUrl);
-}
+  // Obtener estadísticas generales
+  // ─────────────────────────────────────────
+  obtenerEstadisticas(): Observable<EstadisticasReportes> {
+    return this.http.get<EstadisticasReportes>(this.apiUrl);
+  }
 }
