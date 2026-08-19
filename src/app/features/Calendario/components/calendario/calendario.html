@@ -194,10 +194,12 @@
       <div>
         <label class="block text-sm text-gray-700 mb-1">Expediente</label>
         <select 
-          [(ngModel)]="nuevaCita.id_expediente" 
+          [ngModel]="nuevaCita.id_expediente" 
+          (ngModelChange)="nuevaCita.id_expediente = $event; cargarPersonasExpediente()"
           name="id_expediente"
           class="w-full border border-gray-300 p-2 text-sm focus:outline-none focus:border-[#d4b88c] rounded custom-font">
-          <option value="">Sin expediente asociado</option>
+          
+          <option value="">Seleccione un expediente (Opcional)</option>
           <option *ngFor="let exp of expedientes" [value]="exp.id_expediente">
             {{ exp.numero_expediente }} - {{ exp.materia }} ({{ exp.tribunal_juzgado }})
           </option>
@@ -283,29 +285,47 @@
           </div>
         </div>
 
-        <!-- Dropdown para agregar participantes del expediente -->
-        <div class="flex gap-2">
-          <select 
-            (ngModelChange)="cargarPersonasExpediente()" 
-            name="personaSeleccionada"
-            class="w-full border border-gray-300 p-2 text-sm focus:outline-none focus:border-[#d4b88c] rounded custom-font bg-white disabled:bg-gray-100 disabled:text-gray-400"
-            [disabled]="personasDisponibles.length === 0">
-            <option value="" disabled selected>
-              {{ personasDisponibles.length === 0 ? 'Selecciona un expediente primero...' : 'Seleccione un participante...' }}
-            </option>
-            <option *ngFor="let persona of personasDisponibles" [value]="persona">
-              {{ persona }}
-            </option>
-          </select>
-          <button 
-            type="button" 
-            (click)="agregarParticipante()"
-            [disabled]="!personaSeleccionada"
-            class="bg-[#4a1525] text-white px-3 py-2 rounded hover:bg-[#38101c] transition-colors flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
-            <ng-icon name="heroPlus" class="text-lg"></ng-icon>
-          </button>
-        </div>
-      </div>
+       <!-- Sección de Participantes -->
+<div class="mb-4">
+  <label class="block text-sm font-semibold mb-1 custom-font text-[#5b1f2b]">Participantes</label>
+  <div class="flex gap-2">
+    <!-- SELECT DE PERSONAS -->
+    <select 
+      [(ngModel)]="personaSeleccionada" 
+      name="personaSeleccionada"
+      class="flex-1 border border-gray-300 p-2 text-sm focus:outline-none focus:border-[#d4b88c] rounded custom-font">
+      <option value="" disabled selected>
+        {{ personasDisponibles.length === 0 ? 'Selecciona un expediente primero...' : 'Seleccione un participante...' }}
+      </option>
+      <!-- Iteramos sobre las personas disponibles -->
+      <option *ngFor="let persona of personasDisponibles" [value]="persona">
+        {{ persona }}
+      </option>
+    </select>
+    
+    <!-- BOTÓN DE AGREGAR (+) -->
+    <!-- Nota: Es vital que type sea "button" y no "submit" -->
+    <button 
+      type="button" 
+      (click)="agregarParticipante()"
+      [disabled]="!personaSeleccionada"
+      class="bg-[#8e6872] hover:bg-[#5b1f2b] text-white px-3 rounded flex items-center justify-center transition-colors"
+      [ngClass]="{'opacity-50 cursor-not-allowed': !personaSeleccionada}">
+      +
+    </button>
+  </div>
+</div>
+
+<!-- LISTA DE ETIQUETAS (PARTICIPANTES AGREGADOS) -->
+<div class="mt-2 flex flex-wrap gap-2" *ngIf="nuevaCita.participantes && nuevaCita.participantes.length > 0">
+  <span *ngFor="let part of nuevaCita.participantes; let i = index" 
+        class="bg-gray-200 text-gray-800 px-2 py-1 rounded text-xs flex items-center gap-1">
+    {{ part }}
+    <button type="button" (click)="removerParticipante(i)" class="text-red-500 hover:text-red-700 font-bold ml-1">
+      &times;
+    </button>
+  </span>
+</div>
 
       <!-- Notas -->
       <div>

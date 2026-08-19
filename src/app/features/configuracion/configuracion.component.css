@@ -1,3 +1,12 @@
+.custom-font {
+  font-family: 'Fenix', sans-serif;
+}
+
+.texto-sec {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+}
+
 /* ========== CONTENEDOR PRINCIPAL ========== */
 .config-container {
   padding: 24px 32px 40px;

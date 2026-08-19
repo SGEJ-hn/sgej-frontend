@@ -219,108 +219,237 @@
       </div>
     </ng-container>
   </div>
-  <!-- =============================== -->
-<!-- MODAL DE EDICIÓN DE EXPEDIENTE  -->
-<!-- =============================== -->
-<div *ngIf="mostrarModalEdicion" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-  <div class="bg-white rounded-lg w-full max-w-2xl p-6 shadow-xl border border-gray-200 max-h-[90vh] overflow-y-auto">
+ <!-- ============================================== -->
+<!-- MODAL DE EDICIÓN DE EXPEDIENTE (ESTILO SISTEMA) -->
+<!-- ============================================== -->
+<div *ngIf="mostrarModalEdicion" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+  <div class="bg-white rounded-lg shadow-2xl w-full max-w-4xl flex flex-col max-h-[90vh] overflow-hidden border border-gray-200">
     
     <!-- Encabezado del Modal -->
-    <h2 class="text-xl text-gray-900 border-l-[3px] border-[#4a1525] pl-3 mb-6 font-semibold">
-      Editar Expediente {{ expediente?.numero_expediente }}
-    </h2>
+    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+      <h2 class="text-xl text-[#4B1623] border-l-4 border-[#d4b88c] pl-3 font-bold tracking-wide">
+        Editar Expediente: <span class="font-medium text-gray-700">{{ expediente?.numero_expediente }}</span>
+      </h2>
+      <button (click)="cerrarModalEditar()" class="text-gray-400 hover:text-[#4B1623] transition-colors focus:outline-none bg-white p-1 rounded-full hover:bg-gray-100">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
 
-    <!-- Formulario de Campos -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-      
-      <!-- Materia -->
-      <div>
-        <label class="block text-gray-700 font-medium mb-1">Materia</label>
-        <input 
-          type="text" 
-          [(ngModel)]="expedienteEdicion.materia" 
-          class="w-full border border-gray-300 p-2 text-sm rounded focus:outline-none focus:border-[#d4b88c]">
+    <!-- Navegación de Pestañas -->
+    <div class="px-6 pt-3 border-b border-gray-200 bg-white">
+      <nav class="flex gap-6 text-sm font-medium">
+        <button 
+          (click)="pestanaEdicion = 'general'"
+          [ngClass]="pestanaEdicion === 'general' ? 'border-[#4B1623] text-[#4B1623]' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+          class="pb-3 border-b-2 transition-colors focus:outline-none">
+          Información General
+        </button>
+        <button 
+          (click)="pestanaEdicion = 'partes'"
+          [ngClass]="pestanaEdicion === 'partes' ? 'border-[#4B1623] text-[#4B1623]' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+          class="pb-3 border-b-2 transition-colors focus:outline-none flex items-center gap-2">
+          Partes Involucradas 
+          <span [ngClass]="pestanaEdicion === 'partes' ? 'bg-[#4B1623]/10 text-[#4B1623]' : 'bg-gray-100 text-gray-600'" class="py-0.5 px-2 rounded-full text-xs transition-colors">
+            {{ expedienteEdicion.partes_involucradas?.length || 0 }}
+          </span>
+        </button>
+        <button 
+          (click)="pestanaEdicion = 'equipo'"
+          [ngClass]="pestanaEdicion === 'equipo' ? 'border-[#4B1623] text-[#4B1623]' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+          class="pb-3 border-b-2 transition-colors focus:outline-none flex items-center gap-2">
+          Equipo Asignado
+          <span [ngClass]="pestanaEdicion === 'equipo' ? 'bg-[#4B1623]/10 text-[#4B1623]' : 'bg-gray-100 text-gray-600'" class="py-0.5 px-2 rounded-full text-xs transition-colors">
+            {{ expedienteEdicion.equipo?.length || 0 }}
+          </span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Cuerpo del Modal (Scrollable) -->
+    <div class="flex-1 overflow-y-auto p-6 bg-white">
+
+      <!-- Pestaña 1: Información General -->
+      <div *ngIf="pestanaEdicion === 'general'" class="grid grid-cols-1 md:grid-cols-2 gap-5 animate-fade-in-up">
+        
+        <div class="space-y-1">
+          <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider">Materia</label>
+          <input type="text" [(ngModel)]="expedienteEdicion.materia" class="w-full border border-gray-300 px-3 py-2.5 text-sm rounded-md focus:outline-none focus:border-[#d4b88c] focus:ring-1 focus:ring-[#d4b88c] transition-all bg-gray-50 focus:bg-white">
+        </div>
+
+        <div class="space-y-1">
+          <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider">Estado</label>
+          <select [(ngModel)]="expedienteEdicion.estado" class="w-full border border-gray-300 px-3 py-2.5 text-sm rounded-md focus:outline-none focus:border-[#d4b88c] focus:ring-1 focus:ring-[#d4b88c] transition-all bg-gray-50 focus:bg-white">
+            <option value="Abierto">Abierto</option>
+            <option value="En Trámite">En Trámite</option>
+            <option value="En Espera">En Espera</option>
+            <option value="Cerrado">Cerrado</option>
+            <option value="Archivado">Archivado</option>
+          </select>
+        </div>
+
+        <div class="space-y-1">
+          <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider">Tribunal / Juzgado</label>
+          <input type="text" [(ngModel)]="expedienteEdicion.tribunal_juzgado" class="w-full border border-gray-300 px-3 py-2.5 text-sm rounded-md focus:outline-none focus:border-[#d4b88c] focus:ring-1 focus:ring-[#d4b88c] transition-all bg-gray-50 focus:bg-white">
+        </div>
+
+        <div class="space-y-1">
+          <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider">Juez a Cargo</label>
+          <input type="text" [(ngModel)]="expedienteEdicion.juez_cargo" class="w-full border border-gray-300 px-3 py-2.5 text-sm rounded-md focus:outline-none focus:border-[#d4b88c] focus:ring-1 focus:ring-[#d4b88c] transition-all bg-gray-50 focus:bg-white">
+        </div>
+
+        <div class="space-y-1">
+          <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider">Cuantía del Litigio ($)</label>
+          <input type="number" [(ngModel)]="expedienteEdicion.cuantia_litigio" class="w-full border border-gray-300 px-3 py-2.5 text-sm rounded-md focus:outline-none focus:border-[#d4b88c] focus:ring-1 focus:ring-[#d4b88c] transition-all bg-gray-50 focus:bg-white">
+        </div>
+
+        <div class="space-y-1">
+          <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider">Próxima Cita</label>
+          <input type="date" [(ngModel)]="expedienteEdicion.proxima_cita" class="w-full border border-gray-300 px-3 py-2.5 text-sm rounded-md focus:outline-none focus:border-[#d4b88c] focus:ring-1 focus:ring-[#d4b88c] transition-all bg-gray-50 focus:bg-white">
+        </div>
+
+        <div class="md:col-span-2 space-y-1 mt-2">
+          <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wider">Descripción de los Hechos</label>
+          <textarea rows="4" [(ngModel)]="expedienteEdicion.descripcion_hechos" class="w-full border border-gray-300 px-3 py-2 text-sm rounded-md focus:outline-none focus:border-[#d4b88c] focus:ring-1 focus:ring-[#d4b88c] transition-all bg-gray-50 focus:bg-white resize-y"></textarea>
+        </div>
       </div>
 
-      <!-- Estado -->
-      <div>
-        <label class="block text-gray-700 font-medium mb-1">Estado</label>
-        <select 
-          [(ngModel)]="expedienteEdicion.estado" 
-          class="w-full border border-gray-300 p-2 text-sm rounded focus:outline-none focus:border-[#d4b88c]">
-          <option value="Abierto">Abierto</option>
-          <option value="En Trámite">En Trámite</option>
-          <option value="En Espera">En Espera</option>
-          <option value="Cerrado">Cerrado</option>
-          <option value="Archivado">Archivado</option>
+      <!-- Pestaña 2: Partes Involucradas -->
+      <div *ngIf="pestanaEdicion === 'partes'" class="space-y-5 animate-fade-in-up">
+        <div class="flex justify-between items-center bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <p class="text-sm text-gray-600 font-medium">Gestione los demandantes, demandados u otras partes asociadas al caso.</p>
+          <button (click)="agregarParte()" class="px-4 py-2 text-xs font-bold border-2 border-[#4B1623] text-[#4B1623] rounded-md hover:bg-[#4B1623] hover:text-white transition-colors flex items-center gap-2 shadow-sm">
+            <ng-icon name="heroUser" class="w-4 h-4"></ng-icon> Agregar Parte
+          </button>
+        </div>
+
+        <div *ngFor="let parte of expedienteEdicion.partes_involucradas; let i = index" class="p-5 border border-gray-200 rounded-xl bg-white shadow-sm relative group hover:border-[#d4b88c] transition-colors">
+          
+          <button (click)="eliminarParte(i)" class="absolute top-4 right-4 text-gray-400 hover:text-red-600 transition-colors bg-white p-1.5 rounded-full hover:bg-red-50 focus:outline-none" title="Eliminar parte">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+          </button>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm pr-8">
+            <div class="space-y-1">
+              <label class="block text-xs font-semibold text-gray-500 uppercase">Clasificación</label>
+              <select [(ngModel)]="parte.clasificacion" class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-[#d4b88c] focus:ring-1 focus:ring-[#d4b88c] bg-gray-50">
+                <option value="Demandante">Demandante</option>
+                <option value="Demandado">Demandado</option>
+                <option value="Tercero">Tercero</option>
+              </select>
+            </div>
+            <div class="space-y-1">
+              <label class="block text-xs font-semibold text-gray-500 uppercase">Tipo Persona</label>
+              <select [(ngModel)]="parte.tipo_persona" class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-[#d4b88c] focus:ring-1 focus:ring-[#d4b88c] bg-gray-50">
+                <option value="Física">Física</option>
+                <option value="Jurídica">Jurídica</option>
+              </select>
+            </div>
+            <div class="space-y-1">
+              <label class="block text-xs font-semibold text-gray-500 uppercase">Nombre Completo</label>
+              <input type="text" [(ngModel)]="parte.nombre_completo" class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-[#d4b88c] focus:ring-1 focus:ring-[#d4b88c] bg-gray-50">
+            </div>
+            <div class="space-y-1">
+              <label class="block text-xs font-semibold text-gray-500 uppercase">Identificación / Cédula</label>
+              <input type="text" [(ngModel)]="parte.identificacion" class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-[#d4b88c] focus:ring-1 focus:ring-[#d4b88c] bg-gray-50">
+            </div>
+            <div class="space-y-1">
+              <label class="block text-xs font-semibold text-gray-500 uppercase">Correo Contacto</label>
+              <input type="email" [(ngModel)]="parte.correo_contacto" class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-[#d4b88c] focus:ring-1 focus:ring-[#d4b88c] bg-gray-50">
+            </div>
+            <div class="space-y-1">
+              <label class="block text-xs font-semibold text-gray-500 uppercase">Dirección</label>
+              <input type="text" [(ngModel)]="parte.direccion" class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-[#d4b88c] focus:ring-1 focus:ring-[#d4b88c] bg-gray-50">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pestaña 3: Equipo Asignado -->
+<div *ngIf="pestanaEdicion === 'equipo'" class="space-y-5 animate-fade-in-up">
+  
+  <!-- Alertas de Validación de Equipo -->
+  <div *ngIf="excedioAbogados" class="p-3 text-sm text-red-700 bg-red-100 rounded-lg flex items-center gap-2 border border-red-200">
+    <ng-icon name="heroInformationCircle" class="w-5 h-5"></ng-icon>
+    <span><strong>Límite excedido:</strong> No puedes asignar más de 2 Abogados al caso.</span>
+  </div>
+  
+  <div *ngIf="excedioParalegales" class="p-3 text-sm text-red-700 bg-red-100 rounded-lg flex items-center gap-2 border border-red-200">
+    <ng-icon name="heroInformationCircle" class="w-5 h-5"></ng-icon>
+    <span><strong>Límite excedido:</strong> No puedes asignar más de 2 Paralegales al caso.</span>
+  </div>
+
+  <div class="flex justify-between items-center bg-gray-50 p-4 rounded-lg border border-gray-200">
+    <p class="text-sm text-gray-600 font-medium">Asigne o modifique los miembros del equipo legal responsable.</p>
+    <button (click)="agregarMiembroEquipo()" class="px-4 py-2 text-xs font-bold border-2 border-[#4B1623] text-[#4B1623] rounded-md hover:bg-[#4B1623] hover:text-white transition-colors flex items-center gap-2 shadow-sm">
+      <ng-icon name="heroBriefcase" class="w-4 h-4"></ng-icon> Asignar Miembro
+    </button>
+  </div>
+
+  <div *ngFor="let miembro of expedienteEdicion.equipo; let i = index" class="p-4 border border-gray-200 rounded-xl bg-white shadow-sm flex items-center gap-4 hover:border-[#d4b88c] transition-colors">
+    
+    <div class="bg-[#4B1623]/10 p-3 rounded-full text-[#4B1623]">
+      <ng-icon name="heroUsers" class="w-6 h-6"></ng-icon>
+    </div>
+
+    <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Selector de Usuario (Filtrado por el rol de la fila y ocultando seleccionados) -->
+      <div class="space-y-1">
+        <label class="block text-xs font-semibold text-gray-500 uppercase">Miembro del Equipo</label>
+        <select [(ngModel)]="miembro.id_usuario" class="w-full border border-gray-300 px-3 py-2 rounded text-sm focus:outline-none focus:border-[#d4b88c] focus:ring-1 focus:ring-[#d4b88c] bg-gray-50 focus:bg-white transition-colors">
+          <option value="" disabled selected>-- Seleccione un profesional --</option>
+          <option *ngFor="let usuario of obtenerUsuariosPorRol(miembro.rol_en_caso, miembro.id_usuario)" [value]="usuario.id_usuario">
+            {{ usuario.nombre }} ({{ usuario.rol }})
+          </option>
         </select>
       </div>
 
-      <!-- Tribunal / Juzgado -->
-      <div>
-        <label class="block text-gray-700 font-medium mb-1">Tribunal / Juzgado</label>
-        <input 
-          type="text" 
-          [(ngModel)]="expedienteEdicion.tribunal_juzgado" 
-          class="w-full border border-gray-300 p-2 text-sm rounded focus:outline-none focus:border-[#d4b88c]">
+      <!-- Selector de Rol en el Caso (Notifica el cambio para filtrar) -->
+      <div class="space-y-1">
+        <label class="block text-xs font-semibold text-gray-500 uppercase">Rol en el Caso</label>
+        <select [(ngModel)]="miembro.rol_en_caso" (change)="onRolCasoChange(miembro)" class="w-full border border-gray-300 px-3 py-2 rounded text-sm focus:outline-none focus:border-[#d4b88c] focus:ring-1 focus:ring-[#d4b88c] bg-gray-50 focus:bg-white transition-colors">
+          <option value="Abogado">Abogado</option>
+          <option value="Paralegal">Paralegal</option>
+        </select>
       </div>
-
-      <!-- Juez a Cargo -->
-      <div>
-        <label class="block text-gray-700 font-medium mb-1">Juez a Cargo</label>
-        <input 
-          type="text" 
-          [(ngModel)]="expedienteEdicion.juez_cargo" 
-          class="w-full border border-gray-300 p-2 text-sm rounded focus:outline-none focus:border-[#d4b88c]">
-      </div>
-
-      <!-- Cuantía del Litigio -->
-      <div>
-        <label class="block text-gray-700 font-medium mb-1">Cuantía del Litigio ($)</label>
-        <input 
-          type="number" 
-          [(ngModel)]="expedienteEdicion.cuantia_litigio" 
-          class="w-full border border-gray-300 p-2 text-sm rounded focus:outline-none focus:border-[#d4b88c]">
-      </div>
-
-      <!-- Próxima Cita -->
-      <div>
-        <label class="block text-gray-700 font-medium mb-1">Próxima Cita</label>
-        <input 
-          type="date" 
-          [(ngModel)]="expedienteEdicion.proxima_cita" 
-          class="w-full border border-gray-300 p-2 text-sm rounded focus:outline-none focus:border-[#d4b88c]">
-      </div>
-
-      <!-- Descripción de los Hechos (Ancho completo) -->
-      <div class="md:col-span-2">
-        <label class="block text-gray-700 font-medium mb-1">Descripción de los Hechos</label>
-        <textarea 
-          rows="4" 
-          [(ngModel)]="expedienteEdicion.descripcion_hechos" 
-          class="w-full border border-gray-300 p-2 text-sm rounded focus:outline-none focus:border-[#d4b88c] resize-y"></textarea>
-      </div>
-
     </div>
 
-    <!-- Botones de Acción -->
-    <div class="flex justify-end gap-3 mt-6 border-t border-gray-100 pt-4">
-      <button 
-        (click)="cerrarModalEditar()" 
-        [disabled]="guardandoEdicion" 
-        class="px-4 py-2 text-sm text-gray-500 hover:text-gray-800 transition-colors cursor-pointer">
-        Cancelar
-      </button>
-      
-      <button 
-        (click)="guardarEdicion()" 
-        [disabled]="guardandoEdicion" 
-        class="px-4 py-2 text-sm bg-[#4a1525] hover:bg-[#38101c] text-white rounded transition-colors cursor-pointer flex items-center gap-2">
-        <span *ngIf="guardandoEdicion">Guardando...</span>
-        <span *ngIf="!guardandoEdicion">Guardar Cambios</span>
-      </button>
-    </div>
-
+    <!-- Botón Eliminar -->
+    <button (click)="eliminarMiembroEquipo(i)" class="text-gray-400 hover:text-red-600 transition-colors p-2 rounded-full hover:bg-red-50 focus:outline-none" title="Remover miembro">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+      </svg>
+    </button>
   </div>
+</div>
+
+<!-- Div de cierre que ya tenías antes del pie del modal -->
+</div>
+
+<!-- Pie del Modal (Botones de Acción) -->
+<div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3 rounded-b-lg">
+  <button 
+    (click)="cerrarModalEditar()" 
+    [disabled]="guardandoEdicion" 
+    class="px-5 py-2.5 text-sm font-semibold text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-100 hover:text-gray-900 transition-colors focus:outline-none disabled:opacity-50">
+    Cancelar
+  </button>
+  
+  <button 
+    (click)="guardarEdicion()" 
+    [disabled]="guardandoEdicion || !esFormularioValido" 
+    [ngClass]="{'opacity-50 cursor-not-allowed': !esFormularioValido || guardandoEdicion}"
+    class="px-5 py-2.5 text-sm font-semibold bg-[#4B1623] text-white rounded-md hover:bg-[#3a111b] transition-colors focus:outline-none shadow-md flex items-center gap-2 disabled:opacity-70">
+    <span *ngIf="guardandoEdicion" class="flex items-center gap-2">
+      <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      Guardando...
+    </span>
+    <span *ngIf="!guardandoEdicion">Guardar Cambios</span>
+  </button>
+</div>
 </div>
 </div>

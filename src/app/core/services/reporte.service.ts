@@ -38,8 +38,7 @@ export interface EstadisticasReportes {
 })
 export class ReporteService {
 
-  private readonly apiUrl =
-    `${environment.apiUrl}/reportes`;
+  private apiUrl = 'http://localhost:3000/api/reportes/estadisticas';
 
   constructor(
     private http: HttpClient
@@ -48,16 +47,7 @@ export class ReporteService {
   // ─────────────────────────────────────────
 // Obtener estadísticas generales
 // ─────────────────────────────────────────
-
 obtenerEstadisticas(): Observable<EstadisticasReportes> {
-
-  // Se agrega una marca de tiempo para evitar
-  // que el navegador utilice una respuesta almacenada
-  // en caché y asegurarnos de obtener los datos actuales.
-
-  return this.http.get<EstadisticasReportes>(
-    `${this.apiUrl}/estadisticas?t=${Date.now()}`
-  );
-
+  return this.http.get<EstadisticasReportes>(this.apiUrl);
 }
 }

@@ -1,5 +1,5 @@
 <div class="relative inline-block text-left">
-  <!-- Botón de la Campanita (Con tus estilos originales) -->
+  <!-- Botón de la Campanita -->
   <button 
     (click)="toggleDropdown()" 
     class="relative hover:opacity-80 transition-opacity cursor-pointer flex items-center justify-center p-1 text-[#4B1623]"
@@ -7,7 +7,6 @@
   >
     <ng-icon name="heroBellSolid" size="1.6rem"></ng-icon>
     
-    <!-- Tu Punto indicador o Contador (Solo si hay sin leer) -->
     <span 
       *ngIf="unreadCount > 0"
       class="absolute top-1 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold leading-none text-white bg-red-600 rounded-full border-2 border-white"
@@ -19,11 +18,20 @@
   <!-- Panel Desplegable -->
   <div 
     *ngIf="isOpen"
-    class="origin-top-right absolute right-0 mt-2 w-80 sm:w-96 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50 divide-y divide-gray-100"
+    class="origin-top-right absolute right-0 mt-2 w-80 sm:w-96 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-40 divide-y divide-gray-100"
   >
     <div class="px-4 py-3 bg-gray-50 rounded-t-md flex justify-between items-center">
       <p class="text-sm font-medium text-gray-900">Notificaciones</p>
-      <span class="text-xs text-gray-500">{{ unreadCount }} sin leer</span>
+      <div class="flex items-center gap-3">
+        <span class="text-xs text-gray-500">{{ unreadCount }} sin leer</span>
+        <button 
+          *ngIf="unreadCount > 0"
+          (click)="marcarTodasComoLeidas($event)"
+          class="text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors focus:outline-none"
+        >
+          Marcar todas leídas
+        </button>
+      </div>
     </div>
 
     <!-- Lista de Notificaciones -->
@@ -36,7 +44,7 @@
         *ngFor="let notif of notificaciones" 
         (click)="manejarClicNotificacion(notif)"
         [ngClass]="{'bg-blue-50': !notif.leida, 'hover:bg-gray-50': true}"
-        class="cursor-pointer p-4 flex gap-3 transition-colors duration-150"
+        class="cursor-pointer p-4 flex gap-3 transition-colors duration-150 border-b border-gray-100 last:border-0"
       >
         <div class="flex-shrink-0 mt-1">
           <div [ngClass]="{'text-[#4B1623]': !notif.leida, 'text-gray-400': notif.leida}">
@@ -60,6 +68,58 @@
           <span class="inline-block w-2.5 h-2.5 bg-blue-600 rounded-full"></span>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- MODAL DE LECTURA DE NOTIFICACIÓN           -->
+<!-- ========================================== -->
+<!-- 
+  Fondo arreglado: 
+  - z-[100] asegura que cubra TODO el sistema.
+  - bg-black/40 aplica un fondo negro con 40% de transparencia.
+  - backdrop-blur-sm difumina un poquito lo que hay detrás (calendario, expedientes).
+-->
+<div *ngIf="isModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+  <div class="bg-white rounded-lg shadow-xl w-11/12 sm:w-[450px] max-w-lg overflow-hidden flex flex-col animate-fade-in-up">
+    
+    <!-- Cabecera del Modal -->
+    <div class="px-5 py-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+      <div class="flex items-center gap-2">
+        <ng-icon [name]="getIconoPorTipo(notificacionSeleccionada?.tipo || '')" class="text-[#4B1623] w-6 h-6"></ng-icon>
+        <h3 class="text-lg font-semibold text-gray-900">Detalle de Notificación</h3>
+      </div>
+      <button (click)="cerrarModal()" class="text-gray-400 hover:text-gray-600 focus:outline-none transition-colors">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Cuerpo del Modal -->
+    <div class="p-5 flex-1 overflow-y-auto">
+      <p class="font-bold text-gray-800 text-lg mb-2">{{ notificacionSeleccionada?.titulo }}</p>
+      
+      <div class="bg-gray-50 rounded-md p-4 mb-4 border border-gray-100">
+        <p class="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{{ notificacionSeleccionada?.mensaje }}</p>
+      </div>
+      
+      <div class="flex justify-between items-center mt-4">
+        <span class="text-xs font-medium px-2 py-1 bg-gray-200 text-gray-700 rounded-full capitalize">
+          Tipo: {{ notificacionSeleccionada?.tipo }}
+        </span>
+        <p class="text-xs text-gray-500 font-medium">
+          {{ notificacionSeleccionada?.fecha_creacion | date:'medium' }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Pie del Modal -->
+    <div class="px-5 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+      <button (click)="cerrarModal()" class="px-4 py-2 bg-[#4B1623] text-white text-sm font-medium rounded-md hover:bg-[#3a111b] transition-colors shadow-sm">
+        Cerrar
+      </button>
     </div>
   </div>
 </div>

@@ -59,4 +59,14 @@ export class NotificationService {
       })
     );
   }
+
+ // En tu NotificationService
+  marcarTodasComoLeidas(): Observable<any> {
+    // Le quitamos el '/notificaciones' extra y reseteamos el contador
+    return this.http.put(`${this.apiUrl}/marcar-todas`, {}).pipe(
+      tap(() => {
+        this.unreadCountSubject.next(0);
+      })
+    );
+  }
 }

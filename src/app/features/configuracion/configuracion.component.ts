@@ -1,13 +1,32 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { CommonModule, Location } from '@angular/common'; // 👈 Importamos Location
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SharedHeader } from '../../shared/components/shared-header/shared-header';
 import { ConfiguracionService, ConfiguracionSistema } from '../../core/services/configuracion.service';
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { 
+  heroBuildingLibrarySolid, 
+  heroShieldCheckSolid, 
+  heroCheckCircleSolid, 
+  heroXCircleSolid, 
+  heroCheckSolid,
+  heroArrowLeftSolid // 👈 Importamos el icono de la flecha
+} from '@ng-icons/heroicons/solid';
 
 @Component({
   selector: 'app-configuracion',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, SharedHeader],
+  imports: [CommonModule, ReactiveFormsModule, SharedHeader, NgIconComponent],
+  viewProviders: [
+    provideIcons({ 
+      heroBuildingLibrarySolid, 
+      heroShieldCheckSolid, 
+      heroCheckCircleSolid, 
+      heroXCircleSolid,
+      heroCheckSolid,
+      heroArrowLeftSolid // 👈 Proveemos el icono
+    })
+  ],
   templateUrl: './configuracion.component.html',
   styleUrl: './configuracion.component.css',
 })
@@ -18,9 +37,13 @@ export class ConfiguracionComponent implements OnInit {
   mensajeExito = '';
   mensajeError = '';
 
+  tabActual: 'informacion' | 'seguridad' = 'informacion';
+
   constructor(
     private fb: FormBuilder,
-    private configService: ConfiguracionService
+    private configService: ConfiguracionService,
+    private cdr: ChangeDetectorRef,
+    private location: Location // 👈 Inyectamos Location para el botón Volver
   ) {}
 
   ngOnInit(): void {
@@ -44,38 +67,82 @@ export class ConfiguracionComponent implements OnInit {
     this.cargarConfiguracion();
   }
 
+  // Método para regresar a la vista anterior
+  volver(): void {
+    this.location.back();
+  }
+
+  cambiarTab(tab: 'informacion' | 'seguridad'): void {
+    this.tabActual = tab;
+    this.cdr.detectChanges(); 
+  }
+
   cargarConfiguracion(): void {
     this.configService.obtenerConfiguracion().subscribe({
       next: (config: ConfiguracionSistema) => {
         this.form.patchValue(config);
         this.cargando = false;
+        this.cdr.detectChanges(); 
       },
       error: (err: any) => {
         console.error('Error al cargar configuración:', err);
         this.mensajeError = 'No se pudo cargar la configuración del sistema.';
         this.cargando = false;
+        this.cdr.detectChanges(); 
       },
     });
   }
 
   guardar(): void {
-    if (this.form.invalid) return;
+    // 👈 Nueva lógica de validación
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.mensajeError = 'No se puede guardar: revisa que los campos obligatorios (*) estén completos en ambas pestañas.';
+      
+      // Esto imprimirá en la consola de tu navegador los campos exactos que están fallando
+      Object.keys(this.form.controls).forEach(key => {
+        const control = this.form.get(key);
+        if (control?.invalid) {
+          console.warn(`El campo '${key}' es inválido. Errores:`, control.errors);
+        }
+      });
+
+      this.cdr.detectChanges();
+      
+      setTimeout(() => {
+        this.mensajeError = '';
+        this.cdr.detectChanges();
+      }, 5000);
+      
+      return; 
+    }
 
     this.guardando = true;
     this.mensajeExito = '';
     this.mensajeError = '';
+    this.cdr.detectChanges(); 
 
     this.configService.actualizarConfiguracion(this.form.value).subscribe({
       next: (res: any) => {
         this.mensajeExito = res.message || 'Configuración guardada exitosamente.';
         this.guardando = false;
-        setTimeout(() => (this.mensajeExito = ''), 4000);
+        this.cdr.detectChanges();
+
+        setTimeout(() => {
+          this.mensajeExito = '';
+          this.cdr.detectChanges();
+        }, 4000);
       },
       error: (err: any) => {
         console.error('Error al guardar:', err);
         this.mensajeError = 'Ocurrió un error al guardar la configuración.';
         this.guardando = false;
-        setTimeout(() => (this.mensajeError = ''), 4000);
+        this.cdr.detectChanges();
+
+        setTimeout(() => {
+          this.mensajeError = '';
+          this.cdr.detectChanges();
+        }, 4000);
       },
     });
   }

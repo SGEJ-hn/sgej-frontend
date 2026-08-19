@@ -3,50 +3,50 @@
   <!-- =============================== -->
   <!-- ENCABEZADO                      -->
   <!-- =============================== -->
-  <!-- Si tu sistema usa <app-shared-header> globalmente, puedes reemplazar este bloque. 
-       Lo he diseñado para que empate perfectamente con el fondo y estilo de tu sistema. -->
-  <div class="bg-white border-b border-gray-200 px-8 py-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-    <div>
-      <h1 class="text-2xl font-semibold text-gray-900">Reportes y Estadísticas</h1>
-      <p class="text-sm text-gray-500 mt-1" style="font-family: DM Sans;">Resumen general y métricas del sistema</p>
-    </div>
+  <app-shared-header 
+    titulo="Reportes y Estadísticas" 
+    subtitulo="Resumen general y métricas del sistema">
     
     <div class="flex gap-3">
+      <!-- Botón Excel -->
       <button type="button" (click)="exportarExcel()"
-        class="px-5 py-2 text-sm border border-gray-300 rounded bg-white text-gray-700 hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2">
-        <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+        class="px-5 py-2 text-sm border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2 font-medium cursor-pointer">
+        <ng-icon name="heroDocumentChartBar" class="text-green-600 text-lg"></ng-icon>
         Exportar Excel
       </button>
 
+      <!-- Botón PDF -->
       <button type="button" (click)="exportarPDF()"
-        class="px-5 py-2 text-sm border border-[#4a1525] rounded bg-[#4a1525] text-white hover:bg-[#38101c] transition-colors shadow-sm flex items-center gap-2">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+        class="px-5 py-2 text-sm bg-[#4a1525] hover:bg-[#38101c] text-white transition-colors flex items-center gap-2 font-medium cursor-pointer">
+        <ng-icon name="heroArrowDownTray" class="text-lg"></ng-icon>
         Exportar PDF
       </button>
     </div>
-  </div>
+  </app-shared-header>
 
   <!-- =============================== -->
   <!-- CONTENEDOR PRINCIPAL            -->
   <!-- =============================== -->
   <div class="p-8 flex justify-center">
     
-    <!-- Usamos max-w-6xl para darle espacio suficiente a las gráficas, manteniendo el centrado -->
     <div class="w-full max-w-6xl space-y-6">
 
       <!-- =========================================
            ESTADO DE CARGA Y ERROR
            ========================================= -->
-      <div *ngIf="cargando" class="text-center py-10 text-gray-500 bg-white border border-gray-200 rounded-lg shadow-sm">
-        Cargando estadísticas del sistema...
+      <div *ngIf="cargando" class="text-center py-10 text-gray-500 bg-white border border-gray-200">
+        <div class="flex flex-col items-center gap-3">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4a1525]"></div>
+          <span>Cargando estadísticas del sistema...</span>
+        </div>
       </div>
 
-      <div *ngIf="error && !cargando" class="text-center py-5 text-red-600 bg-red-50 border border-red-200 rounded-lg shadow-sm">
+      <div *ngIf="error && !cargando" class="text-center py-5 text-red-600 bg-red-50 border border-red-200">
         {{ error }}
       </div>
 
       <!-- =========================================
-           CONTENIDO (Si hay datos y no está cargando)
+           CONTENIDO
            ========================================= -->
       <div *ngIf="estadisticas && !cargando" class="space-y-6">
 
@@ -55,19 +55,22 @@
              ======================================= -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           
-          <div class="bg-white border border-gray-200 shadow-sm rounded-lg p-5 flex flex-col justify-between">
+          <div class="bg-white border border-gray-200 p-6 flex flex-col justify-between relative group">
             <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide">Expedientes Activos</h3>
-            <p class="text-4xl font-semibold text-gray-900 mt-3">{{ estadisticas.totalExpedientes }}</p>
+            <p class="text-4xl font-semibold text-gray-800 mt-3">{{ estadisticas.totalExpedientes }}</p>
+            <div class="absolute bottom-0 left-0 h-1 bg-[#4a1525] w-full"></div>
           </div>
 
-          <div class="bg-white border border-gray-200 shadow-sm rounded-lg p-5 flex flex-col justify-between">
+          <div class="bg-white border border-gray-200 p-6 flex flex-col justify-between relative group">
             <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide">Documentos Procesados</h3>
-            <p class="text-4xl font-semibold text-gray-900 mt-3">{{ estadisticas.totalDocumentos }}</p>
+            <p class="text-4xl font-semibold text-gray-800 mt-3">{{ estadisticas.totalDocumentos }}</p>
+            <div class="absolute bottom-0 left-0 h-1 bg-[#d4b88c] w-full"></div>
           </div>
 
-          <div class="bg-white border border-gray-200 shadow-sm rounded-lg p-5 flex flex-col justify-between">
+          <div class="bg-white border border-gray-200 p-6 flex flex-col justify-between relative group">
             <h3 class="text-sm font-medium text-gray-500 uppercase tracking-wide">Tipos de Cita</h3>
-            <p class="text-4xl font-semibold text-gray-900 mt-3">{{ estadisticas.citasPorTipo.length }}</p>
+            <p class="text-4xl font-semibold text-gray-800 mt-3">{{ estadisticas.citasPorTipo.length }}</p>
+            <div class="absolute bottom-0 left-0 h-1 bg-gray-400 w-full"></div>
           </div>
         </div>
 
@@ -77,47 +80,55 @@
         <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
 
           <!-- Expedientes por Estado -->
-          <div class="bg-white border border-gray-200 shadow-sm rounded-lg p-6">
-            <h2 class="text-lg font-medium text-gray-900">Expedientes por estado</h2>
-            <p class="text-sm text-gray-500 mb-6" style="font-family: DM Sans;">Distribución actual de los casos registrados</p>
+          <div class="bg-white border border-gray-200">
+            <div class="p-6 border-b border-gray-200">
+              <h2 class="text-lg font-medium text-gray-800">Expedientes por estado</h2>
+              <p class="text-sm text-gray-500">Distribución actual de los casos registrados</p>
+            </div>
 
-            <div class="h-56 border-b border-gray-100 flex items-end justify-center">
-              <div class="flex items-end justify-center gap-8 h-full w-full">
-                <div *ngFor="let item of estadisticas.expedientesPorEstado" class="h-full flex flex-col justify-end items-center">
-                  <span class="text-sm font-medium text-[#4a1525] mb-2">{{ item._count.id_expediente }}</span>
-                  <div class="w-12 bg-[#4a1525] rounded-t transition-all duration-500 hover:bg-[#38101c]"
-                       [style.height.%]="calcularAltura(item._count.id_expediente, obtenerMaximoEstado())">
+            <div class="p-6">
+              <div class="h-56 border-b border-gray-100 flex items-end justify-center">
+                <div class="flex items-end justify-center gap-8 h-full w-full">
+                  <div *ngFor="let item of estadisticas.expedientesPorEstado" class="h-full flex flex-col justify-end items-center">
+                    <span class="text-sm font-medium text-[#4a1525] mb-2">{{ item._count.id_expediente }}</span>
+                    <div class="w-12 bg-[#4a1525] rounded-t transition-all duration-500 hover:bg-[#38101c]"
+                         [style.height.%]="calcularAltura(item._count.id_expediente, obtenerMaximoEstado())">
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            
-            <div class="flex justify-center gap-8 mt-3">
-              <div *ngFor="let item of estadisticas.expedientesPorEstado" class="w-12 text-center text-xs text-gray-600 break-words">
-                {{ item.estado }}
+              
+              <div class="flex justify-center gap-8 mt-4">
+                <div *ngFor="let item of estadisticas.expedientesPorEstado" class="w-12 text-center text-xs text-gray-600 wrap-break-word">
+                  {{ item.estado }}
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Expedientes por Materia -->
-          <div class="bg-white border border-gray-200 shadow-sm rounded-lg p-6">
-            <h2 class="text-lg font-medium text-gray-900">Expedientes por materia</h2>
-            <p class="text-sm text-gray-500 mb-6" style="font-family: DM Sans;">Clasificación jurídica de los expedientes</p>
+          <div class="bg-white border border-gray-200">
+            <div class="p-6 border-b border-gray-200">
+              <h2 class="text-lg font-medium text-gray-800">Expedientes por materia</h2>
+              <p class="text-sm text-gray-500">Clasificación jurídica de los expedientes</p>
+            </div>
 
-            <div class="h-56 border-b border-gray-100 flex items-end justify-center">
-              <div class="flex items-end justify-center gap-8 h-full w-full">
-                <div *ngFor="let item of estadisticas.expedientesPorMateria" class="h-full flex flex-col justify-end items-center">
-                  <span class="text-sm font-medium text-[#4a1525] mb-2">{{ item._count.id_expediente }}</span>
-                  <div class="w-12 bg-[#4a1525] rounded-t transition-all duration-500 hover:bg-[#38101c]"
-                       [style.height.%]="calcularAltura(item._count.id_expediente, obtenerMaximoMateria())">
+            <div class="p-6">
+              <div class="h-56 border-b border-gray-100 flex items-end justify-center">
+                <div class="flex items-end justify-center gap-8 h-full w-full">
+                  <div *ngFor="let item of estadisticas.expedientesPorMateria" class="h-full flex flex-col justify-end items-center">
+                    <span class="text-sm font-medium text-[#4a1525] mb-2">{{ item._count.id_expediente }}</span>
+                    <div class="w-12 bg-[#4a1525] rounded-t transition-all duration-500 hover:bg-[#38101c]"
+                         [style.height.%]="calcularAltura(item._count.id_expediente, obtenerMaximoMateria())">
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div class="flex justify-center gap-8 mt-3">
-              <div *ngFor="let item of estadisticas.expedientesPorMateria" class="w-12 text-center text-xs text-gray-600 break-words">
-                {{ item.materia }}
+              <div class="flex justify-center gap-8 mt-4">
+                <div *ngFor="let item of estadisticas.expedientesPorMateria" class="w-12 text-center text-xs text-gray-600 wrap-break-word">
+                  {{ item.materia }}
+                </div>
               </div>
             </div>
           </div>
@@ -126,14 +137,17 @@
         <!-- =======================================
              SEGUNDA FILA DE GRÁFICOS
              ======================================= -->
-        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <!-- Cambiamos las columnas para que sea dinámico -->
+        <div class="grid grid-cols-1 gap-6" [ngClass]="{'xl:grid-cols-2': esAdmin}">
 
-          <!-- Citas por Tipo -->
-          <div class="bg-white border border-gray-200 shadow-sm rounded-lg p-6 flex flex-col">
-            <h2 class="text-lg font-medium text-gray-900">Citas por tipo</h2>
-            <p class="text-sm text-gray-500 mb-6" style="font-family: DM Sans;">Volumen de citas programadas por categoría</p>
+          <!-- Citas por Tipo (Visible para todos) -->
+          <div class="bg-white border border-gray-200 flex flex-col">
+            <div class="p-6 border-b border-gray-200">
+              <h2 class="text-lg font-medium text-gray-800">Citas por tipo</h2>
+              <p class="text-sm text-gray-500">Volumen de citas programadas por categoría</p>
+            </div>
 
-            <div class="flex-grow flex flex-col justify-between">
+            <div class="p-6 grow flex flex-col justify-between">
               <div>
                 <div class="h-48 border-b border-gray-100 flex items-end justify-center">
                   <div class="flex items-end justify-center gap-8 h-full w-full">
@@ -149,37 +163,39 @@
                   </div>
                 </div>
                 
-                <div class="flex justify-center gap-8 mt-3">
-                  <div *ngFor="let item of estadisticas.citasPorTipo" class="w-12 text-center text-xs font-medium break-words" [style.color]="obtenerColorCita(item.tipo_cita)">
+                <div class="flex justify-center gap-8 mt-4">
+                  <div *ngFor="let item of estadisticas.citasPorTipo" class="w-12 text-center text-xs font-medium wrap-break-word" [style.color]="obtenerColorCita(item.tipo_cita)">
                     {{ item.tipo_cita }}
                   </div>
                 </div>
               </div>
 
               <!-- Leyenda -->
-              <div class="flex flex-wrap justify-center gap-5 mt-6 pt-4 border-t border-gray-100">
+              <div class="flex flex-wrap justify-center gap-5 mt-8 pt-4 border-t border-gray-100">
                 <div class="flex items-center gap-2">
-                  <span class="w-2.5 h-2.5 rounded bg-green-600"></span>
+                  <span class="w-2.5 h-2.5 rounded-sm bg-green-600"></span>
                   <span class="text-xs text-gray-600">Audiencia</span>
                 </div>
                 <div class="flex items-center gap-2">
-                  <span class="w-2.5 h-2.5 rounded bg-blue-600"></span>
+                  <span class="w-2.5 h-2.5 rounded-sm bg-blue-600"></span>
                   <span class="text-xs text-gray-600">Reunión</span>
                 </div>
                 <div class="flex items-center gap-2">
-                  <span class="w-2.5 h-2.5 rounded bg-orange-500"></span>
+                  <span class="w-2.5 h-2.5 rounded-sm bg-orange-500"></span>
                   <span class="text-xs text-gray-600">Trámite</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Usuarios por Rol -->
-          <div class="bg-white border border-gray-200 shadow-sm rounded-lg p-6">
-            <h2 class="text-lg font-medium text-gray-900">Usuarios por rol</h2>
-            <p class="text-sm text-gray-500 mb-6" style="font-family: DM Sans;">Distribución de accesos y permisos</p>
+          <!-- Usuarios por Rol (SOLO ADMIN) -->
+          <div *ngIf="esAdmin" class="bg-white border border-gray-200">
+            <div class="p-6 border-b border-gray-200">
+              <h2 class="text-lg font-medium text-gray-800">Usuarios por rol</h2>
+              <p class="text-sm text-gray-500">Distribución de accesos y permisos</p>
+            </div>
 
-            <div class="w-full flex flex-col items-center">
+            <div class="p-6 w-full flex flex-col items-center">
               <div class="w-full max-w-md">
                 
                 <div class="h-56 border-b border-gray-100 flex items-end justify-center">
@@ -193,8 +209,8 @@
                   </div>
                 </div>
                 
-                <div class="grid grid-cols-4 justify-items-center mt-3 gap-2">
-                  <div *ngFor="let item of estadisticas.usuariosPorRol" class="w-full text-center text-xs text-gray-600 px-1 break-words">
+                <div class="grid grid-cols-4 justify-items-center mt-4 gap-2">
+                  <div *ngFor="let item of estadisticas.usuariosPorRol" class="w-full text-center text-xs text-gray-600 px-1 wrap-break-word">
                     {{ item.rol }}
                   </div>
                 </div>
@@ -207,24 +223,37 @@
         <!-- =======================================
              RESUMEN DEL SISTEMA
              ======================================= -->
-        <div class="bg-white border border-gray-200 shadow-sm rounded-lg p-6 mt-2">
-          <h2 class="text-lg font-medium text-gray-900 mb-4">Visión General del Sistema</h2>
+        <div class="bg-white border border-gray-200 mt-2">
+          <div class="p-6 border-b border-gray-200">
+            <h2 class="text-lg font-medium text-gray-800">Visión General del Sistema</h2>
+          </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Cambiamos a 2 columnas si no es admin, 3 si lo es -->
+          <div class="p-6 grid grid-cols-1 gap-4" [ngClass]="esAdmin ? 'md:grid-cols-3' : 'md:grid-cols-2'">
             
-            <div class="flex justify-between items-center p-4 border border-gray-100 rounded bg-[#f8f7f5]">
-              <span class="text-sm text-gray-600">Total Expedientes</span>
+            <div class="flex justify-between items-center p-4 border border-gray-200 bg-[#f8f7f5]">
+              <div class="flex items-center gap-3">
+                <ng-icon name="heroFolder" class="text-gray-400 text-xl"></ng-icon>
+                <span class="text-sm text-gray-600">Total Expedientes</span>
+              </div>
               <span class="text-xl font-semibold text-[#4a1525]">{{ estadisticas.totalExpedientes }}</span>
             </div>
 
-            <div class="flex justify-between items-center p-4 border border-gray-100 rounded bg-[#f8f7f5]">
-              <span class="text-sm text-gray-600">Total Documentos</span>
-              <span class="text-xl font-semibold text-green-600">{{ estadisticas.totalDocumentos }}</span>
+            <div class="flex justify-between items-center p-4 border border-gray-200 bg-[#f8f7f5]">
+              <div class="flex items-center gap-3">
+                <ng-icon name="heroDocumentText" class="text-gray-400 text-xl"></ng-icon>
+                <span class="text-sm text-gray-600">Total Documentos</span>
+              </div>
+              <span class="text-xl font-semibold text-[#4a1525]">{{ estadisticas.totalDocumentos }}</span>
             </div>
 
-            <div class="flex justify-between items-center p-4 border border-gray-100 rounded bg-[#f8f7f5]">
-              <span class="text-sm text-gray-600">Total Usuarios</span>
-              <span class="text-xl font-semibold text-blue-600">{{ obtenerTotalUsuarios() }}</span>
+            <!-- Total Usuarios (SOLO ADMIN) -->
+            <div *ngIf="esAdmin" class="flex justify-between items-center p-4 border border-gray-200 bg-[#f8f7f5]">
+              <div class="flex items-center gap-3">
+                <ng-icon name="heroUsers" class="text-gray-400 text-xl"></ng-icon>
+                <span class="text-sm text-gray-600">Total Usuarios</span>
+              </div>
+              <span class="text-xl font-semibold text-[#4a1525]">{{ obtenerTotalUsuarios() }}</span>
             </div>
 
           </div>

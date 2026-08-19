@@ -1,174 +1,212 @@
-<!-- Header -->
+
 <app-shared-header 
+  class="custom-font"
   titulo="Configuración del Sistema" 
   subtitulo="Administrar los datos del bufete y las políticas de seguridad">
+  
+  <!-- Este botón se inyectará automáticamente en el <ng-content> del header -->
+  <button 
+    type="button"
+    (click)="volver()" 
+    class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 hover:text-[#4A1525] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4A1525] transition-all cursor-pointer">
+    <ng-icon name="heroArrowLeftSolid" size="1.2rem"></ng-icon>
+    Volver
+  </button>
+
 </app-shared-header>
 
-<!-- Contenido Principal -->
-<div class="config-container">
+<!-- Contenido Principal Centrado -->
+<div class="config-container max-w-5xl mx-auto w-full px-8 py-4">
 
   <!-- Loader -->
   @if (cargando) {
-    <div class="loader-wrapper">
-      <div class="loader-spinner"></div>
-      <p>Cargando configuración...</p>
+    <div class="loader-wrapper flex flex-col items-center justify-center py-12">
+      <div class="loader-spinner border-4 border-[#4A1525] border-t-transparent rounded-full w-10 h-10 animate-spin mb-4"></div>
+      <p class="text-gray-500 font-medium">Cargando configuración...</p>
     </div>
   } @else {
 
+    <!-- Pestañas de Navegación -->
+    <div class="flex gap-6 border-b border-gray-300 mb-8 px-2">
+      <button 
+        type="button"
+        (click)="cambiarTab('informacion')"
+        [class.border-[#4A1525]]="tabActual === 'informacion'"
+        [class.text-[#4A1525]]="tabActual === 'informacion'"
+        [class.border-transparent]="tabActual !== 'informacion'"
+        [class.text-gray-500]="tabActual !== 'informacion'"
+        class="pb-3 border-b-2 font-medium flex items-center gap-2 transition-colors cursor-pointer hover:text-[#4A1525]">
+        <ng-icon name="heroBuildingLibrarySolid" size="1.2rem"></ng-icon>
+        Información General
+      </button>
+
+      <button 
+        type="button"
+        (click)="cambiarTab('seguridad')"
+        [class.border-[#4A1525]]="tabActual === 'seguridad'"
+        [class.text-[#4A1525]]="tabActual === 'seguridad'"
+        [class.border-transparent]="tabActual !== 'seguridad'"
+        [class.text-gray-500]="tabActual !== 'seguridad'"
+        class="pb-3 border-b-2 font-medium flex items-center gap-2 transition-colors cursor-pointer hover:text-[#4A1525]">
+        <ng-icon name="heroShieldCheckSolid" size="1.2rem"></ng-icon>
+        Políticas de Seguridad
+      </button>
+    </div>
+
     <!-- Mensajes de retroalimentación -->
     @if (mensajeExito) {
-      <div class="alerta alerta-exito">
-        ✅ {{ mensajeExito }}
+      <div class="alerta alerta-exito flex items-center gap-2 bg-green-50 text-green-800 p-4 rounded-md mb-6 border border-green-200 shadow-sm">
+        <ng-icon name="heroCheckCircleSolid" size="1.4rem"></ng-icon>
+        {{ mensajeExito }}
       </div>
     }
     @if (mensajeError) {
-      <div class="alerta alerta-error">
-        ❌ {{ mensajeError }}
+      <div class="alerta alerta-error flex items-center gap-2 bg-red-50 text-red-800 p-4 rounded-md mb-6 border border-red-200 shadow-sm">
+        <ng-icon name="heroXCircleSolid" size="1.4rem"></ng-icon>
+        {{ mensajeError }}
       </div>
     }
 
     <form [formGroup]="form" (ngSubmit)="guardar()">
 
       <!-- ==================== SECCIÓN 1: INFORMACIÓN DEL BUFETE ==================== -->
-      <div class="config-card">
-        <div class="card-header">
-          <div class="card-icon icon-bufete">🏛️</div>
-          <div>
-            <h2 class="card-title">Información General del Bufete</h2>
-            <p class="card-subtitle">Datos de identificación y contacto de la firma legal</p>
+      @if (tabActual === 'informacion') {
+        <div class="config-card bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+          <div class="card-header flex items-center gap-3 mb-6">
+            <div class="card-icon text-[#4A1525] bg-[#4A1525]/10 p-2 rounded-lg flex items-center justify-center">
+              <ng-icon name="heroBuildingLibrarySolid" size="1.5rem"></ng-icon>
+            </div>
+            <div>
+              <h2 class="card-title text-xl font-semibold text-gray-800">Información General del Bufete</h2>
+              <p class="card-subtitle text-sm text-gray-500">Datos de identificación y contacto de la firma legal</p>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label for="nombre_bufete" class="block text-sm font-medium text-gray-700 mb-1">Nombre del Bufete *</label>
+              <input id="nombre_bufete" type="text" formControlName="nombre_bufete" class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:border-[#4A1525]" placeholder="Ej: Justice Attorney Law">
+            </div>
+
+            <div class="form-group">
+              <label for="cedula_rtn" class="block text-sm font-medium text-gray-700 mb-1">Cédula / RTN *</label>
+              <input id="cedula_rtn" type="text" formControlName="cedula_rtn" class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:border-[#4A1525]" placeholder="Ej: 0801-1990-00001">
+            </div>
+
+            <div class="form-group">
+              <label for="sitio_web" class="block text-sm font-medium text-gray-700 mb-1">Sitio Web</label>
+              <input id="sitio_web" type="url" formControlName="sitio_web" class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:border-[#4A1525]" placeholder="https://www.ejemplo.com">
+            </div>
+
+            <div class="form-group">
+              <label for="telefono" class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+              <input id="telefono" type="tel" formControlName="telefono" class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:border-[#4A1525]" placeholder="+504 9999-0000">
+            </div>
+
+            <div class="form-group">
+              <label for="correo_electronico" class="block text-sm font-medium text-gray-700 mb-1">Correo Electrónico</label>
+              <input id="correo_electronico" type="email" formControlName="correo_electronico" class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:border-[#4A1525]" placeholder="contacto@bufete.com">
+            </div>
+
+            <div class="form-group full-width">
+              <label for="direccion" class="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+              <input id="direccion" type="text" formControlName="direccion" class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:border-[#4A1525]" placeholder="Barrio El Centro, Tegucigalpa, Honduras">
+            </div>
+
+            <div class="form-group full-width">
+              <label for="descripcion_bufete" class="block text-sm font-medium text-gray-700 mb-1">Descripción del Bufete</label>
+              <textarea id="descripcion_bufete" formControlName="descripcion_bufete" rows="3" class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:border-[#4A1525]" placeholder="Breve descripción de los servicios legales ofrecidos..."></textarea>
+            </div>
           </div>
         </div>
-
-        <div class="form-grid">
-          <!-- Nombre del Bufete -->
-          <div class="form-group full-width">
-            <label for="nombre_bufete">Nombre del Bufete *</label>
-            <input id="nombre_bufete" type="text" formControlName="nombre_bufete" placeholder="Ej: Justice Attorney Law">
-          </div>
-
-          <!-- Cédula / RTN -->
-          <div class="form-group">
-            <label for="cedula_rtn">Cédula / RTN *</label>
-            <input id="cedula_rtn" type="text" formControlName="cedula_rtn" placeholder="Ej: 0801-1990-00001">
-          </div>
-
-          <!-- Sitio Web -->
-          <div class="form-group">
-            <label for="sitio_web">Sitio Web</label>
-            <input id="sitio_web" type="url" formControlName="sitio_web" placeholder="https://www.ejemplo.com">
-          </div>
-
-          <!-- Teléfono -->
-          <div class="form-group">
-            <label for="telefono">Teléfono</label>
-            <input id="telefono" type="tel" formControlName="telefono" placeholder="+504 9999-0000">
-          </div>
-
-          <!-- Correo Electrónico -->
-          <div class="form-group">
-            <label for="correo_electronico">Correo Electrónico</label>
-            <input id="correo_electronico" type="email" formControlName="correo_electronico" placeholder="contacto@bufete.com">
-          </div>
-
-          <!-- Dirección -->
-          <div class="form-group full-width">
-            <label for="direccion">Dirección</label>
-            <input id="direccion" type="text" formControlName="direccion" placeholder="Barrio El Centro, Tegucigalpa, Honduras">
-          </div>
-
-          <!-- Descripción del Bufete -->
-          <div class="form-group full-width">
-            <label for="descripcion_bufete">Descripción del Bufete</label>
-            <textarea id="descripcion_bufete" formControlName="descripcion_bufete" rows="3" placeholder="Breve descripción de los servicios legales ofrecidos..."></textarea>
-          </div>
-        </div>
-      </div>
+      }
 
       <!-- ==================== SECCIÓN 2: POLÍTICAS DE SEGURIDAD ==================== -->
-      <div class="config-card">
-        <div class="card-header">
-          <div class="card-icon icon-seguridad">🔒</div>
-          <div>
-            <h2 class="card-title">Políticas de Seguridad</h2>
-            <p class="card-subtitle">Configurar reglas de protección del sistema y sesión</p>
+      @if (tabActual === 'seguridad') {
+        <div class="config-card bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+          <div class="card-header flex items-center gap-3 mb-6">
+            <div class="card-icon text-[#4A1525] bg-[#4A1525]/10 p-2 rounded-lg flex items-center justify-center">
+              <ng-icon name="heroShieldCheckSolid" size="1.5rem"></ng-icon>
+            </div>
+            <div>
+              <h2 class="card-title text-xl font-semibold text-gray-800">Políticas de Seguridad</h2>
+              <p class="card-subtitle text-sm text-gray-500">Configurar reglas de protección del sistema y sesión</p>
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="tiempo_inactividad_min" class="block text-sm font-medium text-gray-700 mb-1">Tiempo de Inactividad (minutos) *</label>
+              <input id="tiempo_inactividad_min" type="number" formControlName="tiempo_inactividad_min" min="1" max="480" class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:border-[#4A1525]">
+              <span class="form-hint text-xs text-gray-400 mt-1 block">La sesión se cerrará automáticamente después de este periodo.</span>
+            </div>
+
+            <div class="form-group">
+              <label for="longitud_min_contrasena" class="block text-sm font-medium text-gray-700 mb-1">Longitud Mínima de Contraseña *</label>
+              <input id="longitud_min_contrasena" type="number" formControlName="longitud_min_contrasena" min="6" max="50" class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:border-[#4A1525]">
+              <span class="form-hint text-xs text-gray-400 mt-1 block">Número mínimo de caracteres requeridos.</span>
+            </div>
+
+            <div class="form-group">
+              <label for="intentos_max_login" class="block text-sm font-medium text-gray-700 mb-1">Intentos Máximos de Login *</label>
+              <input id="intentos_max_login" type="number" formControlName="intentos_max_login" min="1" max="20" class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:border-[#4A1525]">
+              <span class="form-hint text-xs text-gray-400 mt-1 block">Intentos fallidos antes de bloquear la cuenta.</span>
+            </div>
+
+            <div class="form-group">
+              <label for="duracion_bloqueo_min" class="block text-sm font-medium text-gray-700 mb-1">Duración del Bloqueo (minutos) *</label>
+              <input id="duracion_bloqueo_min" type="number" formControlName="duracion_bloqueo_min" min="1" max="1440" class="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:border-[#4A1525]">
+              <span class="form-hint text-xs text-gray-400 mt-1 block">Tiempo de bloqueo tras exceder los intentos.</span>
+            </div>
+          </div>
+
+          <div class="toggles-section mt-8 flex flex-col gap-4">
+            <div class="toggle-item flex justify-between items-center bg-gray-50 p-4 rounded-md border border-gray-200">
+              <div>
+                <span class="toggle-label block font-semibold text-gray-800">Autenticación de Dos Factores (2FA)</span>
+                <span class="toggle-desc text-sm text-gray-500">Requerir verificación adicional al iniciar sesión</span>
+              </div>
+              <label class="toggle-switch relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" formControlName="requerir_2fa" class="sr-only peer">
+                <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#4A1525]"></div>
+              </label>
+            </div>
+
+            <div class="toggle-item flex justify-between items-center bg-gray-50 p-4 rounded-md border border-gray-200">
+              <div>
+                <span class="toggle-label block font-semibold text-gray-800">Notificaciones Push</span>
+                <span class="toggle-desc text-sm text-gray-500">Enviar notificaciones push a los usuarios del sistema</span>
+              </div>
+              <label class="toggle-switch relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" formControlName="notificaciones_push" class="sr-only peer">
+                <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#4A1525]"></div>
+              </label>
+            </div>
+
+            <div class="toggle-item flex justify-between items-center bg-gray-50 p-4 rounded-md border border-gray-200">
+              <div>
+                <span class="toggle-label block font-semibold text-gray-800">Recordatorios de Audiencias</span>
+                <span class="toggle-desc text-sm text-gray-500">Enviar recordatorios automáticos antes de las audiencias</span>
+              </div>
+              <label class="toggle-switch relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" formControlName="recordatorios_audiencias" class="sr-only peer">
+                <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#4A1525]"></div>
+              </label>
+            </div>
           </div>
         </div>
-
-        <div class="form-grid">
-          <!-- Tiempo de Inactividad -->
-          <div class="form-group">
-            <label for="tiempo_inactividad_min">Tiempo de Inactividad (minutos) *</label>
-            <input id="tiempo_inactividad_min" type="number" formControlName="tiempo_inactividad_min" min="1" max="480">
-            <span class="form-hint">La sesión se cerrará automáticamente después de este periodo sin actividad.</span>
-          </div>
-
-          <!-- Longitud Mínima Contraseña -->
-          <div class="form-group">
-            <label for="longitud_min_contrasena">Longitud Mínima de Contraseña *</label>
-            <input id="longitud_min_contrasena" type="number" formControlName="longitud_min_contrasena" min="6" max="50">
-            <span class="form-hint">Número mínimo de caracteres requeridos para las contraseñas.</span>
-          </div>
-
-          <!-- Intentos Máximos de Login -->
-          <div class="form-group">
-            <label for="intentos_max_login">Intentos Máximos de Login *</label>
-            <input id="intentos_max_login" type="number" formControlName="intentos_max_login" min="1" max="20">
-            <span class="form-hint">Número de intentos fallidos antes de bloquear la cuenta.</span>
-          </div>
-
-          <!-- Duración de Bloqueo -->
-          <div class="form-group">
-            <label for="duracion_bloqueo_min">Duración del Bloqueo (minutos) *</label>
-            <input id="duracion_bloqueo_min" type="number" formControlName="duracion_bloqueo_min" min="1" max="1440">
-            <span class="form-hint">Tiempo que la cuenta permanecerá bloqueada tras exceder los intentos.</span>
-          </div>
-        </div>
-
-        <!-- Toggles de Seguridad -->
-        <div class="toggles-section">
-          <div class="toggle-item">
-            <div>
-              <span class="toggle-label">Autenticación de Dos Factores (2FA)</span>
-              <span class="toggle-desc">Requerir verificación adicional al iniciar sesión</span>
-            </div>
-            <label class="toggle-switch">
-              <input type="checkbox" formControlName="requerir_2fa">
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-
-          <div class="toggle-item">
-            <div>
-              <span class="toggle-label">Notificaciones Push</span>
-              <span class="toggle-desc">Enviar notificaciones push a los usuarios del sistema</span>
-            </div>
-            <label class="toggle-switch">
-              <input type="checkbox" formControlName="notificaciones_push">
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-
-          <div class="toggle-item">
-            <div>
-              <span class="toggle-label">Recordatorios de Audiencias</span>
-              <span class="toggle-desc">Enviar recordatorios automáticos antes de las audiencias programadas</span>
-            </div>
-            <label class="toggle-switch">
-              <input type="checkbox" formControlName="recordatorios_audiencias">
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
-        </div>
-      </div>
+      }
 
       <!-- ==================== BOTÓN GUARDAR ==================== -->
-      <div class="form-actions">
-        <button type="submit" class="btn-guardar" [disabled]="form.invalid || guardando">
+      <div class="form-actions mt-8 flex justify-end">
+        <!-- 👈 Se eliminó "form.invalid" de la condición del disabled -->
+        <button type="submit" class="btn-guardar flex items-center gap-2 px-8 py-3 bg-[#4A1525] text-white font-medium rounded-md hover:bg-[#3d111e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm" [disabled]="guardando">
           @if (guardando) {
-            <span class="btn-spinner"></span>
+            <span class="btn-spinner border-2 border-white border-t-transparent rounded-full w-5 h-5 animate-spin"></span>
             Guardando...
           } @else {
-            💾 Guardar Configuración
+            <ng-icon name="heroCheckSolid" size="1.2rem"></ng-icon>
+            Guardar Cambios
           }
         </button>
       </div>

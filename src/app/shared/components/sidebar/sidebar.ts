@@ -114,12 +114,6 @@ export class Sidebar implements OnInit, OnDestroy {
       icono: 'heroChartPie',
       roles: ['Administrador', 'Abogado'] 
     },
-    {
-      nombre: 'Configuración',
-      ruta: '/configuracion',
-      icono: 'heroCog8Tooth',
-      roles: ['Administrador'] 
-    }
   ];
 
   get menuFiltrado() {
@@ -145,17 +139,19 @@ export class Sidebar implements OnInit, OnDestroy {
     this.router.navigate(['/login']);
   }
 
-  // 👇 Esta función decide qué se ilumina leyendo la variable que acabamos de actualizar 👇
+ // 👇 Esta función decide qué se ilumina leyendo la variable que acabamos de actualizar 👇
   esActivo(item: any): boolean {
     if (item.nombre === 'Inicio') {
       return this.rutaActual === '/dashboard';
     }
+    
+    // Si tuvieras un item 'Documentos' en el futuro
     if (item.nombre === 'Documentos') {
       return this.rutaActual.includes('/documentos');
     }
+    
     if (item.nombre === 'Expedientes') {
-      // Se apaga automáticamente si la ruta incluye /documentos
-      return this.rutaActual.includes('/expedientes') && !this.rutaActual.includes('/documentos');
+      return this.rutaActual.includes('/expedientes');
     }
     
     return this.rutaActual.startsWith(item.ruta);

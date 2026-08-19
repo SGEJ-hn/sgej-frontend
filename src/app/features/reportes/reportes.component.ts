@@ -1,2074 +1,399 @@
-import {
-  ChangeDetectorRef,
-  Component,
-  OnInit
-} from '@angular/core';
-
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-import {
-  ReporteService,
-  EstadisticasReportes
-} from '../../core/services/reporte.service';
-
+import { NgIconComponent, provideIcons } from '@ng-icons/core';
+import { SharedHeader } from '../../shared/components/shared-header/shared-header';
+import { ReporteService, EstadisticasReportes } from '../../core/services/reporte.service';
+import {AuthService} from '../../core/services/auth.service'
 import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx-js-style';
+import { 
+  heroDocumentChartBar, 
+  heroArrowDownTray, 
+  heroFolder, 
+  heroUsers,
+  heroDocumentText
+} from '@ng-icons/heroicons/outline';
 
 @Component({
   selector: 'app-reportes',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, NgIconComponent, SharedHeader],
+  viewProviders: [provideIcons({ heroDocumentChartBar, heroArrowDownTray, heroFolder, heroUsers, heroDocumentText })],
   templateUrl: './reportes.component.html',
   styleUrls: ['./reportes.component.css'],
-
 })
-
 export class ReportesComponent implements OnInit {
-
-
-  // ─────────────────────────────────────────────
-  // Variables del componente
-  // ─────────────────────────────────────────────
-
+  
   estadisticas: EstadisticasReportes | null = null;
-
   cargando = true;
-
   error = '';
-
-
-  // ─────────────────────────────────────────────
-  // Constructor
-  // ─────────────────────────────────────────────
+  rolUsuario = '';
+  esAdmin = false;
 
   constructor(
     private reporteService: ReporteService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private authService: AuthService
   ) {}
 
-
-  // ─────────────────────────────────────────────
-  // Inicialización del componente
-  // ─────────────────────────────────────────────
-
   ngOnInit(): void {
-
+    const usuarioActual = this.authService.getUser();
+    this.rolUsuario = usuarioActual?.rol || '';
+    this.esAdmin = this.rolUsuario === 'ADMIN';
     this.cargarEstadisticas();
-
   }
-
-
-  // ─────────────────────────────────────────────
-  // Obtener estadísticas
-  // ─────────────────────────────────────────────
 
   cargarEstadisticas(): void {
-
     this.cargando = true;
-
     this.error = '';
-
-
-    this.reporteService
-      .obtenerEstadisticas()
-      .subscribe({
-
-        next: (datos) => {
-
-          console.log(
-            'ESTADÍSTICAS RECIBIDAS EN ANGULAR:',
-            datos
-          );
-
-          this.estadisticas = datos;
-
-          this.cargando = false;
-
-          this.cdr.detectChanges();
-
-        },
-
-
-        error: (error) => {
-
-          console.error(
-            'ERROR AL OBTENER ESTADÍSTICAS:',
-            error
-          );
-
-          this.error =
-            'No se pudieron cargar las estadísticas.';
-
-          this.cargando = false;
-
-          this.cdr.detectChanges();
-
-        }
-
-      });
-
+    this.reporteService.obtenerEstadisticas().subscribe({
+      next: (datos) => {
+        this.estadisticas = datos;
+        this.cargando = false;
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('ERROR AL OBTENER ESTADÍSTICAS:', error);
+        this.error = 'No se pudieron cargar las estadísticas.';
+        this.cargando = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
-
   // ─────────────────────────────────────────────
-  // Máximo de expedientes por estado
+  // Métodos de apoyo para los gráficos
   // ─────────────────────────────────────────────
 
-  obtenerMaximoEstado(): number {
-
-    if (
-      !this.estadisticas ||
-      this.estadisticas.expedientesPorEstado.length === 0
-    ) {
-
-      return 1;
-
-    }
-
-    return Math.max(
-      ...this.estadisticas.expedientesPorEstado.map(
-        item => item._count.id_expediente ?? 0
-      )
-    ) || 1;
-
+  private obtenerMaximoGenerico(arreglo: any[] | undefined, propiedad: string): number {
+    if (!arreglo || arreglo.length === 0) return 1;
+    return Math.max(...arreglo.map(item => item._count?.[propiedad] ?? 0)) || 1;
   }
 
+  obtenerMaximoEstado(): number { return this.obtenerMaximoGenerico(this.estadisticas?.expedientesPorEstado, 'id_expediente'); }
+  obtenerMaximoMateria(): number { return this.obtenerMaximoGenerico(this.estadisticas?.expedientesPorMateria, 'id_expediente'); }
+  obtenerMaximoCitas(): number { return this.obtenerMaximoGenerico(this.estadisticas?.citasPorTipo, 'id_cita'); }
+  obtenerMaximoUsuarios(): number { return this.obtenerMaximoGenerico(this.estadisticas?.usuariosPorRol, 'id_usuario'); }
 
-  // ─────────────────────────────────────────────
-  // Máximo de expedientes por materia
-  // ─────────────────────────────────────────────
-
-  obtenerMaximoMateria(): number {
-
-    if (
-      !this.estadisticas ||
-      this.estadisticas.expedientesPorMateria.length === 0
-    ) {
-
-      return 1;
-
-    }
-
-    return Math.max(
-      ...this.estadisticas.expedientesPorMateria.map(
-        item => item._count.id_expediente ?? 0
-      )
-    ) || 1;
-
+  calcularAltura(valor: number | undefined, maximo: number): number {
+    return (!valor || maximo <= 0) ? 0 : (valor / maximo) * 100;
   }
-
-
-  // ─────────────────────────────────────────────
-  // Máximo de citas
-  // ─────────────────────────────────────────────
-
-  obtenerMaximoCitas(): number {
-
-    if (
-      !this.estadisticas ||
-      this.estadisticas.citasPorTipo.length === 0
-    ) {
-
-      return 1;
-
-    }
-
-    return Math.max(
-      ...this.estadisticas.citasPorTipo.map(
-        item => item._count.id_cita ?? 0
-      )
-    ) || 1;
-
-  }
-
-
-  // ─────────────────────────────────────────────
-  // Máximo de usuarios
-  // ─────────────────────────────────────────────
-
-  obtenerMaximoUsuarios(): number {
-
-    if (
-      !this.estadisticas ||
-      this.estadisticas.usuariosPorRol.length === 0
-    ) {
-
-      return 1;
-
-    }
-
-    return Math.max(
-      ...this.estadisticas.usuariosPorRol.map(
-        item => item._count.id_usuario ?? 0
-      )
-    ) || 1;
-
-  }
-
-
-  // ─────────────────────────────────────────────
-  // Calcular altura de las barras
-  // ─────────────────────────────────────────────
-
-  calcularAltura(
-    valor: number | undefined,
-    maximo: number
-  ): number {
-
-    if (!valor || maximo <= 0) {
-
-      return 0;
-
-    }
-
-    return (valor / maximo) * 100;
-
-  }
-
-
-  // ─────────────────────────────────────────────
-  // Colores de las citas
-  //
-  // Se mantienen los colores utilizados
-  // en el calendario.
-  // ─────────────────────────────────────────────
 
   obtenerColorCita(tipo?: string): string {
-
-    if (!tipo) {
-
-      return '#4B1623';
-
-    }
-
-
+    if (!tipo) return '#4B1623';
     switch (tipo.toLowerCase()) {
-
-      // Audiencia → verde
-
-      case 'audiencia':
-
-        return '#16A34A';
-
-
-      // Reunión → azul
-
+      case 'audiencia': return '#16A34A';
       case 'reunión':
-      case 'reunion':
-
-        return '#2563EB';
-
-
-      // Trámite → naranja
-
+      case 'reunion': return '#2563EB';
       case 'trámite':
-      case 'tramite':
-
-        return '#F59E0B';
-
-
-      // Color por defecto
-
-      default:
-
-        return '#4B1623';
-
+      case 'tramite': return '#F59E0B';
+      default: return '#4B1623';
     }
-
   }
-
-
-  // ─────────────────────────────────────────────
-  // Total de usuarios
-  // ─────────────────────────────────────────────
 
   obtenerTotalUsuarios(): number {
-
-    if (!this.estadisticas) {
-
-      return 0;
-
-    }
-
-
-    return this.estadisticas.usuariosPorRol.reduce(
-      (total, item) =>
-        total + (item._count.id_usuario ?? 0),
-      0
-    );
-
+    if (!this.estadisticas) return 0;
+    return this.estadisticas.usuariosPorRol.reduce((total, item) => total + (item._count.id_usuario ?? 0), 0);
   }
 
-  // ─────────────────────────────────────────────
-// Exportar estadísticas a Excel
-// Genera un reporte general del sistema SGEJ
-// con formato, colores y diferentes hojas.
+  obtenerTotalCitas(): number {
+    if (!this.estadisticas) return 0;
+    return this.estadisticas.citasPorTipo.reduce((total, item) => total + (item._count.id_cita ?? 0), 0);
+  }
+
 // ─────────────────────────────────────────────
-
-exportarExcel(): void {
-
-  // Verificamos que existan estadísticas antes de exportar
-
-  if (!this.estadisticas) {
-
-    console.error(
-      'No existen estadísticas para exportar.'
-    );
-
-    return;
-
-  }
-
-
+  // Exportar estadísticas a Excel (Diseño Profesional)
   // ─────────────────────────────────────────────
-  // Colores institucionales
-  // ─────────────────────────────────────────────
-
-  const COLOR_VINO = '4B1623';
-
-  const COLOR_CREMA = 'F3F2EE';
-
-  const COLOR_BLANCO = 'FFFFFF';
-
-  const COLOR_VERDE = '16A34A';
-
-  const COLOR_AZUL = '2563EB';
-
-  const COLOR_NARANJA = 'F59E0B';
-
-  const COLOR_GRIS = '666666';
-
-  const COLOR_BORDE = 'D9D9D9';
-
-
-
-  // ─────────────────────────────────────────────
-  // Estilo para títulos principales
-  // ─────────────────────────────────────────────
-
-  const estiloTitulo: any = {
-
-    font: {
-      name: 'Calibri',
-      sz: 18,
-      bold: true,
-      color: {
-        rgb: COLOR_BLANCO
-      }
-    },
-
-    fill: {
-      fgColor: {
-        rgb: COLOR_VINO
-      }
-    },
-
-    alignment: {
-      horizontal: 'center',
-      vertical: 'center'
+  exportarExcel(): void {
+    if (!this.estadisticas) {
+      console.error('No existen estadísticas para exportar.');
+      return;
     }
 
-  };
-
-
-
-  // ─────────────────────────────────────────────
-  // Estilo para subtítulos
-  // ─────────────────────────────────────────────
-
-  const estiloSubtitulo: any = {
-
-    font: {
-      name: 'Calibri',
-      sz: 11,
-      italic: true,
-      color: {
-        rgb: COLOR_GRIS
-      }
-    },
-
-    alignment: {
-      horizontal: 'center',
-      vertical: 'center'
-    }
-
-  };
-
-
-
-  // ─────────────────────────────────────────────
-  // Estilo para encabezados de tablas
-  // ─────────────────────────────────────────────
-
-  const estiloEncabezado: any = {
-
-    font: {
-      name: 'Calibri',
-      sz: 11,
-      bold: true,
-      color: {
-        rgb: COLOR_BLANCO
-      }
-    },
-
-    fill: {
-      fgColor: {
-        rgb: COLOR_VINO
-      }
-    },
-
-    alignment: {
-      horizontal: 'center',
-      vertical: 'center',
-      wrapText: true
-    },
-
-    border: {
-
-      top: {
-        style: 'thin',
-        color: {
-          rgb: COLOR_BORDE
-        }
-      },
-
-      bottom: {
-        style: 'thin',
-        color: {
-          rgb: COLOR_BORDE
-        }
-      },
-
-      left: {
-        style: 'thin',
-        color: {
-          rgb: COLOR_BORDE
-        }
-      },
-
-      right: {
-        style: 'thin',
-        color: {
-          rgb: COLOR_BORDE
-        }
-      }
-
-    }
-
-  };
-
-
-
-  // ─────────────────────────────────────────────
-  // Estilo para datos normales
-  // ─────────────────────────────────────────────
-
-  const estiloDato: any = {
-
-    font: {
-      name: 'Calibri',
-      sz: 11,
-      color: {
-        rgb: '333333'
-      }
-    },
-
-    alignment: {
-      vertical: 'center'
-    },
-
-    border: {
-
-      top: {
-        style: 'thin',
-        color: {
-          rgb: COLOR_BORDE
-        }
-      },
-
-      bottom: {
-        style: 'thin',
-        color: {
-          rgb: COLOR_BORDE
-        }
-      },
-
-      left: {
-        style: 'thin',
-        color: {
-          rgb: COLOR_BORDE
-        }
-      },
-
-      right: {
-        style: 'thin',
-        color: {
-          rgb: COLOR_BORDE
-        }
-      }
-
-    }
-
-  };
-
-
-
-  // ─────────────────────────────────────────────
-  // Estilo para cantidades
-  // ─────────────────────────────────────────────
-
-  const estiloCantidad: any = {
-
-    font: {
-      name: 'Calibri',
-      sz: 11,
-      bold: true,
-      color: {
-        rgb: COLOR_VINO
-      }
-    },
-
-    alignment: {
-      horizontal: 'center',
-      vertical: 'center'
-    },
-
-    border: {
-
-      top: {
-        style: 'thin',
-        color: {
-          rgb: COLOR_BORDE
-        }
-      },
-
-      bottom: {
-        style: 'thin',
-        color: {
-          rgb: COLOR_BORDE
-        }
-      },
-
-      left: {
-        style: 'thin',
-        color: {
-          rgb: COLOR_BORDE
-        }
-      },
-
-      right: {
-        style: 'thin',
-        color: {
-          rgb: COLOR_BORDE
-        }
-      }
-
-    }
-
-  };
-
-
-
-  // ─────────────────────────────────────────────
-  // Crear libro de Excel
-  // ─────────────────────────────────────────────
-
-  const libro = XLSX.utils.book_new();
-
-
-
-  // =====================================================
-  // HOJA 1 — RESUMEN
-  // =====================================================
-
-  const totalCitas =
-    this.estadisticas.citasPorTipo.reduce(
-      (
-        total: number,
-        item: any
-      ) => {
-
-        return total +
-          Number(
-            item._count?.id_cita || 0
-          );
-
-      },
-
-      0
-    );
-
-
-  const totalUsuarios =
-    this.estadisticas.usuariosPorRol.reduce(
-      (
-        total: number,
-        item: any
-      ) => {
-
-        return total +
-          Number(
-            item._count?.id_usuario || 0
-          );
-
-      },
-
-      0
-    );
-
-
-  const datosResumen: any[][] = [
-
-    [
-      'JUSTICE ATTORNEY LAW',
-      ''
-    ],
-
-    [
-      'REPORTE GENERAL DEL SISTEMA SGEJ',
-      ''
-    ],
-
-    [
-      'Sistema de Gestión de Expedientes Jurídicos',
-      ''
-    ],
-
-    [],
-
-    [
-      'RESUMEN GENERAL',
-      ''
-    ],
-
-    [],
-
-    [
-      'Total de expedientes',
-      this.estadisticas.totalExpedientes
-    ],
-
-    [
-      'Total de documentos',
-      this.estadisticas.totalDocumentos
-    ],
-
-    [
-      'Total de citas',
-      totalCitas
-    ],
-
-    [
-      'Tipos de cita',
-      this.estadisticas.citasPorTipo.length
-    ],
-
-    [
-      'Total de usuarios',
-      totalUsuarios
-    ],
-
-    [],
-
-    [
-      'EXPEDIENTES POR ESTADO',
-      ''
-    ],
-
-    [
-      'Estado',
-      'Cantidad'
-    ]
-
-  ];
-
-
-
-  // Agregar expedientes por estado
-
-  this.estadisticas.expedientesPorEstado
-    .forEach(
-      (item: any) => {
-
-        datosResumen.push([
-
-          item.estado,
-
-          Number(
-            item._count?.id_expediente || 0
-          )
-
-        ]);
-
-      }
-    );
-
-
-
-  // ─────────────────────────────────────────────
-  // Expedientes por materia
-  // ─────────────────────────────────────────────
-
-  datosResumen.push([]);
-
-  datosResumen.push([
-    'EXPEDIENTES POR MATERIA',
-    ''
-  ]);
-
-  datosResumen.push([
-    'Materia',
-    'Cantidad'
-  ]);
-
-
-  this.estadisticas.expedientesPorMateria
-    .forEach(
-      (item: any) => {
-
-        datosResumen.push([
-
-          item.materia,
-
-          Number(
-            item._count?.id_expediente || 0
-          )
-
-        ]);
-
-      }
-    );
-
-
-
-  // ─────────────────────────────────────────────
-  // Citas por tipo
-  // ─────────────────────────────────────────────
-
-  datosResumen.push([]);
-
-  datosResumen.push([
-    'CITAS POR TIPO',
-    ''
-  ]);
-
-  datosResumen.push([
-    'Tipo de cita',
-    'Cantidad'
-  ]);
-
-
-  this.estadisticas.citasPorTipo
-    .forEach(
-      (item: any) => {
-
-        datosResumen.push([
-
-          item.tipo_cita,
-
-          Number(
-            item._count?.id_cita || 0
-          )
-
-        ]);
-
-      }
-    );
-
-
-
-  // ─────────────────────────────────────────────
-  // Usuarios por rol
-  // ─────────────────────────────────────────────
-
-  datosResumen.push([]);
-
-  datosResumen.push([
-    'USUARIOS POR ROL',
-    ''
-  ]);
-
-  datosResumen.push([
-    'Rol',
-    'Cantidad'
-  ]);
-
-
-  this.estadisticas.usuariosPorRol
-    .forEach(
-      (item: any) => {
-
-        datosResumen.push([
-
-          item.rol,
-
-          Number(
-            item._count?.id_usuario || 0
-          )
-
-        ]);
-
-      }
-    );
-
-
-
-  // Crear hoja
-
-  const hojaResumen =
-    XLSX.utils.aoa_to_sheet(
-      datosResumen
-    );
-
-
-
-  // ─────────────────────────────────────────────
-  // Combinar títulos
-  // ─────────────────────────────────────────────
-
-  hojaResumen['!merges'] = [
-
-    {
-      s: {
-        r: 0,
-        c: 0
-      },
-
-      e: {
-        r: 0,
-        c: 1
-      }
-    },
-
-    {
-      s: {
-        r: 1,
-        c: 0
-      },
-
-      e: {
-        r: 1,
-        c: 1
-      }
-    },
-
-    {
-      s: {
-        r: 2,
-        c: 0
-      },
-
-      e: {
-        r: 2,
-        c: 1
-      }
-    }
-
-  ];
-
-
-
-  // ─────────────────────────────────────────────
-  // Aplicar estilos a los títulos
-  // ─────────────────────────────────────────────
-
-  hojaResumen['A1'].s =
-    estiloTitulo;
-
-  hojaResumen['A2'].s =
-    estiloTitulo;
-
-  hojaResumen['A2'].s.font.sz =
-    14;
-
-  hojaResumen['A3'].s =
-    estiloSubtitulo;
-
-
-
-  // ─────────────────────────────────────────────
-  // Estilo de las secciones
-  // ─────────────────────────────────────────────
-
-  const filasSeccion: number[] = [];
-
-
-  for (
-    let i = 0;
-    i < datosResumen.length;
-    i++
-  ) {
-
-    const valor =
-      datosResumen[i][0];
-
-
-    if (
-      valor === 'RESUMEN GENERAL' ||
-      valor === 'EXPEDIENTES POR ESTADO' ||
-      valor === 'EXPEDIENTES POR MATERIA' ||
-      valor === 'CITAS POR TIPO' ||
-      valor === 'USUARIOS POR ROL'
-    ) {
-
-      filasSeccion.push(i + 1);
-
-    }
-
-  }
-
-
-
-  filasSeccion.forEach(
-    (fila: number) => {
-
-      hojaResumen[`A${fila}`].s = {
-
-        ...estiloTitulo,
-
-        font: {
-
-          name: 'Calibri',
-          sz: 12,
-          bold: true,
-          color: {
-            rgb: COLOR_BLANCO
-          }
-
-        }
-
-      };
-
-    }
-  );
-
-
-
-  // ─────────────────────────────────────────────
-  // Estilos para las tablas
-  // ─────────────────────────────────────────────
-
-  for (
-    let fila = 1;
-    fila <= datosResumen.length;
-    fila++
-  ) {
-
-    const celdaA =
-      hojaResumen[`A${fila}`];
-
-    const celdaB =
-      hojaResumen[`B${fila}`];
-
-
-    if (
-      !celdaA ||
-      !celdaB
-    ) {
-
-      continue;
-
-    }
-
-
-    // Saltamos títulos y tarjetas
-
-    if (
-      fila <= 3 ||
-      fila === 7 ||
-      fila === 8 ||
-      fila === 9 ||
-      fila === 10 ||
-      fila === 11
-    ) {
-
-      continue;
-
-    }
-
-
-    // Encabezados de tablas
-
-    if (
-      celdaA.v === 'Estado' ||
-      celdaA.v === 'Materia' ||
-      celdaA.v === 'Tipo de cita' ||
-      celdaA.v === 'Rol'
-    ) {
-
-      celdaA.s =
-        estiloEncabezado;
-
-      celdaB.s =
-        estiloEncabezado;
-
-      continue;
-
-    }
-
-
-    // Datos normales
-
-    if (
-      typeof celdaA.v === 'string'
-    ) {
-
-      celdaA.s =
-        estiloDato;
-
-    }
-
-
-    if (
-      typeof celdaB.v === 'number'
-    ) {
-
-      celdaB.s =
-        estiloCantidad;
-
-    }
-
-  }
-
-
-
-  // ─────────────────────────────────────────────
-  // Estilo especial para tarjetas principales
-  // ─────────────────────────────────────────────
-
-  hojaResumen['B7'].s = {
-
-    ...estiloCantidad,
-
-    font: {
-
-      name: 'Calibri',
-      sz: 16,
-      bold: true,
-      color: {
-        rgb: COLOR_VINO
-      }
-
-    },
-
-    fill: {
-
-      fgColor: {
-        rgb: COLOR_CREMA
-      }
-
-    }
-
-  };
-
-
-  hojaResumen['B8'].s = {
-
-    ...estiloCantidad,
-
-    font: {
-
-      name: 'Calibri',
-      sz: 16,
-      bold: true,
-      color: {
-        rgb: COLOR_VERDE
-      }
-
-    },
-
-    fill: {
-
-      fgColor: {
-        rgb: COLOR_CREMA
-      }
-
-    }
-
-  };
-
-
-  hojaResumen['B9'].s = {
-
-    ...estiloCantidad,
-
-    font: {
-
-      name: 'Calibri',
-      sz: 16,
-      bold: true,
-      color: {
-        rgb: COLOR_AZUL
-      }
-
-    },
-
-    fill: {
-
-      fgColor: {
-        rgb: COLOR_CREMA
-      }
-
-    }
-
-  };
-
-
-  hojaResumen['B10'].s = {
-
-    ...estiloCantidad,
-
-    font: {
-
-      name: 'Calibri',
-      sz: 16,
-      bold: true,
-      color: {
-        rgb: COLOR_NARANJA
-      }
-
-    },
-
-    fill: {
-
-      fgColor: {
-        rgb: COLOR_CREMA
-      }
-
-    }
-
-  };
-
-
-  hojaResumen['B11'].s = {
-
-    ...estiloCantidad,
-
-    font: {
-
-      name: 'Calibri',
-      sz: 16,
-      bold: true,
-      color: {
-        rgb: COLOR_VINO
-      }
-
-    },
-
-    fill: {
-
-      fgColor: {
-        rgb: COLOR_CREMA
-      }
-
-    }
-
-  };
-
-
-
-  // Ancho de columnas
-
-  hojaResumen['!cols'] = [
-
-    {
-      wch: 36
-    },
-
-    {
-      wch: 18
-    }
-
-  ];
-
-
-  // Altura de filas
-
-  hojaResumen['!rows'] = [
-
-    {
-      hpt: 32
-    },
-
-    {
-      hpt: 26
-    },
-
-    {
-      hpt: 22
-    }
-
-  ];
-
-
-  // Congelar encabezados
-
-  hojaResumen['!freeze'] = {
-
-    xSplit: 0,
-
-    ySplit: 5
-
-  };
-
-
-  XLSX.utils.book_append_sheet(
-
-    libro,
-
-    hojaResumen,
-
-    'Resumen'
-
-  );
-
-
-
-  // =====================================================
-  // HOJA 2 — EXPEDIENTES POR ESTADO
-  // =====================================================
-
-  const datosEstado: any[][] = [
-
-    [
-      'EXPEDIENTES POR ESTADO',
-      ''
-    ],
-
-    [
-      'Estado',
-      'Cantidad'
-    ]
-
-  ];
-
-
-  this.estadisticas.expedientesPorEstado
-    .forEach(
-      (item: any) => {
-
-        datosEstado.push([
-
-          item.estado,
-
-          Number(
-            item._count?.id_expediente || 0
-          )
-
-        ]);
-
-      }
-    );
-
-
-  const hojaEstado =
-    XLSX.utils.aoa_to_sheet(
-      datosEstado
-    );
-
-
-  hojaEstado['!merges'] = [
-
-    {
-      s: {
-        r: 0,
-        c: 0
-      },
-
-      e: {
-        r: 0,
-        c: 1
-      }
-    }
-
-  ];
-
-
-  hojaEstado['A1'].s =
-    estiloTitulo;
-
-  hojaEstado['A2'].s =
-    estiloEncabezado;
-
-  hojaEstado['B2'].s =
-    estiloEncabezado;
-
-
-  for (
-    let fila = 3;
-    fila <= datosEstado.length;
-    fila++
-  ) {
-
-    hojaEstado[`A${fila}`].s =
-      estiloDato;
-
-    hojaEstado[`B${fila}`].s =
-      estiloCantidad;
-
-  }
-
-
-  hojaEstado['!cols'] = [
-
-    {
-      wch: 30
-    },
-
-    {
-      wch: 18
-    }
-
-  ];
-
-
-  hojaEstado['!freeze'] = {
-
-    xSplit: 0,
-
-    ySplit: 2
-
-  };
-
-
-  XLSX.utils.book_append_sheet(
-
-    libro,
-
-    hojaEstado,
-
-    'Expedientes Estado'
-
-  );
-
-
-
-  // =====================================================
-  // HOJA 3 — EXPEDIENTES POR MATERIA
-  // =====================================================
-
-  const datosMateria: any[][] = [
-
-    [
-      'EXPEDIENTES POR MATERIA',
-      ''
-    ],
-
-    [
-      'Materia',
-      'Cantidad'
-    ]
-
-  ];
-
-
-  this.estadisticas.expedientesPorMateria
-    .forEach(
-      (item: any) => {
-
-        datosMateria.push([
-
-          item.materia,
-
-          Number(
-            item._count?.id_expediente || 0
-          )
-
-        ]);
-
-      }
-    );
-
-
-  const hojaMateria =
-    XLSX.utils.aoa_to_sheet(
-      datosMateria
-    );
-
-
-  hojaMateria['!merges'] = [
-
-    {
-      s: {
-        r: 0,
-        c: 0
-      },
-
-      e: {
-        r: 0,
-        c: 1
-      }
-    }
-
-  ];
-
-
-  hojaMateria['A1'].s =
-    estiloTitulo;
-
-  hojaMateria['A2'].s =
-    estiloEncabezado;
-
-  hojaMateria['B2'].s =
-    estiloEncabezado;
-
-
-  for (
-    let fila = 3;
-    fila <= datosMateria.length;
-    fila++
-  ) {
-
-    hojaMateria[`A${fila}`].s =
-      estiloDato;
-
-    hojaMateria[`B${fila}`].s =
-      estiloCantidad;
-
-  }
-
-
-  hojaMateria['!cols'] = [
-
-    {
-      wch: 30
-    },
-
-    {
-      wch: 18
-    }
-
-  ];
-
-
-  hojaMateria['!freeze'] = {
-
-    xSplit: 0,
-
-    ySplit: 2
-
-  };
-
-
-  XLSX.utils.book_append_sheet(
-
-    libro,
-
-    hojaMateria,
-
-    'Expedientes Materia'
-
-  );
-
-
-
-  // =====================================================
-  // HOJA 4 — CITAS
-  // =====================================================
-
-  const datosCitas: any[][] = [
-
-    [
-      'CITAS POR TIPO',
-      ''
-    ],
-
-    [
-      'Tipo de cita',
-      'Cantidad'
-    ]
-
-  ];
-
-
-  this.estadisticas.citasPorTipo
-    .forEach(
-      (item: any) => {
-
-        datosCitas.push([
-
-          item.tipo_cita,
-
-          Number(
-            item._count?.id_cita || 0
-          )
-
-        ]);
-
-      }
-    );
-
-
-  const hojaCitas =
-    XLSX.utils.aoa_to_sheet(
-      datosCitas
-    );
-
-
-  hojaCitas['!merges'] = [
-
-    {
-      s: {
-        r: 0,
-        c: 0
-      },
-
-      e: {
-        r: 0,
-        c: 1
-      }
-    }
-
-  ];
-
-
-  hojaCitas['A1'].s =
-    estiloTitulo;
-
-  hojaCitas['A2'].s =
-    estiloEncabezado;
-
-  hojaCitas['B2'].s =
-    estiloEncabezado;
-
-
-  for (
-    let fila = 3;
-    fila <= datosCitas.length;
-    fila++
-  ) {
-
-    const celda =
-      hojaCitas[`A${fila}`];
-
-
-    let color =
-      COLOR_VINO;
-
-
-    if (
-      celda &&
-      typeof celda.v === 'string'
-    ) {
-
-      const tipo =
-        celda.v.toLowerCase();
-
-
-      if (
-        tipo === 'audiencia'
-      ) {
-
-        color =
-          COLOR_VERDE;
-
-      }
-
-
-      if (
-        tipo === 'reunión' ||
-        tipo === 'reunion'
-      ) {
-
-        color =
-          COLOR_AZUL;
-
-      }
-
-
-      if (
-        tipo === 'trámite' ||
-        tipo === 'tramite'
-      ) {
-
-        color =
-          COLOR_NARANJA;
-
-      }
-
-    }
-
-
-    hojaCitas[`A${fila}`].s = {
-
-      ...estiloDato,
-
-      font: {
-
-        name: 'Calibri',
-
-        sz: 11,
-
-        bold: true,
-
-        color: {
-          rgb: color
-        }
-
-      }
-
+    const COLORES = {
+      VINO: '4A1525', CREMA: 'F8F7F5', BLANCO: 'FFFFFF',
+      GRIS_OSCURO: '333333', GRIS_CLARO: 'F3F4F6', BORDE: 'E5E7EB'
     };
 
+    const bordesGenerales = {
+      top: { style: 'thin', color: { rgb: COLORES.BORDE } },
+      bottom: { style: 'thin', color: { rgb: COLORES.BORDE } },
+      left: { style: 'thin', color: { rgb: COLORES.BORDE } },
+      right: { style: 'thin', color: { rgb: COLORES.BORDE } }
+    };
 
-    hojaCitas[`B${fila}`].s =
-      estiloCantidad;
+    const estiloTituloPrincipal = {
+      font: { name: 'Arial', sz: 20, bold: true, color: { rgb: COLORES.BLANCO } },
+      fill: { fgColor: { rgb: COLORES.VINO } },
+      alignment: { horizontal: 'center', vertical: 'center' }
+    };
 
-  }
+    const estiloMetadatos = {
+      font: { name: 'Arial', sz: 10, italic: true, color: { rgb: COLORES.GRIS_OSCURO } },
+      alignment: { horizontal: 'right', vertical: 'center' }
+    };
 
+    const estiloEncabezadoTabla = {
+      font: { name: 'Arial', sz: 11, bold: true, color: { rgb: COLORES.BLANCO } },
+      fill: { fgColor: { rgb: '6B2036' } }, // Un vino un poco más claro
+      alignment: { horizontal: 'left', vertical: 'center', wrapText: true },
+      border: bordesGenerales
+    };
 
-  hojaCitas['!cols'] = [
+    const estiloDato = {
+      font: { name: 'Arial', sz: 11, color: { rgb: COLORES.GRIS_OSCURO } },
+      alignment: { vertical: 'center', horizontal: 'left' },
+      border: bordesGenerales
+    };
 
-    {
-      wch: 30
-    },
+    const estiloDatoNumerico = {
+      ...estiloDato,
+      font: { name: 'Arial', sz: 11, bold: true, color: { rgb: COLORES.VINO } },
+      alignment: { horizontal: 'center', vertical: 'center' },
+      fill: { fgColor: { rgb: COLORES.CREMA } }
+    };
 
-    {
-      wch: 18
+    const libro = XLSX.utils.book_new();
+
+    const generarBloqueDatos = (titulo: string, cabecera1: string, datos: any[], keyNombre: string, keyValor: string): any[][] => {
+      const bloque: any[][] = [];
+      bloque.push([titulo, '']);
+      bloque.push([cabecera1, 'Cantidad Registrada']);
+      datos.forEach(item => bloque.push([item[keyNombre], Number(item._count?.[keyValor] || 0)]));
+      return bloque;
+    };
+
+    // =====================================================
+    // HOJA 1 — RESUMEN GENERAL
+    // =====================================================
+    let datosResumen: any[][] = [
+      ['JUSTICE ATTORNEY LAW - REPORTE DE GESTIÓN', ''],
+      [`Fecha de emisión: ${new Date().toLocaleDateString()}`, ''],
+      [`Generado por: ${this.rolUsuario}`, ''],
+      [],
+      ['MÉTRICAS PRINCIPALES DEL SISTEMA', ''],
+      ['Total de expedientes activos', this.estadisticas.totalExpedientes],
+      ['Total de documentos procesados', this.estadisticas.totalDocumentos],
+      ['Total de citas programadas', this.obtenerTotalCitas()],
+      ['Categorías de citas', this.estadisticas.citasPorTipo.length]
+    ];
+
+    // Ocultar total de usuarios si NO es admin
+    if (this.esAdmin) {
+      datosResumen.push(['Total de usuarios registrados', this.obtenerTotalUsuarios()]);
     }
 
-  ];
+    datosResumen.push([]);
 
-
-  hojaCitas['!freeze'] = {
-
-    xSplit: 0,
-
-    ySplit: 2
-
-  };
-
-
-  XLSX.utils.book_append_sheet(
-
-    libro,
-
-    hojaCitas,
-
-    'Citas'
-
-  );
-
-
-
-  // =====================================================
-  // HOJA 5 — USUARIOS
-  // =====================================================
-
-  const datosUsuarios: any[][] = [
-
-    [
-      'USUARIOS POR ROL',
-      ''
-    ],
-
-    [
-      'Rol',
-      'Cantidad'
-    ]
-
-  ];
-
-
-  this.estadisticas.usuariosPorRol
-    .forEach(
-      (item: any) => {
-
-        datosUsuarios.push([
-
-          item.rol,
-
-          Number(
-            item._count?.id_usuario || 0
-          )
-
-        ]);
-
-      }
+    // Añadir bloques dinámicamente
+    datosResumen = datosResumen.concat(
+      generarBloqueDatos('DESGLOSE DE EXPEDIENTES POR ESTADO', 'Estado del Caso', this.estadisticas.expedientesPorEstado, 'estado', 'id_expediente'),
+      [[]],
+      generarBloqueDatos('DESGLOSE DE EXPEDIENTES POR MATERIA', 'Materia Jurídica', this.estadisticas.expedientesPorMateria, 'materia', 'id_expediente'),
+      [[]],
+      generarBloqueDatos('DESGLOSE DE CITAS POR TIPO', 'Tipo de Actividad', this.estadisticas.citasPorTipo, 'tipo_cita', 'id_cita')
     );
 
+    // Ocultar bloque de usuarios si NO es admin
+    if (this.esAdmin) {
+      datosResumen = datosResumen.concat(
+        [[]],
+        generarBloqueDatos('DESGLOSE DE USUARIOS POR ROL', 'Rol en el Sistema', this.estadisticas.usuariosPorRol, 'rol', 'id_usuario')
+      );
+    }
 
-  const hojaUsuarios =
-    XLSX.utils.aoa_to_sheet(
-      datosUsuarios
-    );
+    const hojaResumen = XLSX.utils.aoa_to_sheet(datosResumen);
 
+    // Fusiones de celdas
+    hojaResumen['!merges'] = [
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 1 } }, // Título
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 1 } }, // Fecha
+      { s: { r: 2, c: 0 }, e: { r: 2, c: 1 } }  // Autor
+    ];
 
-  hojaUsuarios['!merges'] = [
+    // Aplicar estilos
+    hojaResumen['A1'].s = estiloTituloPrincipal;
+    hojaResumen['A2'].s = estiloMetadatos;
+    hojaResumen['A3'].s = estiloMetadatos;
 
-    {
-      s: {
-        r: 0,
-        c: 0
-      },
+    for (let fila = 4; fila <= datosResumen.length; fila++) {
+      const celdaA = hojaResumen[`A${fila}`];
+      const celdaB = hojaResumen[`B${fila}`];
+      
+      if (!celdaA) continue;
 
-      e: {
-        r: 0,
-        c: 1
+      if (typeof celdaA.v === 'string' && celdaA.v.includes('MÉTRICAS') || celdaA.v.includes('DESGLOSE')) {
+        celdaA.s = { ...estiloTituloPrincipal, font: { ...estiloTituloPrincipal.font, sz: 12 } };
+        if(celdaB) celdaB.s = { ...estiloTituloPrincipal, font: { ...estiloTituloPrincipal.font, sz: 12 } };
+        // Fusión para subtítulos
+        hojaResumen['!merges'].push({ s: { r: fila - 1, c: 0 }, e: { r: fila - 1, c: 1 } });
+        continue;
+      }
+
+      if (celdaB) {
+        if (['Estado del Caso', 'Materia Jurídica', 'Tipo de Actividad', 'Rol en el Sistema'].includes(celdaA.v) || celdaB.v === 'Cantidad Registrada') {
+          celdaA.s = estiloEncabezadoTabla;
+          celdaB.s = { ...estiloEncabezadoTabla, alignment: { horizontal: 'center' } };
+        } else {
+          celdaA.s = estiloDato;
+          celdaB.s = estiloDatoNumerico;
+        }
       }
     }
 
-  ];
+    hojaResumen['!cols'] = [{ wch: 45 }, { wch: 25 }];
+    XLSX.utils.book_append_sheet(libro, hojaResumen, 'Reporte General');
 
-
-  hojaUsuarios['A1'].s =
-    estiloTitulo;
-
-  hojaUsuarios['A2'].s =
-    estiloEncabezado;
-
-  hojaUsuarios['B2'].s =
-    estiloEncabezado;
-
-
-  for (
-    let fila = 3;
-    fila <= datosUsuarios.length;
-    fila++
-  ) {
-
-    hojaUsuarios[`A${fila}`].s =
-      estiloDato;
-
-    hojaUsuarios[`B${fila}`].s =
-      estiloCantidad;
-
+    XLSX.writeFile(libro, `Reporte_SGEJ_${new Date().getTime()}.xlsx`);
   }
 
+  // ─────────────────────────────────────────────
+  // Exportar estadísticas a PDF (Diseño Profesional)
+  // ─────────────────────────────────────────────
+  exportarPDF(): void {
+    if (!this.estadisticas) return;
 
-  hojaUsuarios['!cols'] = [
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    let posicionY = 0;
+    let paginaActual = 1;
 
-    {
-      wch: 30
-    },
+    const agregarEncabezado = () => {
+      // Franja superior Vino
+      pdf.setFillColor(74, 21, 37); // #4a1525
+      pdf.rect(0, 0, 210, 35, 'F');
+      
+      // Texto principal
+      pdf.setFontSize(22);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(255, 255, 255);
+      pdf.text('JUSTICE ATTORNEY LAW', 15, 20);
+      
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "normal");
+      pdf.text('Sistema de Gestión de Expedientes Jurídicos', 15, 27);
 
-    {
-      wch: 18
+      posicionY = 50;
+      
+      // Título del documento
+      pdf.setFontSize(16);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(40, 40, 40);
+      pdf.text('REPORTE ESTADÍSTICO DE GESTIÓN', 15, posicionY);
+      posicionY += 7;
+
+      // Metadatos
+      pdf.setFontSize(9);
+      pdf.setFont("helvetica", "normal");
+      pdf.setTextColor(100, 100, 100);
+      pdf.text(`Fecha de emisión: ${new Date().toLocaleDateString()} a las ${new Date().toLocaleTimeString()}`, 15, posicionY);
+      pdf.text(`Generado por: ${this.rolUsuario}`, 140, posicionY);
+      posicionY += 5;
+
+      // Línea divisoria
+      pdf.setDrawColor(200, 200, 200);
+      pdf.line(15, posicionY, 195, posicionY);
+      posicionY += 15;
+    };
+
+    const agregarPiePagina = () => {
+      pdf.setFontSize(8);
+      pdf.setTextColor(150, 150, 150);
+      pdf.setDrawColor(220, 220, 220);
+      pdf.line(15, 285, 195, 285);
+      pdf.text(`Documento generado por SGEJ - Confidencial | Página ${paginaActual}`, 15, 290);
+    };
+
+    const verificarEspacio = (espacioNecesario: number) => {
+      if (posicionY + espacioNecesario > 270) {
+        agregarPiePagina();
+        pdf.addPage();
+        paginaActual++;
+        agregarEncabezado();
+      }
+    };
+
+    const dibujarTabla = (titulo: string, items: any[], keyNombre: string, keyValor: string) => {
+      verificarEspacio(30 + (items.length * 8));
+
+      // Título de la sección con fondo
+      pdf.setFillColor(243, 244, 246); // Gris muy claro
+      pdf.rect(15, posicionY - 6, 180, 10, 'F');
+      pdf.setFontSize(11);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(74, 21, 37);
+      pdf.text(titulo.toUpperCase(), 20, posicionY);
+      posicionY += 10;
+
+      // Cabeceras de tabla
+      pdf.setFontSize(9);
+      pdf.setTextColor(120, 120, 120);
+      pdf.text('DESCRIPCIÓN', 20, posicionY);
+      pdf.text('CANTIDAD', 175, posicionY);
+      posicionY += 3;
+      pdf.setDrawColor(74, 21, 37);
+      pdf.setLineWidth(0.5);
+      pdf.line(15, posicionY, 195, posicionY);
+      posicionY += 6;
+
+      // Filas
+      pdf.setFont("helvetica", "normal");
+      pdf.setTextColor(60, 60, 60);
+      pdf.setLineWidth(0.1);
+      pdf.setDrawColor(230, 230, 230);
+
+      items.forEach(item => {
+        pdf.text(String(item[keyNombre]), 20, posicionY);
+        pdf.text(String(item._count[keyValor]), 180, posicionY, { align: 'center' });
+        posicionY += 3;
+        pdf.line(15, posicionY, 195, posicionY); // Línea separadora de fila
+        posicionY += 6;
+      });
+
+      posicionY += 10; // Espaciado final de la sección
+    };
+
+    // INICIO DEL DOCUMENTO
+    agregarEncabezado();
+
+    // BLOQUE DE MÉTRICAS PRINCIPALES
+    pdf.setFillColor(250, 250, 250);
+    pdf.setDrawColor(220, 220, 220);
+    pdf.roundedRect(15, posicionY, 180, this.esAdmin ? 35 : 25, 2, 2, 'FD'); // Más alto si es admin
+    
+    pdf.setFontSize(12);
+    pdf.setFont("helvetica", "bold");
+    pdf.setTextColor(74, 21, 37);
+    pdf.text('Métricas Principales', 20, posicionY + 8);
+    
+    pdf.setFontSize(10);
+    pdf.setFont("helvetica", "normal");
+    pdf.setTextColor(60, 60, 60);
+    
+    // Columna Izquierda
+    pdf.text(`Expedientes Activos: ${this.estadisticas.totalExpedientes}`, 20, posicionY + 16);
+    pdf.text(`Citas Programadas: ${this.obtenerTotalCitas()}`, 20, posicionY + 22);
+    
+    // Columna Derecha
+    pdf.text(`Documentos Procesados: ${this.estadisticas.totalDocumentos}`, 105, posicionY + 16);
+    pdf.text(`Categorías de Citas: ${this.estadisticas.citasPorTipo.length}`, 105, posicionY + 22);
+
+    if (this.esAdmin) {
+      pdf.text(`Usuarios Registrados: ${this.obtenerTotalUsuarios()}`, 20, posicionY + 28);
     }
 
-  ];
+    posicionY += this.esAdmin ? 45 : 35;
 
+    // SECCIONES DETALLADAS
+    dibujarTabla('Desglose por Estado del Expediente', this.estadisticas.expedientesPorEstado, 'estado', 'id_expediente');
+    dibujarTabla('Desglose por Materia Jurídica', this.estadisticas.expedientesPorMateria, 'materia', 'id_expediente');
+    dibujarTabla('Desglose de Citas por Tipo', this.estadisticas.citasPorTipo, 'tipo_cita', 'id_cita');
 
-  hojaUsuarios['!freeze'] = {
+    // SOLO PARA ADMIN: Mostrar la tabla de usuarios
+    if (this.esAdmin) {
+      dibujarTabla('Accesos por Rol de Usuario', this.estadisticas.usuariosPorRol, 'rol', 'id_usuario');
+    }
 
-    xSplit: 0,
-
-    ySplit: 2
-
-  };
-
-
-  XLSX.utils.book_append_sheet(
-
-    libro,
-
-    hojaUsuarios,
-
-    'Usuarios'
-
-  );
-
-
-
-  // =====================================================
-  // GENERAR ARCHIVO
-  // =====================================================
-
-  XLSX.writeFile(
-
-    libro,
-
-    'reporte-general-SGEJ.xlsx'
-
-  );
-
-
-  console.log(
-    'Excel generado correctamente.'
-  );
-
-}
-
-
-// ─────────────────────────────────────────────
-// Exportar estadísticas a PDF
-// ─────────────────────────────────────────────
-
-exportarPDF(): void {
-
-  // Verificar que existan estadísticas
-
-  if (!this.estadisticas) {
-
-    return;
-
+    agregarPiePagina();
+    pdf.save(`Reporte_SGEJ_${new Date().getTime()}.pdf`);
   }
-
-
-  // Crear documento PDF
-
-  const pdf = new jsPDF();
-
-
-  // =========================================
-  // ENCABEZADO
-  // =========================================
-
-  pdf.setFontSize(20);
-
-  pdf.setTextColor(75, 22, 35);
-
-  pdf.text(
-    'JUSTICE ATTORNEY LAW',
-    20,
-    20
-  );
-
-
-  pdf.setFontSize(16);
-
-  pdf.setTextColor(40, 40, 40);
-
-  pdf.text(
-    'Reportes y Estadísticas',
-    20,
-    32
-  );
-
-
-  pdf.setFontSize(10);
-
-  pdf.setTextColor(100, 100, 100);
-
-  pdf.text(
-    'Resumen general de la información del sistema',
-    20,
-    40
-  );
-
-
-  // =========================================
-  // RESUMEN GENERAL
-  // =========================================
-
-  pdf.setFontSize(13);
-
-  pdf.setTextColor(75, 22, 35);
-
-  pdf.text(
-    'Resumen general',
-    20,
-    55
-  );
-
-
-  pdf.setFontSize(11);
-
-  pdf.setTextColor(50, 50, 50);
-
-  pdf.text(
-    `Total de expedientes: ${this.estadisticas.totalExpedientes}`,
-    25,
-    65
-  );
-
-  pdf.text(
-    `Total de documentos: ${this.estadisticas.totalDocumentos}`,
-    25,
-    73
-  );
-
-  pdf.text(
-    `Tipos de cita: ${this.estadisticas.citasPorTipo.length}`,
-    25,
-    81
-  );
-
-
-  // =========================================
-  // EXPEDIENTES POR ESTADO
-  // =========================================
-
-  pdf.setFontSize(13);
-
-  pdf.setTextColor(75, 22, 35);
-
-  pdf.text(
-    'Expedientes por estado',
-    20,
-    98
-  );
-
-
-  let posicionY = 108;
-
-
-  this.estadisticas.expedientesPorEstado
-    .forEach(item => {
-
-      pdf.setFontSize(10);
-
-      pdf.setTextColor(50, 50, 50);
-
-      pdf.text(
-        `${item.estado}: ${item._count.id_expediente}`,
-        25,
-        posicionY
-      );
-
-      posicionY += 8;
-
-    });
-
-
-  // =========================================
-  // EXPEDIENTES POR MATERIA
-  // =========================================
-
-  posicionY += 8;
-
-  pdf.setFontSize(13);
-
-  pdf.setTextColor(75, 22, 35);
-
-  pdf.text(
-    'Expedientes por materia',
-    20,
-    posicionY
-  );
-
-
-  posicionY += 10;
-
-
-  this.estadisticas.expedientesPorMateria
-    .forEach(item => {
-
-      pdf.setFontSize(10);
-
-      pdf.setTextColor(50, 50, 50);
-
-      pdf.text(
-        `${item.materia}: ${item._count.id_expediente}`,
-        25,
-        posicionY
-      );
-
-      posicionY += 8;
-
-    });
-
-
-  // =========================================
-  // CITAS POR TIPO
-  // =========================================
-
-  posicionY += 8;
-
-  pdf.setFontSize(13);
-
-  pdf.setTextColor(75, 22, 35);
-
-  pdf.text(
-    'Citas por tipo',
-    20,
-    posicionY
-  );
-
-
-  posicionY += 10;
-
-
-  this.estadisticas.citasPorTipo
-    .forEach(item => {
-
-      pdf.setFontSize(10);
-
-      pdf.setTextColor(50, 50, 50);
-
-      pdf.text(
-        `${item.tipo_cita}: ${item._count.id_cita}`,
-        25,
-        posicionY
-      );
-
-      posicionY += 8;
-
-    });
-
-
-  // =========================================
-  // USUARIOS POR ROL
-  // =========================================
-
-  posicionY += 8;
-
-
-  // Si estamos muy abajo, crear nueva página
-
-  if (posicionY > 250) {
-
-    pdf.addPage();
-
-    posicionY = 20;
-
-  }
-
-
-  pdf.setFontSize(13);
-
-  pdf.setTextColor(75, 22, 35);
-
-  pdf.text(
-    'Usuarios por rol',
-    20,
-    posicionY
-  );
-
-
-  posicionY += 10;
-
-
-  this.estadisticas.usuariosPorRol
-    .forEach(item => {
-
-      pdf.setFontSize(10);
-
-      pdf.setTextColor(50, 50, 50);
-
-      pdf.text(
-        `${item.rol}: ${item._count.id_usuario}`,
-        25,
-        posicionY
-      );
-
-      posicionY += 8;
-
-    });
-
-
-  // =========================================
-  // PIE DEL DOCUMENTO
-  // =========================================
-
-  pdf.setFontSize(9);
-
-  pdf.setTextColor(120, 120, 120);
-
-  pdf.text(
-    'Sistema de Gestión de Expedientes Jurídicos - SGEJ',
-    20,
-    285
-  );
-
-
-  // =========================================
-  // DESCARGAR PDF
-  // =========================================
-
-  pdf.save(
-    'reporte-general-SGEJ.pdf'
-  );
-
-}
-
 }

@@ -170,10 +170,20 @@ export class Calendario implements OnInit {
   personaSeleccionada: string = '';
 
   // Agregar un participante desde la lista desplegable
+  // Agregar un participante desde la lista desplegable
   agregarParticipante(): void {
+    console.log('Intentando agregar a:', this.personaSeleccionada);
+    
+    // Red de seguridad por si el arreglo no existe
+    if (!this.nuevaCita.participantes) {
+      this.nuevaCita.participantes = [];
+    }
+
     if (this.personaSeleccionada && !this.nuevaCita.participantes.includes(this.personaSeleccionada)) {
       this.nuevaCita.participantes.push(this.personaSeleccionada);
-      this.personaSeleccionada = ''; 
+      this.personaSeleccionada = ''; // Limpiamos el select después de agregar
+    } else if (this.nuevaCita.participantes.includes(this.personaSeleccionada)) {
+      alert('Este participante ya fue agregado a la cita.');
     }
   }
 
@@ -515,14 +525,17 @@ export class Calendario implements OnInit {
       recordatorio_automatico:
         this.citaSeleccionada.recordatorio_automatico,
       
-      participantes: 
-        this.citaSeleccionada.participantes ? [...this.citaSeleccionada.participantes] : []
+      participantes: this.citaSeleccionada.participantes
+        ? this.citaSeleccionada.participantes.map((p: any) => typeof p === 'string' ? p : p.nombre_participante)
+        : []
+        
     };
 
     // 🔥 Agrega esta línea para que cargue la lista si la cita tiene expediente
     this.cargarPersonasExpediente(); 
 
     this.modalNuevaCitaAbierto = true;
+    
 
   }
 
@@ -716,7 +729,8 @@ export class Calendario implements OnInit {
       hora_inicio: this.nuevaCita.hora_inicio,
       duracion_estimada: this.nuevaCita.duracion_estimada,
       notas_recordatorio: this.nuevaCita.notas_recordatorio,
-      recordatorio_automatico: this.nuevaCita.recordatorio_automatico
+      recordatorio_automatico: this.nuevaCita.recordatorio_automatico,
+      participantes: this.nuevaCita.participantes
     };
   }
 
