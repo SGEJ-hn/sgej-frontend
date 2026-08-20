@@ -146,21 +146,32 @@ onClienteSeleccionado(event: any, parte: any): void {
 
   // --- MÉTODOS PARA EL MODAL DE EDICIÓN ---
 
-  abrirModalEditar(): void {
-    if (!this.expediente) return;
+  // Agregar dentro de la clase DetalleExpediente:
 
-    this.expedienteEdicion = JSON.parse(JSON.stringify(this.expediente));
-    
-    if (!this.expedienteEdicion.partes_involucradas) {
-      this.expedienteEdicion.partes_involucradas = [];
-    }
-    if (!this.expedienteEdicion.equipo) {
-      this.expedienteEdicion.equipo = [];
-    }
+get estaCerrado(): boolean {
+  const estado = this.expediente?.estado?.toLowerCase();
+  return estado === 'cerrado' || estado === 'archivado';
+}
 
-    this.pestanaEdicion = 'general';
-    this.mostrarModalEdicion = true;
+abrirModalEditar(): void {
+  // Bloquear edición si el expediente está cerrado
+  if (!this.expediente || this.estaCerrado) {
+    alert('Este expediente está cerrado y no se puede editar.');
+    return;
   }
+
+  this.expedienteEdicion = JSON.parse(JSON.stringify(this.expediente));
+  
+  if (!this.expedienteEdicion.partes_involucradas) {
+    this.expedienteEdicion.partes_involucradas = [];
+  }
+  if (!this.expedienteEdicion.equipo) {
+    this.expedienteEdicion.equipo = [];
+  }
+
+  this.pestanaEdicion = 'general';
+  this.mostrarModalEdicion = true;
+}
 
   agregarParte(): void {
     if (!this.expedienteEdicion.partes_involucradas) {

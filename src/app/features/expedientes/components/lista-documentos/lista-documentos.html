@@ -1,150 +1,164 @@
 <div class="min-h-screen bg-[#f8f7f5] font-sans custom-font relative flex flex-col">
   
   <app-shared-header 
-  titulo="Documentos del Expediente" 
-  [subtitulo]="subtituloDinamico">    
+    titulo="Documentos del Expediente" 
+    [subtitulo]="subtituloDinamico">    
     <a [routerLink]="['/expedientes', expedienteId ]" class="text-gray-500 hover:text-gray-800 flex items-center gap-2 text-sm transition-colors cursor-pointer mr-2">
       <ng-icon name="heroArrowLeft"></ng-icon>
       Volver al Expediente
     </a>
-    <a *ngIf="puedeGestionarDocumentos" [routerLink]="['/expedientes', expedienteId, 'documentos', 'subir']" class="px-5 py-2 bg-[#4a1525] hover:bg-[#38101c] text-white font-medium flex items-center gap-2 transition-colors cursor-pointer">
+    
+    <!-- Botón Subir Documento: Solo visible si tiene permisos Y el expediente NO está cerrado -->
+    <a *ngIf="puedeGestionarDocumentos && !expedienteCerrado" 
+       [routerLink]="['/expedientes', expedienteId, 'documentos', 'subir']" 
+       class="px-5 py-2 bg-[#4a1525] hover:bg-[#38101c] text-white font-medium flex items-center gap-2 transition-colors cursor-pointer">
       <ng-icon name="heroPlus"></ng-icon>
       Subir Documento
     </a>
   </app-shared-header>
 
   <div class="p-8">
-  <div class="bg-white border border-gray-200">
-    
-    <div class="p-6 border-b border-gray-200 flex justify-between items-center">
-      <div class="relative w-1/3">
-        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
-          <ng-icon name="heroMagnifyingGlass" class="text-[1.1rem]"></ng-icon>
-        </div>
-    
-        <input 
-          type="text" 
-          [ngModel]="terminoBusqueda" 
-          (ngModelChange)="onSearchChange($event)"
-          placeholder="Buscar documento..." 
-          class="w-full border border-gray-300 py-2 pl-10 pr-3 text-sm focus:outline-none focus:border-[#d4b88c] transition-colors">
+
+    <!-- Banner Informativo de Expediente Cerrado -->
+    <div *ngIf="expedienteCerrado" class="mb-4 p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded flex items-center justify-between text-sm">
+      <div class="flex items-center gap-2">
+        <ng-icon name="heroInformationCircle" class="text-lg"></ng-icon>
+        <span><strong>Expediente Cerrado:</strong> Este expediente se encuentra en modo de solo lectura. No se pueden subir, editar ni eliminar documentos.</span>
       </div>
-      <span class="text-sm text-gray-400">{{ totalEntradas }} Resultados</span>
     </div>
 
-    <!-- Tabla de Documentos -->
-    <div class="overflow-x-auto">
-      <table class="w-full text-left border-collapse">
-        <thead>
-          <tr class="border-b border-gray-200 text-gray-500 text-sm">
-            <th class="py-4 pl-8 pr-4 font-normal">Documento</th>
-            <th class="p-4 font-normal">Categoría</th>
-            <th class="p-4 font-normal">Fecha</th>
-            <th class="p-4 font-normal">Tamaño</th>
-            <th class="py-4 pl-4 pr-8 font-normal text-right">Acciones</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-100">
-          
-          <tr *ngFor="let doc of documentos" class="hover:bg-gray-50 transition-colors group">
-            <td class="py-4 pl-8 pr-4 flex items-center gap-3">
-              <div class="bg-red-50 text-red-400 p-1.5 rounded">
-                <ng-icon name="heroDocumentText"></ng-icon>
-              </div>
-              <span class="text-sm text-gray-800 font-medium">{{ doc.nombre_documento }}</span>
-            </td>
-            <td class="p-4 text-sm text-gray-600">{{ doc.categoria }}</td>
-            <td class="p-4 text-sm text-gray-600">{{ doc.fecha_carga | date:'longDate' }}</td>
-            <td class="p-4 text-sm text-gray-600">{{ doc.tamano_mb }} MB</td>
-            
-            <td class="py-4 pl-4 pr-8 flex items-center justify-end gap-2">
-              
-              <!-- Botón Ver -->
-              <a [href]="doc.url_archivo" target="_blank" class="bg-[#4a1525] hover:bg-[#38101c] text-white px-3 py-1.5 rounded flex items-center gap-1 text-xs transition-colors">
-                <ng-icon name="heroEye"></ng-icon> Ver
-              </a>
-              
-              <!-- Botón Descargar -->
-              <button (click)="descargarDocumento(doc)" class="bg-[#4a1525] hover:bg-[#38101c] text-white px-3 py-1.5 rounded flex items-center gap-1 text-xs transition-colors cursor-pointer">
-                <ng-icon name="heroArrowDownTray"></ng-icon> Descargar
-              </button>
-              
-              <!-- Botón Editar -->
-              <button *ngIf="puedeGestionarDocumentos" (click)="abrirModalEditar(doc)" class="bg-[#4a1525] hover:bg-[#38101c] text-white p-1.5 rounded transition-colors cursor-pointer">
-                <ng-icon name="heroPencilSquare"></ng-icon>
-              </button>
-              
-              <!-- Botón Eliminar -->
-              <button *ngIf="puedeGestionarDocumentos" (click)="eliminar(doc.id_documento)" class="bg-[#4a1525] hover:bg-red-700 text-white p-1.5 rounded transition-colors cursor-pointer">
-                <ng-icon name="heroTrash"></ng-icon>
-              </button>
-              
-            </td>
-          </tr>
-
-          <!-- Mensaje si no hay documentos -->
-          <tr *ngIf="documentos.length === 0">
-            <td colspan="5" class="p-8 text-center text-gray-500">
-              No se encontraron documentos.
-            </td>
-          </tr>
-
-        </tbody>
-      </table>
-    </div>
-    <!-- Controles de Paginación -->
-<div class="flex items-center justify-between border-t border-gray-200 px-4 py-3 sm:px-6 mt-6" *ngIf="totalPaginas > 1">
-  <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-    <div>
-      <p class="text-sm text-gray-700">
-        Mostrando página <span class="font-medium">{{ paginaActual }}</span> de <span class="font-medium">{{ totalPaginas }}</span>
-        (Total: {{ totalEntradas }} registros)
-      </p>
-    </div>
-    <div>
-      <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
-        
-        <!-- Botón Anterior -->
-        <button 
-          (click)="paginaAnterior()" 
-          [disabled]="paginaActual === 1"
-          [ngClass]="{'opacity-50 cursor-not-allowed': paginaActual === 1}"
-          class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
-          <span class="sr-only">Anterior</span>
-          <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
-          </svg>
-        </button>
-
-        <!-- Indicador estático (opcional si prefieres botones numéricos) -->
-        <span class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 focus:outline-offset-0">
-          {{ paginaActual }}
-        </span>
-
-        <!-- Botón Siguiente -->
-        <button 
-          (click)="paginaSiguiente()" 
-          [disabled]="paginaActual === totalPaginas"
-          [ngClass]="{'opacity-50 cursor-not-allowed': paginaActual === totalPaginas}"
-          class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
-          <span class="sr-only">Siguiente</span>
-          <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
-          </svg>
-        </button>
-
-      </nav>
-    </div>
-  </div>
-</div>
+    <div class="bg-white border border-gray-200">
       
+      <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+        <div class="relative w-1/3">
+          <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+            <ng-icon name="heroMagnifyingGlass" class="text-[1.1rem]"></ng-icon>
+          </div>
+      
+          <input 
+            type="text" 
+            [ngModel]="terminoBusqueda" 
+            (ngModelChange)="onSearchChange($event)"
+            placeholder="Buscar documento..." 
+            class="w-full border border-gray-300 py-2 pl-10 pr-3 text-sm focus:outline-none focus:border-[#d4b88c] transition-colors">
+        </div>
+        <span class="text-sm text-gray-400">{{ totalEntradas }} Resultados</span>
+      </div>
+
+      <!-- Tabla de Documentos -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-gray-200 text-gray-500 text-sm">
+              <th class="py-4 pl-8 pr-4 font-normal">Documento</th>
+              <th class="p-4 font-normal">Categoría</th>
+              <th class="p-4 font-normal">Fecha</th>
+              <th class="p-4 font-normal">Tamaño</th>
+              <th class="py-4 pl-4 pr-8 font-normal text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            
+            <tr *ngFor="let doc of documentos" class="hover:bg-gray-50 transition-colors group">
+              <td class="py-4 pl-8 pr-4 flex items-center gap-3">
+                <div class="bg-red-50 text-red-400 p-1.5 rounded">
+                  <ng-icon name="heroDocumentText"></ng-icon>
+                </div>
+                <span class="text-sm text-gray-800 font-medium">{{ doc.nombre_documento }}</span>
+              </td>
+              <td class="p-4 text-sm text-gray-600">{{ doc.categoria }}</td>
+              <td class="p-4 text-sm text-gray-600">{{ doc.fecha_carga | date:'longDate' }}</td>
+              <td class="p-4 text-sm text-gray-600">{{ doc.tamano_mb }} MB</td>
+              
+              <td class="py-4 pl-4 pr-8 flex items-center justify-end gap-2">
+                
+                <!-- Botón Ver (Siempre disponible) -->
+                <a [href]="doc.url_archivo" target="_blank" class="bg-[#4a1525] hover:bg-[#38101c] text-white px-3 py-1.5 rounded flex items-center gap-1 text-xs transition-colors">
+                  <ng-icon name="heroEye"></ng-icon> Ver
+                </a>
+                
+                <!-- Botón Descargar (Siempre disponible) -->
+                <button (click)="descargarDocumento(doc)" class="bg-[#4a1525] hover:bg-[#38101c] text-white px-3 py-1.5 rounded flex items-center gap-1 text-xs transition-colors cursor-pointer">
+                  <ng-icon name="heroArrowDownTray"></ng-icon> Descargar
+                </button>
+                
+                <!-- Botón Editar (Oculto si el expediente está cerrado) -->
+                <button *ngIf="puedeGestionarDocumentos && !expedienteCerrado" 
+                        (click)="abrirModalEditar(doc)" 
+                        class="bg-[#4a1525] hover:bg-[#38101c] text-white p-1.5 rounded transition-colors cursor-pointer">
+                  <ng-icon name="heroPencilSquare"></ng-icon>
+                </button>
+                
+                <!-- Botón Eliminar (Oculto si el expediente está cerrado) -->
+                <button *ngIf="puedeGestionarDocumentos && !expedienteCerrado" 
+                        (click)="eliminar(doc.id_documento)" 
+                        class="bg-[#4a1525] hover:bg-red-700 text-white p-1.5 rounded transition-colors cursor-pointer">
+                  <ng-icon name="heroTrash"></ng-icon>
+                </button>
+                
+              </td>
+            </tr>
+
+            <!-- Mensaje si no hay documentos -->
+            <tr *ngIf="documentos.length === 0">
+              <td colspan="5" class="p-8 text-center text-gray-500">
+                No se encontraron documentos.
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Controles de Paginación -->
+      <div class="flex items-center justify-between border-t border-gray-200 px-4 py-3 sm:px-6 mt-6" *ngIf="totalPaginas > 1">
+        <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+          <div>
+            <p class="text-sm text-gray-700">
+              Mostrando página <span class="font-medium">{{ paginaActual }}</span> de <span class="font-medium">{{ totalPaginas }}</span>
+              (Total: {{ totalEntradas }} registros)
+            </p>
+          </div>
+          <div>
+            <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+              
+              <!-- Botón Anterior -->
+              <button 
+                (click)="paginaAnterior()" 
+                [disabled]="paginaActual === 1"
+                [ngClass]="{'opacity-50 cursor-not-allowed': paginaActual === 1}"
+                class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                <span class="sr-only">Anterior</span>
+                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
+                </svg>
+              </button>
+
+              <span class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 focus:outline-offset-0">
+                {{ paginaActual }}
+              </span>
+
+              <!-- Botón Siguiente -->
+              <button 
+                (click)="paginaSiguiente()" 
+                [disabled]="paginaActual === totalPaginas"
+                [ngClass]="{'opacity-50 cursor-not-allowed': paginaActual === totalPaginas}"
+                class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                <span class="sr-only">Siguiente</span>
+                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                </svg>
+              </button>
+
+            </nav>
+          </div>
+        </div>
+      </div>
 
     </div>
   </div>
 
-  <!-- =============================== -->
-  <!-- MODAL DE EDICIÓN DE DOCUMENTO   -->
-  <!-- =============================== -->
+  <!-- Modal de Edición de Documento -->
   <div *ngIf="mostrarModalEdicion" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
     <div class="bg-white rounded-lg w-full max-w-md p-6 shadow-xl border border-gray-200">
       

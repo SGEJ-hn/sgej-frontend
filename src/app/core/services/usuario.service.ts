@@ -20,6 +20,16 @@ export interface CrearUsuarioDto {
   estado?: string;
 }
 
+// Nueva interfaz
+export interface UsuariosResponse {
+  total: number;
+  total_activos: number; // <- Agregado
+  total_inactivos: number; // <- Agregado
+  total_paginas: number;
+  pagina_actual: number;
+  usuarios: Usuario[];
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -28,15 +38,25 @@ export class UsuarioService {
 
   constructor(private http: HttpClient) {}
 
+  // ESTA FUNCIÓN SE QUEDA IGUAL (Para que Expedientes no falle)
   obtenerUsuarios(filtros?: { rol?: string; estado?: string; busqueda?: string }): Observable<Usuario[]> {
     let params = new HttpParams();
     if (filtros?.rol) params = params.set('rol', filtros.rol);
     if (filtros?.estado) params = params.set('estado', filtros.estado);
     if (filtros?.busqueda) params = params.set('busqueda', filtros.busqueda);
-
     return this.http.get<Usuario[]>(this.apiUrl, { params });
   }
 
+  // NUEVA FUNCIÓN PARA LA TABLA DE USUARIOS
+  obtenerUsuariosPaginados(page: number = 1, limit: number = 8, filtros?: any): Observable<UsuariosResponse> {
+    let params = new HttpParams().set('page', page.toString()).set('limit', limit.toString());
+    if (filtros?.rol) params = params.set('rol', filtros.rol);
+    if (filtros?.estado) params = params.set('estado', filtros.estado);
+    if (filtros?.busqueda) params = params.set('busqueda', filtros.busqueda);
+    return this.http.get<UsuariosResponse>(`${this.apiUrl}/paginados`, { params });
+  }
+
+  // Las demás funciones (obtenerUsuarioPorId, crear, actualizar, eliminar) quedan exactas...
   obtenerUsuarioPorId(id: string): Observable<Usuario> {
     return this.http.get<Usuario>(`${this.apiUrl}/${id}`);
   }

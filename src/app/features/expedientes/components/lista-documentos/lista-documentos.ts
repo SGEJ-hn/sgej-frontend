@@ -18,6 +18,7 @@ import {
 import { Documentos } from '../../services/documentos';
 import { SharedHeader } from '../../../../shared/components/shared-header/shared-header';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ExpedienteService } from '../../../../core/services/expediente';
 
 @Component({
   selector: 'app-lista-documentos',
@@ -32,6 +33,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 export class ListaDocumentos implements OnInit {
   
   private documentosService = inject(Documentos);
+  private expedienteService = inject(ExpedienteService);
   private route = inject(ActivatedRoute);
   private cdr = inject(ChangeDetectorRef); 
   private authService = inject(AuthService);
@@ -39,6 +41,7 @@ export class ListaDocumentos implements OnInit {
   expedienteId: string = '';
   documentos: any[] = [];
   terminoBusqueda: string = ''; 
+  expedienteCerrado: boolean = false;
   private searchSubject = new Subject<string>();
   
   mostrarModalEdicion: boolean = false;
@@ -58,6 +61,7 @@ export class ListaDocumentos implements OnInit {
   ngOnInit() {
     this.expedienteId = this.route.snapshot.paramMap.get('id_expediente') || '';
     if (this.expedienteId) {
+      this.verificarEstadoExpediente();
       this.cargarDocumentos();
     }
 
@@ -67,6 +71,18 @@ export class ListaDocumentos implements OnInit {
     ).subscribe(termino => {
       this.terminoBusqueda = termino;
       this.ejecutarBusqueda();
+    });
+  }
+
+  //  Consulta el estado del expediente
+  verificarEstadoExpediente(): void {
+    this.expedienteService.obtenerExpediente(this.expedienteId).subscribe({
+      next: (exp) => {
+        const estado = exp.estado?.toLowerCase();
+        this.expedienteCerrado = estado === 'cerrado' || estado === 'archivado';
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Error al verificar estado del expediente:', err)
     });
   }
 
@@ -115,7 +131,12 @@ export class ListaDocumentos implements OnInit {
     this.cargarDocumentos();
   }
 
+  // Proteger método de eliminación adicionalmente por TS
   eliminar(id_documento: string) {
+    if (this.expedienteCerrado) {
+      alert('No se pueden eliminar documentos de un expediente cerrado.');
+      return;
+    }
     if (confirm('¿Estás seguro de que deseas eliminar este documento permanentemente?')) {
       this.documentosService.eliminarDocumento(id_documento).subscribe({
         next: () => this.cargarDocumentos(), 
@@ -154,7 +175,12 @@ export class ListaDocumentos implements OnInit {
     }
   }
 
+  // Proteger edición por TS
   abrirModalEditar(doc: any) {
+    if (this.expedienteCerrado) {
+      alert('No se pueden editar documentos de un expediente cerrado.');
+      return;
+    }
     this.documentoEnEdicion = doc;
     this.editNombre = doc.nombre_documento; 
     this.editCategoria = doc.categoria;   

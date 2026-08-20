@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
@@ -52,9 +52,9 @@ export interface Expediente {
   proxima_cita?: string;
 }
 
-// ¡Faltaba esta interfaz!
 export interface ExpedientesResponse {
   total: number;
+  total_paginas?: number;
   expedientes: Expediente[];
 }
 
@@ -67,28 +67,31 @@ export class ExpedienteService {
 
   constructor(private http: HttpClient) {}
 
-  // Obtener todos los expedientes
-  obtenerExpedientes(): Observable<ExpedientesResponse> {
-    return this.http.get<ExpedientesResponse>(this.apiUrl);
+  // ✅ ACTUALIZADO: Soporte para paginación y búsqueda en el servidor
+  obtenerExpedientes(page: number = 1, limit: number = 8, search: string = ''): Observable<ExpedientesResponse> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', limit.toString());
+
+    if (search.trim() !== '') {
+      params = params.set('buscar', search);
+    }
+
+    return this.http.get<ExpedientesResponse>(this.apiUrl, { params });
   }
 
-  // Obtener un expediente por ID
   obtenerExpediente(id: string): Observable<Expediente> {
     return this.http.get<Expediente>(`${this.apiUrl}/${id}`);
   }
 
-  // Obtener un expediente por ID
-  // Mantiene compatibilidad con el código anterior del equipo
   obtenerExpedientePorId(id: string): Observable<Expediente> {
     return this.http.get<Expediente>(`${this.apiUrl}/${id}`);
   }
 
-  // Crear un expediente
   crearExpediente(expediente: Expediente): Observable<Expediente> {
     return this.http.post<Expediente>(this.apiUrl, expediente);
   }
 
-  // Actualizar un expediente
   actualizarExpediente(
     id: string,
     expediente: Partial<Expediente>
@@ -99,7 +102,6 @@ export class ExpedienteService {
     );
   }
 
-  // Eliminar un expediente
   eliminarExpediente(id: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }

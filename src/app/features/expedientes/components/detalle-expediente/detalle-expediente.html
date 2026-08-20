@@ -14,7 +14,7 @@
     </a>
     
     <!-- Botón Editar -->
-    <button *ngIf="expediente && esAdministrador" (click)="abrirModalEditar()" class="px-4 py-1.5 bg-[#4a1525] hover:bg-[#38101c] text-white text-xs font-medium rounded flex items-center gap-2 transition-colors cursor-pointer">
+    <button *ngIf="expediente && esAdministrador && !estaCerrado" (click)="abrirModalEditar()" class="px-4 py-1.5 bg-[#4a1525] hover:bg-[#38101c] text-white text-xs font-medium rounded flex items-center gap-2 transition-colors cursor-pointer">
       <ng-icon name="heroPencilSquare"></ng-icon>
       Editar
     </button>
@@ -41,33 +41,46 @@
     <!-- Contenedor Principal -->
     <ng-container *ngIf="expediente && !cargando">
       
-      <!-- 1. TARJETA SUPERIOR: Resumen Principal -->
-      <div class="bg-white border border-gray-200 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <div class="flex items-center gap-3">
-            <span class="w-1.5 h-1.5 rounded-full bg-[#4a1525]"></span>
-            <h2 class="text-xl text-gray-800">{{ obtenerNombreDemandante() }}</h2>
-            <span class="px-2 py-0.5 text-xs font-medium border rounded text-green-600 bg-green-50 border-green-200">
-              {{ expediente.estado || 'Activo' }}
-            </span>
-          </div>
-          <div class="flex items-center gap-3 mt-3 text-sm text-gray-500">
-            <span>{{ expediente.materia }}</span>
-            <span class="w-1 h-1 rounded-full bg-[#4a1525]"></span>
-            <span>{{ expediente.tribunal_juzgado || 'Sin tribunal asignado' }}</span>
-            <span class="w-1 h-1 rounded-full bg-[#4a1525]"></span>
-            <span>Apertura: {{ expediente.fecha_apertura | date:'d MMMM yyyy' }}</span>
-          </div>
-        </div>
-        <div class="flex gap-3">
-          <a [routerLink]="['/expedientes', expediente.id_expediente, 'historial']" class="bg-[#4a1525] hover:bg-[#38101c] text-white px-4 py-2 text-sm flex items-center gap-2 transition-colors cursor-pointer rounded-sm">
-            <ng-icon name="heroClock"></ng-icon> Historial
-          </a>
-          <a [routerLink]="['/expedientes', expediente.id_expediente, 'documentos']" class="bg-[#4a1525] hover:bg-[#38101c] text-white px-4 py-2 text-sm flex items-center gap-2 transition-colors cursor-pointer rounded-sm">
-            <ng-icon name="heroDocumentText"></ng-icon> Documentos
-          </a>
-        </div>
-      </div>
+      <!-- Reemplazar en la Tarjeta Superior (Header del Expediente) -->
+<div class="bg-white border border-gray-200 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+  <div>
+    <div class="flex items-center gap-3">
+      <span class="w-1.5 h-1.5 rounded-full" [ngClass]="estaCerrado ? 'bg-red-600' : 'bg-[#4a1525]'"></span>
+      <h2 class="text-xl text-gray-800">{{ obtenerNombreDemandante() }}</h2>
+      
+      <!-- Badge de Estado Dinámico -->
+      <span [ngClass]="{
+        'text-green-600 bg-green-50 border-green-200': expediente.estado === 'Abierto' || expediente.estado === 'En Trámite',
+        'text-red-700 bg-red-50 border-red-200': estaCerrado,
+        'text-yellow-700 bg-yellow-50 border-yellow-200': expediente.estado === 'En Espera'
+      }" class="px-2 py-0.5 text-xs font-medium border rounded">
+        {{ expediente.estado || 'Activo' }}
+      </span>
+    </div>
+    
+    <div class="flex items-center gap-3 mt-3 text-sm text-gray-500">
+      <span>{{ expediente.materia }}</span>
+      <span class="w-1 h-1 rounded-full bg-[#4a1525]"></span>
+      <span>{{ expediente.tribunal_juzgado || 'Sin tribunal asignado' }}</span>
+      <span class="w-1 h-1 rounded-full bg-[#4a1525]"></span>
+      <span>Apertura: {{ expediente.fecha_apertura | date:'d MMMM yyyy' }}</span>
+    </div>
+  </div>
+
+  <div class="flex gap-3 items-center">
+    <!-- Aviso si el expediente está cerrado -->
+    <span *ngIf="estaCerrado" class="text-xs text-red-600 bg-red-50 border border-red-200 px-3 py-1.5 rounded flex items-center gap-1">
+      <ng-icon name="heroInformationCircle"></ng-icon> Expediente Cerrado (Solo lectura)
+    </span>
+
+    <a [routerLink]="['/expedientes', expediente.id_expediente, 'historial']" class="bg-[#4a1525] hover:bg-[#38101c] text-white px-4 py-2 text-sm flex items-center gap-2 transition-colors cursor-pointer rounded-sm">
+      <ng-icon name="heroClock"></ng-icon> Historial
+    </a>
+    <a [routerLink]="['/expedientes', expediente.id_expediente, 'documentos']" class="bg-[#4a1525] hover:bg-[#38101c] text-white px-4 py-2 text-sm flex items-center gap-2 transition-colors cursor-pointer rounded-sm">
+      <ng-icon name="heroDocumentText"></ng-icon> Documentos
+    </a>
+  </div>
+</div>
 
       <!-- 2. GRID PRINCIPAL (3 Columnas) -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

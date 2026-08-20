@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { SharedHeader } from '../../shared/components/shared-header/shared-header';
-import { UsuarioService, Usuario } from '../../core/services/usuario.service';
+import { UsuarioService, Usuario, UsuariosResponse } from '../../core/services/usuario.service';
 import { NgIconComponent, provideIcons } from '@ng-icons/core';
 import {
   heroMagnifyingGlass,
@@ -46,40 +46,61 @@ export class UsuariosComponent implements OnInit {
   busqueda = '';
   filtroRol = '';
   filtroEstado = '';
+  
+  // Paginación y KPIs globales
+  paginaActual: number = 1;
+  limite: number = 8;
+  totalPaginas: number = 1;
+  totalEntradas: number = 0;
+  totalActivos: number = 0;   // <-- NUEVA VARIABLE
+  totalInactivos: number = 0; // <-- NUEVA VARIABLE
 
   constructor(
     private usuarioService: UsuarioService,
     private router: Router,
-    private cdr: ChangeDetectorRef // Inyectamos esto para la actualización inmediata
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.cargarUsuarios();
   }
 
-  cargarUsuarios(): void {
+ cargarUsuarios(): void {
+    // 1. Forzamos la vista para que muestre el estado "cargando" inmediatamente
     this.cargando = true;
+    this.cdr.detectChanges(); 
+
     const filtros: any = {};
     if (this.filtroRol) filtros.rol = this.filtroRol;
     if (this.filtroEstado) filtros.estado = this.filtroEstado;
     if (this.busqueda.trim()) filtros.busqueda = this.busqueda.trim();
 
-    this.usuarioService.obtenerUsuarios(filtros).subscribe({
-      next: (data: Usuario[]) => {
-        this.usuarios = data;
+    this.usuarioService.obtenerUsuariosPaginados(this.paginaActual, this.limite, filtros).subscribe({
+      next: (res: UsuariosResponse) => {
+        this.usuarios = res.usuarios || [];
+        this.totalEntradas = res.total || 0;
+        this.totalActivos = res.total_activos || 0;
+        this.totalInactivos = res.total_inactivos || 0;
+        this.totalPaginas = res.total_paginas || 1;
         this.cargando = false;
-        this.cdr.detectChanges(); // Obliga a la pantalla a actualizarse al instante
+        
+        // 2. FORZAMOS LA ACTUALIZACIÓN DE LA VISTA AQUÍ
+        this.cdr.detectChanges(); 
       },
       error: (err: any) => {
         console.error('Error al cargar usuarios:', err);
+        this.usuarios = [];
         this.mensajeError = 'No se pudo cargar la lista de usuarios.';
         this.cargando = false;
-        this.cdr.detectChanges(); // Obliga a la pantalla a actualizarse al instante
+        
+        // 3. Y TAMBIÉN EN CASO DE ERROR
+        this.cdr.detectChanges();
       },
     });
   }
 
   aplicarFiltros(): void {
+    this.paginaActual = 1;
     this.cargarUsuarios();
   }
 
@@ -87,7 +108,22 @@ export class UsuariosComponent implements OnInit {
     this.busqueda = '';
     this.filtroRol = '';
     this.filtroEstado = '';
+    this.paginaActual = 1;
     this.cargarUsuarios();
+  }
+
+  paginaAnterior(): void {
+    if (this.paginaActual > 1) {
+      this.paginaActual--;
+      this.cargarUsuarios();
+    }
+  }
+
+  paginaSiguiente(): void {
+    if (this.paginaActual < this.totalPaginas) {
+      this.paginaActual++;
+      this.cargarUsuarios();
+    }
   }
 
   irACrearUsuario(): void {
@@ -148,18 +184,9 @@ export class UsuariosComponent implements OnInit {
     });
   }
 
-  get totalActivos(): number {
-    return this.usuarios.filter((u) => u.estado === 'Activo').length;
-  }
-
-  get totalInactivos(): number {
-    return this.usuarios.filter((u) => u.estado === 'Inactivo').length;
-  }
-
   // --- MÉTODOS PARA EDICIÓN DE USUARIO ---
 
   abrirModalEdicion(usuario: Usuario): void {
-    // Hacemos una copia del usuario para no afectar la tabla directamente hasta que se guarde
     this.usuarioEnEdicion = { ...usuario };
     this.mostrarModalEdicion = true;
   }
@@ -174,7 +201,6 @@ export class UsuariosComponent implements OnInit {
 
     this.guardandoEdicion = true;
     
-    // Preparamos los datos según lo que pide el Partial<CrearUsuarioDto> de tu servicio
     const datosActualizados = {
       nombre: this.usuarioEnEdicion.nombre,
       correo: this.usuarioEnEdicion.correo,
@@ -187,7 +213,7 @@ export class UsuariosComponent implements OnInit {
         next: (res) => {
           this.mensajeExito = res.message || 'Usuario actualizado exitosamente.';
           this.cerrarModalEdicion();
-          this.cargarUsuarios(); // Recargamos la tabla para ver los cambios
+          this.cargarUsuarios(); 
           this.guardandoEdicion = false;
           
           setTimeout(() => {
