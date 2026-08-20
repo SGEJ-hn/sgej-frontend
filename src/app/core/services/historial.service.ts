@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface EventoHistorial {
   id_historial: string;
@@ -27,7 +28,7 @@ export interface RespuestaHistorial {
   providedIn: 'root'
 })
 export class HistorialService {
-  private apiUrl = 'http://localhost:3000/api/historial';
+  private apiUrl = `${environment.apiUrl}/historial`;
 
   constructor(private http: HttpClient) {}
 
