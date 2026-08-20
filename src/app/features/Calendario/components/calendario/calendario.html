@@ -199,7 +199,7 @@
           name="id_expediente"
           class="w-full border border-gray-300 p-2 text-sm focus:outline-none focus:border-[#d4b88c] rounded custom-font">
           
-          <option value="">Seleccione un expediente (Opcional)</option>
+          <option value="">Seleccione un expediente</option>
           <option *ngFor="let exp of expedientes" [value]="exp.id_expediente">
             {{ exp.numero_expediente }} - {{ exp.materia }} ({{ exp.tribunal_juzgado }})
           </option>
