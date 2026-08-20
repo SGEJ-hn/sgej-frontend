@@ -193,17 +193,47 @@
       <!-- Expediente -->
       <div>
         <label class="block text-sm text-gray-700 mb-1">Expediente</label>
-        <select 
-          [ngModel]="nuevaCita.id_expediente" 
-          (ngModelChange)="nuevaCita.id_expediente = $event; cargarPersonasExpediente()"
-          name="id_expediente"
-          class="w-full border border-gray-300 p-2 text-sm focus:outline-none focus:border-[#d4b88c] rounded custom-font">
+        
+        <!-- INICIO DEL DROPDOWN PERSONALIZADO -->
+        <div class="relative">
           
-          <option value="">Seleccione un expediente</option>
-          <option *ngFor="let exp of expedientes" [value]="exp.id_expediente">
-            {{ exp.numero_expediente }} - {{ exp.materia }} ({{ exp.tribunal_juzgado }})
-          </option>
-        </select>
+          <!-- Botón que simula el input select -->
+          <button 
+            type="button" 
+            (click)="expedienteDropdownAbierto = !expedienteDropdownAbierto"
+            class="w-full border border-gray-300 p-2 text-sm text-left focus:outline-none focus:border-[#d4b88c] rounded custom-font bg-white flex justify-between items-center cursor-pointer">
+            <span class="truncate">{{ obtenerTextoExpedienteSeleccionado() }}</span>
+            
+            <!-- Icono de flecha hacia abajo -->
+            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+
+          <!-- Contenedor de opciones con scroll (AQUÍ ESTÁ LA MAGIA DEL TAMAÑO) -->
+          <div 
+            *ngIf="expedienteDropdownAbierto" 
+            class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded shadow-lg max-h-48 overflow-y-auto">
+            
+            <!-- Opción por defecto (Vacía) -->
+            <div 
+              (click)="seleccionarExpedienteDropdown('')"
+              class="p-2 text-sm cursor-pointer hover:bg-gray-100 text-gray-600 border-b border-gray-200">
+              Seleccione un expediente (Opcional)
+            </div>
+            
+            <!-- Lista de Expedientes -->
+            <div 
+              *ngFor="let exp of expedientes" 
+              (click)="seleccionarExpedienteDropdown(exp.id_expediente)"
+              class="p-2 text-sm cursor-pointer hover:bg-[#f8f7f5] custom-font truncate border-b border-gray-50 last:border-0">
+              {{ exp.numero_expediente }} - {{ exp.materia }} ({{ exp.tribunal_juzgado }})
+            </div>
+            
+          </div>
+        </div>
+        <!-- FIN DEL DROPDOWN PERSONALIZADO -->
+        
       </div>
 
       <!-- Título -->

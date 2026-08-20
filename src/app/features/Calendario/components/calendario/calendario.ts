@@ -356,7 +356,8 @@ export class Calendario implements OnInit {
  cargarExpedientes(): void {
     console.log('CARGANDO EXPEDIENTES DESDE ANGULAR...');
 
-    this.expedienteService.obtenerExpedientes().subscribe({
+    // 🔥 SOLUCIÓN: Pedimos la página 1, con un límite de 1000 expedientes
+    this.expedienteService.obtenerExpedientes(1, 1000).subscribe({
       next: (respuesta: any) => {
         console.log('EXPEDIENTES RECIBIDOS:', respuesta);
 
@@ -376,10 +377,29 @@ export class Calendario implements OnInit {
       },
       error: (error) => {
         console.error('ERROR AL CARGAR EXPEDIENTES:', error);
-        // Si hay error, cargamos las citas de todos modos para no dejar el calendario en blanco
         this.cargarCitas();
       }
     });
+  }
+
+  // Variables para el nuevo dropdown personalizado
+  expedienteDropdownAbierto = false;
+
+  // Método para seleccionar el expediente y cerrar el dropdown
+  seleccionarExpedienteDropdown(idExpediente: string | undefined): void {
+    this.nuevaCita.id_expediente = idExpediente || '';
+    this.expedienteDropdownAbierto = false;
+    this.cargarPersonasExpediente(); // Mantiene la lógica que ya tenías
+  }
+
+  // Método para mostrar el texto seleccionado en el botón
+  obtenerTextoExpedienteSeleccionado(): string {
+    if (!this.nuevaCita.id_expediente) return 'Seleccione un expediente (Opcional)';
+    
+    const exp = this.expedientes.find(e => e.id_expediente === this.nuevaCita.id_expediente);
+    return exp 
+      ? `${exp.numero_expediente} - ${exp.materia} (${exp.tribunal_juzgado})` 
+      : 'Seleccione un expediente (Opcional)';
   }
 
 
