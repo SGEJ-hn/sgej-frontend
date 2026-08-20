@@ -16,12 +16,16 @@ import { HistorialComponent } from './features/expedientes/components/historial/
 import { NuevoExpediente } from './features/expedientes/components/nuevo-expediente/nuevo-expediente';
 import { ConfiguracionComponent } from './features/configuracion/configuracion.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
+import { OlvidePasswordComponent } from './features/auth/olvide-password/olvide-password';
+import { ResetPasswordComponent } from './features/auth/reset-password/reset-password';
 
 const todos = ['Administrador', 'Abogado', 'Paralegal', 'Cliente'] as const;
 const personal = ['Administrador', 'Abogado', 'Paralegal'] as const;
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
+  { path: 'olvide-password', component: OlvidePasswordComponent },
+  { path: 'restablecer-password', component: ResetPasswordComponent },
   { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard, roleGuard([...personal])] },
   { path: 'cliente', component: ClienteDashboard, canActivate: [authGuard, roleGuard(['Cliente'])] },
   { path: 'expedientes', component: ListaExpedientes, canActivate: [authGuard, roleGuard([...todos])] },

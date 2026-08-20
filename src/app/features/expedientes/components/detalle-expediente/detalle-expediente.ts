@@ -47,6 +47,7 @@ export class DetalleExpediente implements OnInit {
   guardandoEdicion: boolean = false;
   pestanaEdicion: 'general' | 'partes' | 'equipo' = 'general';
   usuariosDisponibles: Array<{ id_usuario: string; nombre: string; rol: string }> = [];
+  listaClientes: any[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -110,18 +111,38 @@ export class DetalleExpediente implements OnInit {
     });
   }
   
-  // Método para cargar los abogados y paralegales
-  cargarUsuariosDisponibles(): void {
-    this.usuarioService.obtenerUsuarios().subscribe({ // <-- CAMBIADO A obtenerUsuarios()
-      next: (res) => {
-        // res ya es de tipo Usuario[] gracias al tipado de tu servicio
-        this.usuariosDisponibles = res.filter(
-          (u) => u.rol === 'Abogado' || u.rol === 'Paralegal'
-        );
-      },
-      error: (err) => console.error('Error al cargar la lista de usuarios:', err)
-    });
+  // 2. REEMPLAZA EL MÉTODO cargarUsuariosDisponibles():
+cargarUsuariosDisponibles(): void {
+  this.usuarioService.obtenerUsuarios().subscribe({
+    next: (res) => {
+      // Filtramos Abogados y Paralegales para el equipo
+      this.usuariosDisponibles = res.filter(
+        (u) => u.rol === 'Abogado' || u.rol === 'Paralegal'
+      );
+      
+      // NUEVO: Filtramos a los Clientes para el dropdown
+      this.listaClientes = res.filter(
+        (u) => u.rol === 'Cliente'
+      );
+    },
+    error: (err) => console.error('Error al cargar la lista de usuarios:', err)
+  });
+}
+
+// 3. AGREGA ESTA NUEVA FUNCIÓN (puedes ponerla justo debajo de cargarUsuariosDisponibles):
+onClienteSeleccionado(event: any, parte: any): void {
+  const idCliente = event.target.value;
+  const cliente = this.listaClientes.find(c => c.id_usuario === idCliente);
+  
+  if (cliente) {
+    // Autorrellenamos los datos en la fila específica de la "Parte"
+    parte.nombre_completo = cliente.nombre;
+    parte.correo_contacto = cliente.correo_electronico || cliente.correo || '';
+    
+    // Y muy importante: actualizamos el id_cliente general del expediente para la base de datos
+    this.expedienteEdicion.id_cliente = idCliente;
   }
+}
 
   // --- MÉTODOS PARA EL MODAL DE EDICIÓN ---
 

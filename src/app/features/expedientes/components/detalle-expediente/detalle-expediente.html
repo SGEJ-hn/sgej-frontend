@@ -347,9 +347,27 @@
               </select>
             </div>
             <div class="space-y-1">
-              <label class="block text-xs font-semibold text-gray-500 uppercase">Nombre Completo</label>
-              <input type="text" [(ngModel)]="parte.nombre_completo" class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-[#d4b88c] focus:ring-1 focus:ring-[#d4b88c] bg-gray-50">
-            </div>
+            <label class="block text-xs font-semibold text-gray-500 uppercase">
+              {{ parte.clasificacion === 'Demandante' ? 'Cliente / Nombre Completo' : 'Nombre Completo' }}
+            </label>
+            
+            <!-- NUEVO: Dropdown si la parte es un Demandante -->
+            <select *ngIf="parte.clasificacion === 'Demandante'" 
+                    [(ngModel)]="expedienteEdicion.id_cliente"
+                    (change)="onClienteSeleccionado($event, parte)"
+                    class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-[#d4b88c] focus:ring-1 focus:ring-[#d4b88c] bg-gray-50">
+              <option value="" disabled selected>Seleccione el cliente...</option>
+              <option *ngFor="let cliente of listaClientes" [value]="cliente.id_usuario">
+                {{ cliente.nombre }}
+              </option>
+            </select>
+
+            <!-- SE MANTIENE: Input de texto si es Demandado o Tercero -->
+            <input *ngIf="parte.clasificacion !== 'Demandante'" 
+                  type="text" 
+                  [(ngModel)]="parte.nombre_completo" 
+                  class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-[#d4b88c] focus:ring-1 focus:ring-[#d4b88c] bg-gray-50">
+          </div>
             <div class="space-y-1">
               <label class="block text-xs font-semibold text-gray-500 uppercase">Identificación / Cédula</label>
               <input type="text" [(ngModel)]="parte.identificacion" class="w-full border border-gray-300 px-3 py-2 rounded focus:outline-none focus:border-[#d4b88c] focus:ring-1 focus:ring-[#d4b88c] bg-gray-50">

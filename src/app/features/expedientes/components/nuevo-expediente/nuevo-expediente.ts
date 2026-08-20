@@ -50,6 +50,7 @@ export class NuevoExpediente implements OnInit {
 
   listaAbogados: any[] = [];
   listaParalegales: any[] = [];
+  listaClientes: any[] = []; // <-- Nueva lista para el dropdown
 
   ngOnInit(): void {
     const today = new Date().toISOString().split('T')[0];
@@ -65,16 +66,17 @@ export class NuevoExpediente implements OnInit {
       cuantia_litigio: [null],
       fecha_apertura: [today, [Validators.required]],
 
-      id_cliente: [user?.id_usuario || '', [Validators.required]],
+      // Cambiamos para que no tome por defecto al usuario logueado (podría ser el Admin)
+      id_cliente: ['', [Validators.required]],
 
-      // Parte Demandante (Sin teléfono)
+      // Parte Demandante (Vinculado al Cliente)
       demandante_tipo: ['Persona Física'],
       demandante_nombre: ['', [Validators.required]],
       demandante_identificacion: [''],
       demandante_correo: ['', [Validators.email]],
       demandante_direccion: [''],
 
-      // Parte Demandada (Sin teléfono)
+      // Parte Demandada
       demandado_tipo: ['Persona Física'],
       demandado_nombre: ['', [Validators.required]],
       demandado_identificacion: [''],
@@ -82,7 +84,7 @@ export class NuevoExpediente implements OnInit {
       demandado_direccion: [''],
 
       // Asignación del Equipo
-      abogado_responsable: [user?.id_usuario || '', [Validators.required]],
+      abogado_responsable: ['', [Validators.required]],
       paralegales_asignados: [[]],
 
       // Descripción del Caso
@@ -101,14 +103,40 @@ export class NuevoExpediente implements OnInit {
   cargarUsuarios(): void {
     this.http.get<any[]>(`${environment.apiUrl}/usuarios`).subscribe({
       next: (usuarios) => {
-        this.listaAbogados = usuarios.filter(u => u.rol === 'Abogado' || u.rol === 'Administrador');
+        // CORRECCIÓN: Filtramos solo a los abogados, quitamos al Administrador
+        this.listaAbogados = usuarios.filter(u => u.rol === 'Abogado');
         this.listaParalegales = usuarios.filter(u => u.rol === 'Paralegal');
+        // Extraemos a los clientes para el dropdown
+        this.listaClientes = usuarios.filter(u => u.rol === 'Cliente');
       },
       error: (err) => {
         console.error('Error al cargar la lista de usuarios:', err);
       }
     });
   }
+
+  // EVENTO: Cuando seleccionan un cliente del dropdown
+onClienteSeleccionado(event: any): void {
+  // El value que arroja el HTML debe ser el ID del usuario, no el nombre
+  const idSeleccionado = event.target.value;
+  const clienteEncontrado = this.listaClientes.find(c => c.id_usuario === idSeleccionado);
+  
+  if (clienteEncontrado) {
+    // Autocompletamos los datos del demandante vinculados a este cliente
+    this.expedienteForm.patchValue({
+      id_cliente: clienteEncontrado.id_usuario,
+      demandante_nombre: clienteEncontrado.nombre, // <-- Actualiza el campo nombre
+      demandante_correo: clienteEncontrado.correo || ''
+    });
+  } else {
+    // Limpiamos si hay error
+    this.expedienteForm.patchValue({
+      id_cliente: '',
+      demandante_nombre: '',
+      demandante_correo: ''
+    });
+  }
+}
 
   onSubmit(): void {
     if (this.expedienteForm.invalid) {
@@ -142,7 +170,7 @@ export class NuevoExpediente implements OnInit {
       });
     }
 
-    // 2. Armar partes involucradas (Coincide exacto con la tabla ParteInvolucrada de la BD)
+    // 2. Armar partes involucradas
     const partesDelCaso = [
       {
         clasificacion: 'Demandante',

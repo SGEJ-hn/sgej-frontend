@@ -38,7 +38,9 @@ export class AppComponent implements OnInit, OnDestroy {
   // Verifica si estamos en el login
   isLoginRoute(): boolean {
     return this.router.url === '/' ||
-           this.router.url.startsWith('/login');
+           this.router.url.startsWith('/login') ||
+           this.router.url.startsWith('/olvide-password') || 
+           this.router.url.startsWith('/restablecer-password');
   }
 
   prepararRuta(outlet: RouterOutlet) {

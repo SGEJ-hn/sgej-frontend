@@ -120,7 +120,7 @@
       <!-- SECCIÓN PARTES INVOLUCRADAS -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-        <!-- TARJETA 2: PARTE DEMANDANTE -->
+        <!-- TARJETA 2: PARTE DEMANDANTE (AHORA CON SELECT DE CLIENTES) -->
         <div class="bg-white p-6 rounded shadow-sm border border-gray-200">
           <h2 class="text-base font-medium text-gray-900 mb-6 border-l-[3px] border-[#4A1525] pl-2">
             Parte Demandante
@@ -139,26 +139,31 @@
               </select>
             </div>
 
+            <!-- AQUÍ ESTÁ EL CAMBIO PRINCIPAL (Dropdown en vez de input) -->
             <div>
               <label class="block text-[11px] font-semibold text-gray-500 uppercase mb-1">
-                Nombre Completo *
+                Cliente Seleccionado *
               </label>
-              <input
-                type="text"
-                formControlName="demandante_nombre"
-                placeholder="Nombre Completo del Demandante"
-                class="w-full p-2 text-sm border border-gray-300 rounded bg-white" />
+              <select
+                formControlName="id_cliente" 
+                (change)="onClienteSeleccionado($event)"
+                class="w-full p-2 text-sm border border-gray-300 rounded bg-white focus:ring-1 focus:ring-[#d4b88c] focus:outline-none">
+                <option value="">Seleccione un cliente registrado...</option>
+                <option *ngFor="let cliente of listaClientes" [value]="cliente.id_usuario">
+                  {{ cliente.nombre }}
+                </option>
+              </select>
             </div>
 
             <div>
               <label class="block text-[11px] font-semibold text-gray-500 uppercase mb-1">
-                Cédula
+                Cédula / RTN
               </label>
               <input
                 type="text"
                 formControlName="demandante_identificacion"
                 placeholder="Ej. 080119994567"
-                class="w-full p-2 text-sm border border-gray-300 rounded bg-white" />
+                class="w-full p-2 text-sm border border-gray-300 rounded bg-white focus:ring-1 focus:ring-[#d4b88c] focus:outline-none" />
             </div>
 
             <div>
@@ -169,7 +174,7 @@
                 type="email"
                 formControlName="demandante_correo"
                 placeholder="correo@ejemplo.com"
-                class="w-full p-2 text-sm border border-gray-300 rounded bg-white" />
+                class="w-full p-2 text-sm border border-gray-300 rounded bg-white focus:ring-1 focus:ring-[#d4b88c] focus:outline-none" />
             </div>
 
             <div>
@@ -180,12 +185,12 @@
                 type="text"
                 formControlName="demandante_direccion"
                 placeholder="Dirección Completa"
-                class="w-full p-2 text-sm border border-gray-300 rounded bg-white" />
+                class="w-full p-2 text-sm border border-gray-300 rounded bg-white focus:ring-1 focus:ring-[#d4b88c] focus:outline-none" />
             </div>
           </div>
         </div>
 
-        <!-- TARJETA 3: PARTE DEMANDADA -->
+        <!-- TARJETA 3: PARTE DEMANDADA (SE MANTIENE COMO INPUT LIBRE) -->
         <div class="bg-white p-6 rounded shadow-sm border border-gray-200">
           <h2 class="text-base font-medium text-gray-900 mb-6 border-l-[3px] border-[#4A1525] pl-2">
             Parte Demandada
@@ -212,18 +217,18 @@
                 type="text"
                 formControlName="demandado_nombre"
                 placeholder="Nombre Completo del Demandado"
-                class="w-full p-2 text-sm border border-gray-300 rounded bg-white" />
+                class="w-full p-2 text-sm border border-gray-300 rounded bg-white focus:ring-1 focus:ring-[#d4b88c] focus:outline-none" />
             </div>
 
             <div>
               <label class="block text-[11px] font-semibold text-gray-500 uppercase mb-1">
-                Cédula
+                Cédula / RTN
               </label>
               <input
                 type="text"
                 formControlName="demandado_identificacion"
                 placeholder="Ej. 080119994567"
-                class="w-full p-2 text-sm border border-gray-300 rounded bg-white" />
+                class="w-full p-2 text-sm border border-gray-300 rounded bg-white focus:ring-1 focus:ring-[#d4b88c] focus:outline-none" />
             </div>
 
             <div>
@@ -234,7 +239,7 @@
                 type="email"
                 formControlName="demandado_correo"
                 placeholder="correo@ejemplo.com"
-                class="w-full p-2 text-sm border border-gray-300 rounded bg-white" />
+                class="w-full p-2 text-sm border border-gray-300 rounded bg-white focus:ring-1 focus:ring-[#d4b88c] focus:outline-none" />
             </div>
 
             <div>
@@ -245,7 +250,7 @@
                 type="text"
                 formControlName="demandado_direccion"
                 placeholder="Dirección Completa"
-                class="w-full p-2 text-sm border border-gray-300 rounded bg-white" />
+                class="w-full p-2 text-sm border border-gray-300 rounded bg-white focus:ring-1 focus:ring-[#d4b88c] focus:outline-none" />
             </div>
           </div>
         </div>

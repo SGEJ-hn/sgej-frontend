@@ -17,13 +17,16 @@ export interface LoginResponse {
   usuario: User;
 }
 
+export interface MensajeResponse {
+  message: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private readonly apiUrl = `${environment.apiUrl}/auth`;
   
-  // Signals para reactividad en Angular 19+
   currentUser = signal<User | null>(this.getUserFromStorage());
   isAuthenticated = signal<boolean>(!!this.getToken());
 
@@ -38,6 +41,16 @@ export class AuthService {
       })
     );
   }
+
+  solicitarRecuperacion(correo: string): Observable<MensajeResponse> {
+    return this.http.post<MensajeResponse>(`${this.apiUrl}/olvide-password`, { correo });
+  }
+
+  restablecerPassword(token: string, nuevaContrasena: string): Observable<MensajeResponse> {
+    return this.http.post<MensajeResponse>(`${this.apiUrl}/reset-password`, { token, nuevaContrasena });
+  }
+
+  // ────────────────────────────────────────────────────────
 
   saveSession(token: string, usuario: User): void {
     localStorage.setItem('sgej_token', token);
